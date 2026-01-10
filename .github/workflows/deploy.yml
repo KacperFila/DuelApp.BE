@@ -32,7 +32,4 @@ jobs:
         run: docker push ${{ secrets.ACR_LOGIN_SERVER }}/duelapp:${{ github.sha }}
 
       - name: Deploy to Container App
-        run: az containerapp update \
-          --name duelapp-be \
-          --resource-group DuelAppRG \
-          --image ${{ secrets.ACR_LOGIN_SERVER }}/duelapp:${{ github.sha }}
+        run: az containerapp update --name duelapp-be --resource-group DuelAppRG --image ${{ secrets.ACR_LOGIN_SERVER }}/duelapp:${{ github.sha }}
