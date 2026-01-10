@@ -17,13 +17,13 @@ jobs:
           dotnet-version: "8.0.x"
 
       - name: Restore
-        run: dotnet restore
+        run: dotnet restore src/DuelApp.sln
 
       - name: Test
-        run: dotnet test --no-restore --configuration Release
+        run: dotnet test src/DuelApp.sln --no-restore --configuration Release
 
       - name: Build
-        run: dotnet build --no-restore --configuration Release
+        run: dotnet build src/DuelApp.sln --no-restore --configuration Release
 
       - name: Build Docker image
-        run: docker build -t pr-check .
+        run: docker build -t pr-check -f src/DuelApp.API/Dockerfile src/
