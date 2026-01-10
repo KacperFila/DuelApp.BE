@@ -15,15 +15,12 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Azure Login (OIDC)
+      - name: Azure Login
         uses: azure/login@v2
         with:
           client-id: ${{ secrets.AZURE_CLIENT_ID }}
           tenant-id: ${{ secrets.AZURE_TENANT_ID }}
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
-
-      - name: Login to ACR
-        run: az acr login --name ${{ secrets.ACR_LOGIN_SERVER }}
 
       - name: Build & Push Docker image
         run: |
@@ -34,6 +31,6 @@ jobs:
       - name: Deploy to Container App
         run: |
           az containerapp update \
-            --name duelapp-be \
-            --resource-group DuelAppRG \
+            --name duelapp \
+            --resource-group <RESOURCE_GROUP> \
             --image $IMAGE
