@@ -1,6 +1,0 @@
-@DuelApp.API_HostAddress = http://localhost:5257
-
-GET {{DuelApp.API_HostAddress}}/weatherforecast/
-Accept: application/json
-
-###
