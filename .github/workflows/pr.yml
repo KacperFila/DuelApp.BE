@@ -26,4 +26,4 @@ jobs:
         run: dotnet build src/DuelApp.sln --no-restore --configuration Release
 
       - name: Build Docker image
-        run: docker build -t pr-check .
+        run: docker build -t pr-check -f src/DuelApp.API/Dockerfile src/
