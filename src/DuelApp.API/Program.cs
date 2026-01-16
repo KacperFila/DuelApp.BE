@@ -37,5 +37,5 @@ app.Run();
 
 record WeatherForecast(DateOnly Date, int TemperatureC, string? Summary)
 {
-    public int TemperatureF => 20;
+    public int TemperatureF => 25;
 }
