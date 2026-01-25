@@ -32,3 +32,13 @@ _UpgradeReport_Files/
 Thumbs.db
 Desktop.ini
 .DS_Store
+
+# Terraform files
+*.tfstate
+*.tfstate.backup
+.terraform/
+.crash.log
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json

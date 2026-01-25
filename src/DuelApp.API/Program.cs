@@ -16,7 +16,7 @@ app.UseHttpsRedirection();
 
 var summaries = new[]
 {
-    "Freezing"
+    "Very Hot"
 };
 
 app.MapGet("/weatherforecast", () =>
@@ -37,5 +37,5 @@ app.Run();
 
 record WeatherForecast(DateOnly Date, int TemperatureC, string? Summary)
 {
-    public int TemperatureF => 25;
+    public int TemperatureF => 50;
 }
