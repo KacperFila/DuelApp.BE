@@ -23,7 +23,7 @@ resource "azurerm_container_app" "duelapp_be" {
 
     container {
       name   = "duelapp-be"
-      image = "duelapp.azurecr.io/duelapp:d3be3bf3513f4da9e86c67acb17fff8b151d36ef"
+      image = "duelapp.azurecr.io/duelapp:c6917148cf5d66f1e82b5dec0f59654b190e3f6b"
       cpu    = 0.25
       memory = "0.5Gi"
       args   = []
