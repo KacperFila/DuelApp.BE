@@ -18,7 +18,7 @@ resource "azurerm_container_app" "duelapp_be" {
 
   template {
     min_replicas    = 1
-    max_replicas    = 10
+    max_replicas    = 1
     revision_suffix = null
 
     container {
