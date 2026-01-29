@@ -1,0 +1,6 @@
+﻿using System.Collections.Generic;
+
+namespace DuelApp.Shared.Infrastructure.Modules
+{
+    internal record ModuleInfo(string Name, string Path, IEnumerable<string> Policies);
+}

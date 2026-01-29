@@ -26,7 +26,7 @@ jobs:
         run: az acr login --name duelapp
 
       - name: Build Docker image
-        run: docker build -t ${{ secrets.ACR_LOGIN_SERVER }}/duelapp:${{ github.sha }} -f src/DuelApp.API/Dockerfile src/
+        run: docker build -t ${{ secrets.ACR_LOGIN_SERVER }}/duelapp:${{ github.sha }} -f Dockerfile .
 
       - name: Push Docker image
         run: docker push ${{ secrets.ACR_LOGIN_SERVER }}/duelapp:${{ github.sha }}

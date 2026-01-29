@@ -1,0 +1,17 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <RootNamespace>DuelApp.Modules.Users.Core</RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <Folder Include="DAL\Configurations\" />
+    <Folder Include="DAL\Repositories\" />
+    <Folder Include="DTO\" />
+    <Folder Include="Entities\" />
+    <Folder Include="Repositories\" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\Shared\DuelApp.Shared.Abstractions\DuelApp.Shared.Abstractions.csproj" />
+    <ProjectReference Include="..\..\..\Shared\DuelApp.Shared.Infrastructure\DuelApp.Shared.Infrastructure.csproj" />
+  </ItemGroup>
+</Project>
