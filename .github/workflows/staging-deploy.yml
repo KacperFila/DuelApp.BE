@@ -23,7 +23,7 @@ jobs:
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
       - name: Log in Docker to ACR
-        run: az acr login --name stagingduelappacr86969
+        run: az acr login --name ${{ secrets.ACR_NAME }}
 
       - name: Build Docker image
         run: docker build -t ${{ secrets.ACR_LOGIN_SERVER }}/duelapp:${{ github.sha }} -f Dockerfile .
