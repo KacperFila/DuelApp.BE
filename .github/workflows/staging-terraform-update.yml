@@ -1,4 +1,4 @@
-name: Bump image tag in Terraform
+name: Bump image tag in Terraform (staging)
 on:
   workflow_run:
     workflows: ["Deploy to Azure Container Apps"]
@@ -44,14 +44,14 @@ jobs:
 
       - name: Update Terraform main.tf with new image
         run: |
-          sed -i -E "s|^([[:space:]]*image\s*=\s*\"[^\:]+:)[^\"]+\"|\1${IMAGE_TAG}\"|" ./infra/main.tf
+          sed -i -E "s|^([[:space:]]*image\s*=\s*\"[^\:]+:)[^\"]+\"|\1${IMAGE_TAG}\"|" ./infra/staging/main.tf
 
       - name: Terraform init
-        working-directory: ./infra
+        working-directory: ./infra/staging
         run: terraform init -input=false
 
       - name: Terraform apply
-        working-directory: ./infra
+        working-directory: ./infra/staging
         run: terraform apply -auto-approve -input=false
 
       - name: Commit updated main.tf back to repo (if changed)
@@ -60,7 +60,7 @@ jobs:
         run: |
           git config --global user.name "github-actions"
           git config --global user.email "actions@github.com"
-          git add ./infra/main.tf
+          git add ./infra/staging/main.tf
           git remote set-url origin "https://x-access-token:${GH_PAT}@github.com/${{ github.repository }}.git"
           echo "DEBUG: git remote after override"
           git remote -v
