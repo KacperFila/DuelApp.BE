@@ -1,6 +1,8 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using System.Runtime.CompilerServices;
+using Microsoft.EntityFrameworkCore;
 using DuelApp.Modules.Users.Core.Entities;
 
+[assembly: InternalsVisibleTo("DuelApp.Migrator")]
 namespace DuelApp.Modules.Users.Core.DAL
 {
     internal class UsersDbContext : DbContext
