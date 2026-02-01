@@ -25,7 +25,7 @@ internal class AppInitializer : IHostedService
     public async Task StartAsync(CancellationToken cancellationToken)
     {
         var timestamp = DateTime.UtcNow;
-        _logger.LogInformation("[{Time}] Starting App Initializer", timestamp);
+        _logger.LogInformation("[{Time}] Starting App Initializer in environment: {Environment}", timestamp, _env.EnvironmentName);
         
         if (_env.IsDevelopment())
         {
