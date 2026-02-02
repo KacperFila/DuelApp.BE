@@ -1,7 +1,7 @@
 name: Bump image tag in Terraform (staging)
 on:
   workflow_run:
-    workflows: ["Deploy to Azure Container Apps"]
+    workflows: ["Build, Migrate, and Deploy to Azure Container Apps"]
     types:
       - completed
 
