@@ -217,6 +217,17 @@ resource "azurerm_container_app" "duelapp_be" {
     identity = azurerm_user_assigned_identity.duelapp_uami.id
   }
 
+  ingress {
+    external_enabled = true
+    target_port      = 8080
+    transport        = "auto"
+
+    traffic_weight {
+      latest_revision = true
+      percentage      = 100
+    }
+  }
+
   secret {
     name                = "postgres--connection-string"
     key_vault_secret_id = azurerm_key_vault_secret.postgres_connection_string.id
