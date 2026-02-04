@@ -86,7 +86,9 @@ resource "azurerm_key_vault_access_policy" "current_user" {
     "Get",
     "List",
     "Set",
-    "Delete"
+    "Delete",
+    "Recover",
+    "Purge"
   ]
 
   depends_on = [azurerm_key_vault.duelapp_kv]
