@@ -84,4 +84,4 @@ jobs:
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
       - name: Deploy to Container App
-        run: az containerapp update --name staging-duelapp-be --resource-group rg-duelapp-staging --image ${{ needs.build.outputs.image }}
+        run: az containerapp update --name staging-duelapp-be --resource-group rg-duelapp-be-staging --image ${{ needs.build.outputs.image }}
