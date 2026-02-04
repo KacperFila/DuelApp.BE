@@ -15,10 +15,9 @@ resource "random_password" "postgres_admin_password" {
 # =====================================================
 # Resource Group
 # =====================================================
-
-resource "azurerm_resource_group" "duelapp_rg" {
-  name     = "rg-duelapp-staging"
+resource "azurerm_resource_group" "rg_duelapp_be_staging" {
   location = "polandcentral"
+  name     = "rg-duelapp-be-staging"
 
   tags = {
     environment = "staging"
@@ -29,45 +28,44 @@ resource "azurerm_resource_group" "duelapp_rg" {
 # =====================================================
 # Azure Container Registry
 # =====================================================
-
 resource "azurerm_container_registry" "duelapp_acr" {
   name                = "stagingduelappacr${random_integer.suffix.result}"
-  resource_group_name = azurerm_resource_group.duelapp_rg.name
-  location            = azurerm_resource_group.duelapp_rg.location
+  resource_group_name = azurerm_resource_group.rg_duelapp_be_staging.name
+  location            = azurerm_resource_group.rg_duelapp_be_staging.location
   sku                 = "Basic"
   admin_enabled       = false
 
   tags = {
     environment = "staging"
     project     = "duelapp"
+    component   = "backend"
   }
 }
 
 # =====================================================
 # Container Apps Environment
 # =====================================================
-
 resource "azurerm_container_app_environment" "duelapp_env" {
   name                = "staging-duelapp-env"
-  location            = azurerm_resource_group.duelapp_rg.location
-  resource_group_name = azurerm_resource_group.duelapp_rg.name
+  location            = azurerm_resource_group.rg_duelapp_be_staging.location
+  resource_group_name = azurerm_resource_group.rg_duelapp_be_staging.name
 
   tags = {
     environment = "staging"
     project     = "duelapp"
+    component   = "backend"
   }
 }
 
 # =====================================================
 # Key Vault
 # =====================================================
-
 data "azurerm_client_config" "current" {}
 
 resource "azurerm_key_vault" "duelapp_kv" {
   name                     = "staging-duelapp-kv${random_integer.suffix.result}"
-  location                 = azurerm_resource_group.duelapp_rg.location
-  resource_group_name      = azurerm_resource_group.duelapp_rg.name
+  location                 = azurerm_resource_group.rg_duelapp_be_staging.location
+  resource_group_name      = azurerm_resource_group.rg_duelapp_be_staging.name
   tenant_id                = data.azurerm_client_config.current.tenant_id
   sku_name                 = "standard"
   purge_protection_enabled = false
@@ -75,17 +73,32 @@ resource "azurerm_key_vault" "duelapp_kv" {
   tags = {
     environment = "staging"
     project     = "duelapp"
+    component   = "backend"
   }
+}
+
+resource "azurerm_key_vault_access_policy" "current_user" {
+  key_vault_id = azurerm_key_vault.duelapp_kv.id
+  tenant_id    = data.azurerm_client_config.current.tenant_id
+  object_id    = data.azurerm_client_config.current.object_id  # Your current principal
+
+  secret_permissions = [
+    "Get",
+    "List",
+    "Set",
+    "Delete"
+  ]
+
+  depends_on = [azurerm_key_vault.duelapp_kv]
 }
 
 # =====================================================
 # PostgreSQL Flexible Server
 # =====================================================
-
 resource "azurerm_postgresql_flexible_server" "postgres" {
   name                = "staging-duelapp-psql${random_integer.suffix.result}"
-  resource_group_name = azurerm_resource_group.duelapp_rg.name
-  location            = azurerm_resource_group.duelapp_rg.location
+  resource_group_name = azurerm_resource_group.rg_duelapp_be_staging.name
+  location            = azurerm_resource_group.rg_duelapp_be_staging.location
 
   administrator_login    = "psqladmin"
   administrator_password = random_password.postgres_admin_password.result
@@ -94,7 +107,7 @@ resource "azurerm_postgresql_flexible_server" "postgres" {
   version    = "15"
   storage_mb = 32768
 
-  backup_retention_days        = 7
+  backup_retention_days         = 7
   public_network_access_enabled = true
 
   lifecycle {
@@ -107,13 +120,13 @@ resource "azurerm_postgresql_flexible_server" "postgres" {
   tags = {
     environment = "staging"
     project     = "duelapp"
+    component   = "backend"
   }
 }
 
 # =====================================================
 # PostgreSQL Firewall Rules
 # =====================================================
-
 variable "allowed_ips" {
   default = [
     "0.0.0.0",        # Azure services
@@ -133,7 +146,6 @@ resource "azurerm_postgresql_flexible_server_firewall_rule" "allowed" {
 # =====================================================
 # PostgreSQL Connection String
 # =====================================================
-
 locals {
   postgres_connection_string = format(
     "Host=%s.postgres.database.azure.com;Database=postgres;Username=%s;Password=%s;Ssl Mode=Require;",
@@ -146,42 +158,52 @@ locals {
 # =====================================================
 # Key Vault Secrets
 # =====================================================
-
 resource "azurerm_key_vault_secret" "postgres_connection_string" {
   name         = "postgres--connection-string"
   value        = local.postgres_connection_string
   key_vault_id = azurerm_key_vault.duelapp_kv.id
+
+  depends_on = [azurerm_key_vault_access_policy.current_user]
 }
 
 resource "azurerm_key_vault_secret" "postgres_admin_password" {
   name         = "postgres--admin-password"
   value        = random_password.postgres_admin_password.result
   key_vault_id = azurerm_key_vault.duelapp_kv.id
+
+  depends_on = [azurerm_key_vault_access_policy.current_user]
 }
 
 # =====================================================
 # User Assigned Managed Identity
 # =====================================================
-
 resource "azurerm_user_assigned_identity" "duelapp_uami" {
   name                = "uami-duelapp-staging"
-  resource_group_name = azurerm_resource_group.duelapp_rg.name
-  location            = azurerm_resource_group.duelapp_rg.location
+  resource_group_name = azurerm_resource_group.rg_duelapp_be_staging.name
+  location            = azurerm_resource_group.rg_duelapp_be_staging.location
 
   tags = {
     environment = "staging"
     project     = "duelapp"
+    component   = "backend"
   }
 }
 
 # =====================================================
 # Permissions
 # =====================================================
-
 resource "azurerm_role_assignment" "acr_pull_uami" {
   scope                = azurerm_container_registry.duelapp_acr.id
   role_definition_name = "AcrPull"
   principal_id         = azurerm_user_assigned_identity.duelapp_uami.principal_id
+}
+
+resource "azurerm_role_assignment" "github_actions_subscription" {
+  scope                = "/subscriptions/c1b91c67-3a2b-49ac-a3ac-43974a8698a4"
+  role_definition_name = "Contributor"
+  principal_id         = azuread_service_principal.github_actions_oidc.object_id
+
+  depends_on = [azuread_service_principal.github_actions_oidc]
 }
 
 resource "azurerm_key_vault_access_policy" "duelapp_uami_policy" {
@@ -197,13 +219,30 @@ resource "azurerm_key_vault_access_policy" "duelapp_uami_policy" {
   ]
 }
 
+resource "azurerm_key_vault_access_policy" "github_actions_policy" {
+  key_vault_id = azurerm_key_vault.duelapp_kv.id
+  tenant_id    = data.azurerm_client_config.current.tenant_id
+  object_id    = azuread_service_principal.github_actions_oidc.object_id
+
+  secret_permissions = [
+    "Get",
+    "List",
+    "Set",
+    "Delete"
+  ]
+
+  depends_on = [
+    azurerm_key_vault.duelapp_kv,
+    azuread_service_principal.github_actions_oidc
+  ]
+}
+
 # =====================================================
 # Container App
 # =====================================================
-
 resource "azurerm_container_app" "duelapp_be" {
   name                         = "staging-duelapp-be"
-  resource_group_name          = azurerm_resource_group.duelapp_rg.name
+  resource_group_name          = azurerm_resource_group.rg_duelapp_be_staging.name
   container_app_environment_id = azurerm_container_app_environment.duelapp_env.id
   revision_mode                = "Single"
 
@@ -273,5 +312,59 @@ resource "azurerm_container_app" "duelapp_be" {
   tags = {
     environment = "staging"
     project     = "duelapp"
+    component   = "backend"
   }
+}
+
+# =====================================================
+# App registrations
+# =====================================================
+resource "azuread_application" "github_actions_oidc" {
+  display_name     = "github-actions-oidc"
+  sign_in_audience = "AzureADMyOrg"
+
+  required_resource_access {
+    resource_app_id = "00000003-0000-0000-c000-000000000000"
+
+    resource_access {
+      id   = "e1fe6dd8-ba31-4d61-89e7-88639da4683d" # User.Read
+      type = "Scope"
+    }
+  }
+}
+
+# =====================================================
+# Service Principal
+# =====================================================
+resource "azuread_service_principal" "github_actions_oidc" {
+  client_id = azuread_application.github_actions_oidc.client_id
+}
+
+# =====================================================
+# Federated Credentials
+# =====================================================
+resource "azuread_application_federated_identity_credential" "github_actions_fe" {
+  application_id = azuread_application.github_actions_oidc.id
+  display_name   = "github-actions-fe"
+  description    = "Deployments for DuelApp.FE"
+  audiences      = ["api://AzureADTokenExchange"]
+  issuer         = "https://token.actions.githubusercontent.com"
+  subject        = "repo:KacperFila/DuelApp.FE:ref:refs/heads/main"
+}
+
+resource "azuread_application_federated_identity_credential" "github_actions_be" {
+  application_id = azuread_application.github_actions_oidc.id
+  display_name   = "github-actions-be"
+  description    = "Deployments for DuelApp.BE"
+  audiences      = ["api://AzureADTokenExchange"]
+  issuer         = "https://token.actions.githubusercontent.com"
+  subject        = "repo:KacperFila/DuelApp.BE:ref:refs/heads/main"
+}
+
+# =====================================================
+# Output suffix for FE infra
+# =====================================================
+output "suffix" {
+  description = "Random numeric suffix used across BE infra"
+  value       = random_integer.suffix.result
 }
