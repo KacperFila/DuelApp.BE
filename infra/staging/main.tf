@@ -200,7 +200,7 @@ resource "azurerm_role_assignment" "acr_pull_uami" {
 
 resource "azurerm_role_assignment" "github_actions_subscription" {
   scope                = "/subscriptions/c1b91c67-3a2b-49ac-a3ac-43974a8698a4"
-  role_definition_name = "Contributor"
+  role_definition_name = "Owner"
   principal_id         = azuread_service_principal.github_actions_oidc.object_id
 
   depends_on = [azuread_service_principal.github_actions_oidc]
@@ -228,7 +228,10 @@ resource "azurerm_key_vault_access_policy" "github_actions_policy" {
     "Get",
     "List",
     "Set",
-    "Delete"
+    "Delete",
+    "Backup",
+    "Restore",
+    "Purge"
   ]
 
   depends_on = [
