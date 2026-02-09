@@ -284,7 +284,7 @@ resource "azurerm_container_app" "duelapp_be" {
 
     container {
       name   = "staging-duelapp-be"
-      image  = "${azurerm_container_registry.duelapp_acr.login_server}/duelapp:5cdc686a2dc8843226bc7ac323bc671530c06025"
+      image  = var.image_tag
       cpu    = 0.25
       memory = "0.5Gi"
 
