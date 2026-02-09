@@ -77,23 +77,6 @@ resource "azurerm_key_vault" "duelapp_kv" {
   }
 }
 
-resource "azurerm_key_vault_access_policy" "current_user" {
-  key_vault_id = azurerm_key_vault.duelapp_kv.id
-  tenant_id    = data.azurerm_client_config.current.tenant_id
-  object_id    = data.azurerm_client_config.current.object_id  # Your current principal
-
-  secret_permissions = [
-    "Get",
-    "List",
-    "Set",
-    "Delete",
-    "Recover",
-    "Purge"
-  ]
-
-  depends_on = [azurerm_key_vault.duelapp_kv]
-}
-
 # =====================================================
 # PostgreSQL Flexible Server
 # =====================================================
@@ -164,16 +147,12 @@ resource "azurerm_key_vault_secret" "postgres_connection_string" {
   name         = "postgres--connection-string"
   value        = local.postgres_connection_string
   key_vault_id = azurerm_key_vault.duelapp_kv.id
-
-  depends_on = [azurerm_key_vault_access_policy.current_user]
 }
 
 resource "azurerm_key_vault_secret" "postgres_admin_password" {
   name         = "postgres--admin-password"
   value        = random_password.postgres_admin_password.result
   key_vault_id = azurerm_key_vault.duelapp_kv.id
-
-  depends_on = [azurerm_key_vault_access_policy.current_user]
 }
 
 # =====================================================
@@ -194,21 +173,13 @@ resource "azurerm_user_assigned_identity" "duelapp_uami" {
 # =====================================================
 # Permissions
 # =====================================================
-resource "azurerm_role_assignment" "acr_pull_uami" {
+resource "azurerm_role_assignment" "duelapp_uami_acr_pull" {
   scope                = azurerm_container_registry.duelapp_acr.id
   role_definition_name = "AcrPull"
   principal_id         = azurerm_user_assigned_identity.duelapp_uami.principal_id
 }
 
-resource "azurerm_role_assignment" "github_actions_subscription" {
-  scope                = "/subscriptions/c1b91c67-3a2b-49ac-a3ac-43974a8698a4"
-  role_definition_name = "Owner"
-  principal_id         = azuread_service_principal.github_actions_oidc.object_id
-
-  depends_on = [azuread_service_principal.github_actions_oidc]
-}
-
-resource "azurerm_key_vault_access_policy" "duelapp_uami_policy" {
+resource "azurerm_key_vault_access_policy" "duelapp_uami_kv_access" {
   key_vault_id = azurerm_key_vault.duelapp_kv.id
   tenant_id    = data.azurerm_client_config.current.tenant_id
   object_id    = azurerm_user_assigned_identity.duelapp_uami.principal_id
@@ -218,27 +189,6 @@ resource "azurerm_key_vault_access_policy" "duelapp_uami_policy" {
     "Set",
     "List",
     "Delete"
-  ]
-}
-
-resource "azurerm_key_vault_access_policy" "github_actions_policy" {
-  key_vault_id = azurerm_key_vault.duelapp_kv.id
-  tenant_id    = data.azurerm_client_config.current.tenant_id
-  object_id    = azuread_service_principal.github_actions_oidc.object_id
-
-  secret_permissions = [
-    "Get",
-    "List",
-    "Set",
-    "Delete",
-    "Backup",
-    "Restore",
-    "Purge"
-  ]
-
-  depends_on = [
-    azurerm_key_vault.duelapp_kv,
-    azuread_service_principal.github_actions_oidc
   ]
 }
 
@@ -311,7 +261,7 @@ resource "azurerm_container_app" "duelapp_be" {
   }
 
   depends_on = [
-    azurerm_role_assignment.acr_pull_uami
+    azurerm_role_assignment.duelapp_uami_acr_pull
   ]
 
   tags = {
@@ -324,8 +274,8 @@ resource "azurerm_container_app" "duelapp_be" {
 # =====================================================
 # App registrations
 # =====================================================
-resource "azuread_application" "github_actions_oidc" {
-  display_name     = "github-actions-oidc"
+resource "azuread_application" "github_actions_ar" {
+  display_name     = "github_actions_ar"
   sign_in_audience = "AzureADMyOrg"
 
   required_resource_access {
@@ -339,17 +289,10 @@ resource "azuread_application" "github_actions_oidc" {
 }
 
 # =====================================================
-# Service Principal
-# =====================================================
-resource "azuread_service_principal" "github_actions_oidc" {
-  client_id = azuread_application.github_actions_oidc.client_id
-}
-
-# =====================================================
 # Federated Credentials
 # =====================================================
 resource "azuread_application_federated_identity_credential" "github_actions_fe" {
-  application_id = azuread_application.github_actions_oidc.id
+  application_id = azuread_application.github_actions_ar.id
   display_name   = "github-actions-fe"
   description    = "Deployments for DuelApp.FE"
   audiences      = ["api://AzureADTokenExchange"]
@@ -358,7 +301,7 @@ resource "azuread_application_federated_identity_credential" "github_actions_fe"
 }
 
 resource "azuread_application_federated_identity_credential" "github_actions_be" {
-  application_id = azuread_application.github_actions_oidc.id
+  application_id = azuread_application.github_actions_ar.id
   display_name   = "github-actions-be"
   description    = "Deployments for DuelApp.BE"
   audiences      = ["api://AzureADTokenExchange"]
