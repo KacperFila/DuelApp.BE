@@ -276,7 +276,7 @@ resource "azurerm_container_app" "duelapp_be" {
 # Federated Credentials
 # =====================================================
 resource "azuread_application_federated_identity_credential" "github_actions_fe" {
-  application_id = "/applications/48bf8743-7b87-4ef1-b3f3-0b3abd8cfaeb"
+  application_id = "applications/48bf8743-7b87-4ef1-b3f3-0b3abd8cfaeb"
   display_name   = "github-actions-fe"
   description    = "Deployments for DuelApp.FE"
   audiences      = ["api://AzureADTokenExchange"]
@@ -285,7 +285,7 @@ resource "azuread_application_federated_identity_credential" "github_actions_fe"
 }
 
 resource "azuread_application_federated_identity_credential" "github_actions_be" {
-  application_id = "/applications/48bf8743-7b87-4ef1-b3f3-0b3abd8cfaeb"
+  application_id = "applications/48bf8743-7b87-4ef1-b3f3-0b3abd8cfaeb"
   display_name   = "github-actions-be"
   description    = "Deployments for DuelApp.BE"
   audiences      = ["api://AzureADTokenExchange"]
