@@ -265,7 +265,8 @@ resource "azurerm_container_app" "duelapp_be" {
   }
 
   depends_on = [
-    azurerm_role_assignment.duelapp_uami_acr_pull
+    azurerm_role_assignment.duelapp_uami_acr_pull,
+    azurerm_role_assignment.duelapp_uami_kv_access
   ]
 
   tags = {
@@ -273,33 +274,4 @@ resource "azurerm_container_app" "duelapp_be" {
     project     = "duelapp"
     component   = "backend"
   }
-}
-
-# =====================================================
-# Federated Credentials
-# =====================================================
-resource "azuread_application_federated_identity_credential" "github_actions_fe" {
-  application_id = "applications/48bf8743-7b87-4ef1-b3f3-0b3abd8cfaeb"
-  display_name   = "github-actions-fe"
-  description    = "Deployments for DuelApp.FE"
-  audiences      = ["api://AzureADTokenExchange"]
-  issuer         = "https://token.actions.githubusercontent.com"
-  subject        = "repo:KacperFila/DuelApp.FE:ref:refs/heads/main"
-}
-
-resource "azuread_application_federated_identity_credential" "github_actions_be" {
-  application_id = "applications/48bf8743-7b87-4ef1-b3f3-0b3abd8cfaeb"
-  display_name   = "github-actions-be"
-  description    = "Deployments for DuelApp.BE"
-  audiences      = ["api://AzureADTokenExchange"]
-  issuer         = "https://token.actions.githubusercontent.com"
-  subject        = "repo:KacperFila/DuelApp.BE:ref:refs/heads/main"
-}
-
-# =====================================================
-# Output suffix for FE infra
-# =====================================================
-output "suffix" {
-  description = "Random numeric suffix used across BE infra"
-  value       = random_integer.suffix.result
 }
