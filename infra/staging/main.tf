@@ -193,6 +193,16 @@ resource "azurerm_key_vault_access_policy" "duelapp_uami_kv_access" {
   ]
 }
 
+data "azuread_service_principal" "github_actions" {
+  display_name = "github-actions-oidc"
+}
+
+resource "azurerm_role_assignment" "github_actions_kv_secret_officer" {
+  scope                = azurerm_key_vault.duelapp_kv.id
+  role_definition_name = "Key Vault Secrets Officer"
+  principal_id         = data.azuread_service_principal.github_actions.object_id
+}
+
 # =====================================================
 # Container App
 # =====================================================
