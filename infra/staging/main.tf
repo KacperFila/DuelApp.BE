@@ -143,12 +143,20 @@ resource "azurerm_key_vault_secret" "postgres_connection_string" {
   name         = "postgres--connection-string"
   value        = local.postgres_connection_string
   key_vault_id = azurerm_key_vault.duelapp_kv.id
+
+  depends_on = [
+    azurerm_role_assignment.terraform_kv_secret_officer
+  ]
 }
 
 resource "azurerm_key_vault_secret" "postgres_admin_password" {
   name         = "postgres--admin-password"
   value        = random_password.postgres_admin_password.result
   key_vault_id = azurerm_key_vault.duelapp_kv.id
+
+  depends_on = [
+    azurerm_role_assignment.terraform_kv_secret_officer
+  ]
 }
 
 # =====================================================
@@ -194,7 +202,7 @@ resource "azurerm_role_assignment" "github_actions_kv_secret_officer" {
 resource "azurerm_role_assignment" "terraform_kv_secret_officer" {
   scope                = azurerm_key_vault.duelapp_kv.id
   role_definition_name = "Key Vault Secrets Officer"
-  principal_id         = data.azurerm_client_config.current.client_id
+  principal_id         = data.azurerm_client_config.current.object_id
 }
 
 # =====================================================
