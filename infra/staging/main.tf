@@ -196,6 +196,12 @@ resource "azurerm_role_assignment" "github_actions_kv_secret_officer" {
   principal_id         = data.azuread_service_principal.github_actions.object_id
 }
 
+resource "azurerm_role_assignment" "terraform_kv_secret_officer" {
+  scope                = azurerm_key_vault.duelapp_kv.id
+  role_definition_name = "Key Vault Secrets Officer"
+  principal_id         = data.azurerm_client_config.current.client_id
+}
+
 # =====================================================
 # Container App
 # =====================================================
