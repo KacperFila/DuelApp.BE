@@ -235,7 +235,7 @@ resource "azurerm_container_app" "duelapp_be" {
 
     container {
       name   = "staging-duelapp-be"
-      image  = var.image_tag
+      image  = "mcr.microsoft.com/azuredocs/aci-helloworld:latest"
       cpu    = 0.25
       memory = "0.5Gi"
 
@@ -273,27 +273,10 @@ resource "azurerm_container_app" "duelapp_be" {
 }
 
 # =====================================================
-# App registrations
-# =====================================================
-resource "azuread_application" "github_actions_ar" {
-  display_name     = "github_actions_ar"
-  sign_in_audience = "AzureADMyOrg"
-
-  required_resource_access {
-    resource_app_id = "00000003-0000-0000-c000-000000000000"
-
-    resource_access {
-      id   = "e1fe6dd8-ba31-4d61-89e7-88639da4683d" # User.Read
-      type = "Scope"
-    }
-  }
-}
-
-# =====================================================
 # Federated Credentials
 # =====================================================
 resource "azuread_application_federated_identity_credential" "github_actions_fe" {
-  application_id = azuread_application.github_actions_ar.id
+  application_id = "48bf8743-7b87-4ef1-b3f3-0b3abd8cfaeb"
   display_name   = "github-actions-fe"
   description    = "Deployments for DuelApp.FE"
   audiences      = ["api://AzureADTokenExchange"]
@@ -302,7 +285,7 @@ resource "azuread_application_federated_identity_credential" "github_actions_fe"
 }
 
 resource "azuread_application_federated_identity_credential" "github_actions_be" {
-  application_id = azuread_application.github_actions_ar.id
+  application_id = "48bf8743-7b87-4ef1-b3f3-0b3abd8cfaeb"
   display_name   = "github-actions-be"
   description    = "Deployments for DuelApp.BE"
   audiences      = ["api://AzureADTokenExchange"]
