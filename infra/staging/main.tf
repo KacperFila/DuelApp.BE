@@ -180,17 +180,10 @@ resource "azurerm_role_assignment" "duelapp_uami_acr_pull" {
   principal_id         = azurerm_user_assigned_identity.duelapp_uami.principal_id
 }
 
-resource "azurerm_key_vault_access_policy" "duelapp_uami_kv_access" {
-  key_vault_id = azurerm_key_vault.duelapp_kv.id
-  tenant_id    = data.azurerm_client_config.current.tenant_id
-  object_id    = azurerm_user_assigned_identity.duelapp_uami.principal_id
-
-  secret_permissions = [
-    "Get",
-    "Set",
-    "List",
-    "Delete"
-  ]
+resource "azurerm_role_assignment" "duelapp_uami_kv_access" {
+  scope                = azurerm_key_vault.duelapp_kv.id
+  role_definition_name = "Key Vault Secrets User"
+  principal_id         = azurerm_user_assigned_identity.duelapp_uami.principal_id
 }
 
 data "azuread_service_principal" "github_actions" {
