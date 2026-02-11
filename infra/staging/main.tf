@@ -2,11 +2,6 @@
 # Random values
 # =====================================================
 
-resource "random_integer" "suffix" {
-  min = 10000
-  max = 99999
-}
-
 resource "random_password" "postgres_admin_password" {
   length  = 24
   special = true
@@ -29,7 +24,7 @@ resource "azurerm_resource_group" "rg_duelapp_be_staging" {
 # Azure Container Registry
 # =====================================================
 resource "azurerm_container_registry" "duelapp_acr" {
-  name                = "stagingduelappacr${random_integer.suffix.result}"
+  name                = "stagingduelappacr"
   resource_group_name = azurerm_resource_group.rg_duelapp_be_staging.name
   location            = azurerm_resource_group.rg_duelapp_be_staging.location
   sku                 = "Basic"
@@ -63,7 +58,7 @@ resource "azurerm_container_app_environment" "duelapp_env" {
 data "azurerm_client_config" "current" {}
 
 resource "azurerm_key_vault" "duelapp_kv" {
-  name                     = "staging-duelapp-kv${random_integer.suffix.result}"
+  name                     = "staging-duelapp-kv"
   location                 = azurerm_resource_group.rg_duelapp_be_staging.location
   resource_group_name      = azurerm_resource_group.rg_duelapp_be_staging.name
   tenant_id                = data.azurerm_client_config.current.tenant_id
@@ -82,7 +77,7 @@ resource "azurerm_key_vault" "duelapp_kv" {
 # PostgreSQL Flexible Server
 # =====================================================
 resource "azurerm_postgresql_flexible_server" "postgres" {
-  name                = "staging-duelapp-psql${random_integer.suffix.result}"
+  name                = "staging-duelapp-psql"
   resource_group_name = azurerm_resource_group.rg_duelapp_be_staging.name
   location            = azurerm_resource_group.rg_duelapp_be_staging.location
 
