@@ -147,6 +147,10 @@ resource "azurerm_key_vault_secret" "postgres_connection_string" {
   depends_on = [
     azurerm_role_assignment.terraform_kv_secret_officer
   ]
+
+  lifecycle {
+    ignore_changes = [value]
+  }
 }
 
 resource "azurerm_key_vault_secret" "postgres_admin_password" {
@@ -157,6 +161,10 @@ resource "azurerm_key_vault_secret" "postgres_admin_password" {
   depends_on = [
     azurerm_role_assignment.terraform_kv_secret_officer
   ]
+
+  lifecycle {
+    ignore_changes = [value]
+  }
 }
 
 # =====================================================
