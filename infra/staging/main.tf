@@ -108,13 +108,6 @@ resource "azurerm_postgresql_flexible_server" "postgres" {
 # =====================================================
 # PostgreSQL Firewall Rules
 # =====================================================
-variable "allowed_ips" {
-  default = [
-    "0.0.0.0",        # Azure services
-    "93.159.27.97"    # Kacper Warsaw
-  ]
-}
-
 resource "azurerm_postgresql_flexible_server_firewall_rule" "allowed" {
   for_each  = toset(var.allowed_ips)
   name      = "allow-${replace(each.value, ".", "-")}"
@@ -255,7 +248,7 @@ resource "azurerm_container_app" "duelapp_be" {
 
     container {
       name   = "staging-duelapp-be"
-      image  = "mcr.microsoft.com/azuredocs/aci-helloworld:latest"
+      image  = var.image_tag
       cpu    = 0.25
       memory = "0.5Gi"
 
