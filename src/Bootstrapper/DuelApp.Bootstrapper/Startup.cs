@@ -42,7 +42,7 @@ namespace DuelApp.Bootstrapper
                 endpoints.MapControllers();
                 endpoints.MapGet("/", async context =>
                 {
-                    await context.Response.WriteAsync("DuelApp API runs!");
+                    await context.Response.WriteAsync("DuelApp API!");
                 });
                 endpoints.MapModuleInfo();
             });
