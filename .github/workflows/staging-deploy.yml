@@ -90,6 +90,7 @@ jobs:
         run: az containerapp update --name staging-duelapp-be --resource-group rg-duelapp-be-staging --image ${{ needs.build.outputs.image }}
 
       - name: Update staging.tfvars with new image
+        working-directory: infra/staging
         run: |
           IMAGE="${{ needs.build.outputs.image }}"
           sed -i "s|^image_tag *= *\".*\"|image_tag = \"$IMAGE\"|" staging.tfvars
