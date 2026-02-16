@@ -96,9 +96,10 @@ jobs:
           sed -i "s|^image_tag *= *\".*\"|image_tag = \"$IMAGE\"|" staging.tfvars
 
       - name: Commit updated staging.tfvars
+        working-directory: infra/staging
         run: |
           git config user.name "github-actions"
           git config user.email "github-actions@github.com"
           git add staging.tfvars
-          git commit -m "Update docker image to ${{ needs.build.outputs.image }}" || echo "No changes to commit"
+          git commit -m "chore: update docker image to ${{ needs.build.outputs.image }}" || echo "No changes to commit"
           git push
