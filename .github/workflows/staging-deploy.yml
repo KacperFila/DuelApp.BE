@@ -3,10 +3,13 @@ name: Build, Migrate, and Deploy to Azure Container Apps
 on:
   push:
     branches: ["main"]
+    paths-ignore:
+      - 'infra/**'
+      - '.github/workflows/**'
 
 permissions:
   id-token: write
-  contents: read
+  contents: write
 
 jobs:
   build:
@@ -85,3 +88,18 @@ jobs:
 
       - name: Deploy to Container App
         run: az containerapp update --name staging-duelapp-be --resource-group rg-duelapp-be-staging --image ${{ needs.build.outputs.image }}
+
+      - name: Update staging.tfvars with new image
+        working-directory: infra/staging
+        run: |
+          IMAGE="${{ needs.build.outputs.image }}"
+          sed -i "s|^image_tag *= *\".*\"|image_tag = \"$IMAGE\"|" staging.tfvars
+
+      - name: Commit updated staging.tfvars
+        working-directory: infra/staging
+        run: |
+          git config user.name "github-actions"
+          git config user.email "github-actions@github.com"
+          git add staging.tfvars
+          git commit -m "chore: update docker image to ${{ needs.build.outputs.image }}" || echo "No changes to commit"
+          git push

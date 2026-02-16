@@ -42,4 +42,4 @@ jobs:
 
       - name: Terraform apply
         working-directory: ./infra/staging
-        run: terraform apply -auto-approve -input=false
+        run: terraform apply -var-file="staging.tfvars" -auto-approve -input=false
