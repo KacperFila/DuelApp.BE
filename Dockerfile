@@ -25,6 +25,11 @@ COPY ["src/Modules/Duels/DuelApp.Modules.Duels.Application/DuelApp.Modules.Duels
 COPY ["src/Modules/Duels/DuelApp.Modules.Duels.Domain/DuelApp.Modules.Duels.Domain.csproj", "Modules/Duels/DuelApp.Modules.Duels.Domain/"]
 COPY ["src/Modules/Duels/DuelApp.Modules.Duels.Infrastructure/DuelApp.Modules.Duels.Infrastructure.csproj", "Modules/Duels/DuelApp.Modules.Duels.Infrastructure/"]
 COPY ["src/Modules/Duels/DuelApp.Modules.Duels.Shared/DuelApp.Modules.Duels.Shared.csproj", "Modules/Duels/DuelApp.Modules.Duels.Shared/"]
+COPY ["src/Modules/Matchmaking/DuelApp.Modules.Matchmaking.Api/DuelApp.Modules.Matchmaking.Api.csproj", "Modules/Matchmaking/DuelApp.Modules.Matchmaking.Api/"]
+COPY ["src/Modules/Matchmaking/DuelApp.Modules.Matchmaking.Application/DuelApp.Modules.Matchmaking.Application.csproj", "Modules/Matchmaking/DuelApp.Modules.Matchmaking.Application/"]
+COPY ["src/Modules/Matchmaking/DuelApp.Modules.Matchmaking.Domain/DuelApp.Modules.Matchmaking.Domain.csproj", "Modules/Matchmaking/DuelApp.Modules.Matchmaking.Domain/"]
+COPY ["src/Modules/Matchmaking/DuelApp.Modules.Matchmaking.Infrastructure/DuelApp.Modules.Matchmaking.Infrastructure.csproj", "Modules/Matchmaking/DuelApp.Modules.Matchmaking.Infrastructure/"]
+COPY ["src/Modules/Matchmaking/DuelApp.Modules.Matchmaking.Shared/DuelApp.Modules.Matchmaking.Shared.csproj", "Modules/Matchmaking/DuelApp.Modules.Matchmaking.Shared/"]
 COPY ["src/Shared/DuelApp.Shared.Abstractions/DuelApp.Shared.Abstractions.csproj", "Shared/DuelApp.Shared.Abstractions/"]
 COPY ["src/Shared/DuelApp.Shared.Infrastructure/DuelApp.Shared.Infrastructure.csproj", "Shared/DuelApp.Shared.Infrastructure/"]
 
