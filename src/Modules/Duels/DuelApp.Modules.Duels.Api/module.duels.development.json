@@ -1,0 +1,8 @@
+{
+  "duels": {
+    "module": {
+      "enabled": true,
+      "name": "Duels"
+    }
+  }
+}

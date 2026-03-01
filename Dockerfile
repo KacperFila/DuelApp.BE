@@ -20,6 +20,11 @@ COPY ["src/Modules/Questions/DuelApp.Modules.Questions.Application/DuelApp.Modul
 COPY ["src/Modules/Questions/DuelApp.Modules.Questions.Domain/DuelApp.Modules.Questions.Domain.csproj", "Modules/Questions/DuelApp.Modules.Questions.Domain/"]
 COPY ["src/Modules/Questions/DuelApp.Modules.Questions.Infrastructure/DuelApp.Modules.Questions.Infrastructure.csproj", "Modules/Questions/DuelApp.Modules.Questions.Infrastructure/"]
 COPY ["src/Modules/Questions/DuelApp.Modules.Questions.Shared/DuelApp.Modules.Questions.Shared.csproj", "Modules/Questions/DuelApp.Modules.Questions.Shared/"]
+COPY ["src/Modules/Duels/DuelApp.Modules.Duels.Api/DuelApp.Modules.Duels.Api.csproj", "Modules/Duels/DuelApp.Modules.Duels.Api/"]
+COPY ["src/Modules/Duels/DuelApp.Modules.Duels.Application/DuelApp.Modules.Duels.Application.csproj", "Modules/Duels/DuelApp.Modules.Duels.Application/"]
+COPY ["src/Modules/Duels/DuelApp.Modules.Duels.Domain/DuelApp.Modules.Duels.Domain.csproj", "Modules/Duels/DuelApp.Modules.Duels.Domain/"]
+COPY ["src/Modules/Duels/DuelApp.Modules.Duels.Infrastructure/DuelApp.Modules.Duels.Infrastructure.csproj", "Modules/Duels/DuelApp.Modules.Duels.Infrastructure/"]
+COPY ["src/Modules/Duels/DuelApp.Modules.Duels.Shared/DuelApp.Modules.Duels.Shared.csproj", "Modules/Duels/DuelApp.Modules.Duels.Shared/"]
 COPY ["src/Shared/DuelApp.Shared.Abstractions/DuelApp.Shared.Abstractions.csproj", "Shared/DuelApp.Shared.Abstractions/"]
 COPY ["src/Shared/DuelApp.Shared.Infrastructure/DuelApp.Shared.Infrastructure.csproj", "Shared/DuelApp.Shared.Infrastructure/"]
 

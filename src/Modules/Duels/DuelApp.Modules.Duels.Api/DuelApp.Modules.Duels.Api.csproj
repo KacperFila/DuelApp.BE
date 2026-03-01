@@ -1,0 +1,23 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net9.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\..\..\Shared\DuelApp.Shared.Infrastructure\DuelApp.Shared.Infrastructure.csproj" />
+      <ProjectReference Include="..\DuelApp.Modules.Duels.Infrastructure\DuelApp.Modules.Duels.Infrastructure.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <None Update="module.duels.json">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </None>
+      <None Update="module.duels.development.json">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </None>
+    </ItemGroup>
+
+</Project>
