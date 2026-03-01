@@ -1,0 +1,8 @@
+{
+  "questions": {
+    "module": {
+      "enabled": true,
+      "name": "Questions"
+    }
+  }
+}
