@@ -1,0 +1,8 @@
+{
+  "matchmaking": {
+    "module": {
+      "enabled": true,
+      "name": "Matchmaking"
+    }
+  }
+}
