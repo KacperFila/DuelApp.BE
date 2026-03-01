@@ -17,9 +17,9 @@ COPY ["src/Modules/Users/DuelApp.Modules.Users.Api/DuelApp.Modules.Users.Api.csp
 COPY ["src/Modules/Users/DuelApp.Modules.Users.Core/DuelApp.Modules.Users.Core.csproj", "Modules/Users/DuelApp.Modules.Users.Core/"]
 COPY ["src/Modules/Questions/DuelApp.Modules.Questions.Api/DuelApp.Modules.Questions.Api.csproj", "Modules/Questions/DuelApp.Modules.Questions.Api/"]
 COPY ["src/Modules/Questions/DuelApp.Modules.Questions.Application/DuelApp.Modules.Questions.Application.csproj", "Modules/Questions/DuelApp.Modules.Questions.Application/"]
-COPY ["src/Modules/Questions/DuelApp.Modules.Questions.Api/DuelApp.Modules.Questions.Domain.csproj", "Modules/Questions/DuelApp.Modules.Questions.Domain/"]
-COPY ["src/Modules/Questions/DuelApp.Modules.Questions.Api/DuelApp.Modules.Questions.Infrastructure.csproj", "Modules/Questions/DuelApp.Modules.Questions.Infrastructure/"]
-COPY ["src/Modules/Questions/DuelApp.Modules.Questions.Api/DuelApp.Modules.Questions.Shared.csproj", "Modules/Questions/DuelApp.Modules.Questions.Shared/"]
+COPY ["src/Modules/Questions/DuelApp.Modules.Questions.Domain/DuelApp.Modules.Questions.Domain.csproj", "Modules/Questions/DuelApp.Modules.Questions.Domain/"]
+COPY ["src/Modules/Questions/DuelApp.Modules.Questions.Infrastructure/DuelApp.Modules.Questions.Infrastructure.csproj", "Modules/Questions/DuelApp.Modules.Questions.Infrastructure/"]
+COPY ["src/Modules/Questions/DuelApp.Modules.Questions.Shared/DuelApp.Modules.Questions.Shared.csproj", "Modules/Questions/DuelApp.Modules.Questions.Shared/"]
 COPY ["src/Shared/DuelApp.Shared.Abstractions/DuelApp.Shared.Abstractions.csproj", "Shared/DuelApp.Shared.Abstractions/"]
 COPY ["src/Shared/DuelApp.Shared.Infrastructure/DuelApp.Shared.Infrastructure.csproj", "Shared/DuelApp.Shared.Infrastructure/"]
 
