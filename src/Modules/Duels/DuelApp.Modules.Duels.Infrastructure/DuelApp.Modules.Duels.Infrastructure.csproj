@@ -11,4 +11,9 @@
       <ProjectReference Include="..\DuelApp.Modules.Duels.Application\DuelApp.Modules.Duels.Application.csproj" />
     </ItemGroup>
 
+    <ItemGroup>
+      <Folder Include="EF\Migrations\" />
+      <Folder Include="EF\Repositories\" />
+    </ItemGroup>
+
 </Project>

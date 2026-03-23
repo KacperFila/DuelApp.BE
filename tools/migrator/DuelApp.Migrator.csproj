@@ -2,6 +2,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\Modules\Users\DuelApp.Modules.Users.Core\DuelApp.Modules.Users.Core.csproj" />
+    <ProjectReference Include="..\..\src\Modules\Duels\DuelApp.Modules.Duels.Infrastructure\DuelApp.Modules.Duels.Infrastructure.csproj" />
   </ItemGroup>
 
   <ItemGroup>

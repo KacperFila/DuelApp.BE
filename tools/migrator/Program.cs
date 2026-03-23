@@ -1,4 +1,5 @@
 ﻿using DuelApp.Modules.Users.Core.DAL;
+using DuelApp.Modules.Duels.Infrastructure;
 using Microsoft.EntityFrameworkCore;
 
 namespace DuelApp.Migrator;
@@ -29,13 +30,18 @@ class Program
 
         try
         {
-            var optionsBuilder = new DbContextOptionsBuilder<UsersDbContext>();
-            optionsBuilder.UseNpgsql(connectionString);
+            var usersOptionsBuilder = new DbContextOptionsBuilder<UsersDbContext>();
+            var duelsOptionsBuilder = new DbContextOptionsBuilder<DuelsDbContext>();
+            
+            usersOptionsBuilder.UseNpgsql(connectionString);
+            duelsOptionsBuilder.UseNpgsql(connectionString);
 
-            using var context = new UsersDbContext(optionsBuilder.Options);
+            using var usersDbContext = new UsersDbContext(usersOptionsBuilder.Options);
+            using var duelsDbContext = new DuelsDbContext(duelsOptionsBuilder.Options);
 
             Console.WriteLine("Running migrations...");
-            await context.Database.MigrateAsync();
+            await usersDbContext.Database.MigrateAsync();
+            await duelsDbContext.Database.MigrateAsync();
             Console.WriteLine("Migrations completed successfully.");
             return 0;
         }
