@@ -28,8 +28,6 @@ using DuelApp.Shared.Infrastructure.Storage;
 using DuelApp.Shared.Infrastructure.Time;
 
 [assembly: InternalsVisibleTo("DuelApp.Bootstrapper")]
-[assembly: InternalsVisibleTo("DuelApp.Services.Tickets.Core")]
-[assembly: InternalsVisibleTo("DuelApp.Shared.Tests")]
 namespace DuelApp.Shared.Infrastructure
 {
     internal static class Extensions

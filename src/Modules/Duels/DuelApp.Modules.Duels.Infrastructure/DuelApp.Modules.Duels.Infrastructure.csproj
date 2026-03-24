@@ -8,12 +8,12 @@
 
     <ItemGroup>
       <ProjectReference Include="..\..\..\Shared\DuelApp.Shared.Infrastructure\DuelApp.Shared.Infrastructure.csproj" />
+      <ProjectReference Include="..\..\Matchmaking\DuelApp.Modules.Matchmaking.Shared\DuelApp.Modules.Matchmaking.Shared.csproj" />
       <ProjectReference Include="..\DuelApp.Modules.Duels.Application\DuelApp.Modules.Duels.Application.csproj" />
     </ItemGroup>
 
     <ItemGroup>
       <Folder Include="EF\Migrations\" />
-      <Folder Include="EF\Repositories\" />
     </ItemGroup>
 
 </Project>

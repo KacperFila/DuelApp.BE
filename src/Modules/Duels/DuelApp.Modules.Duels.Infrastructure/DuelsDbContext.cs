@@ -12,7 +12,7 @@ public class DuelsDbContext : DbContext
     {
     }
 
-    public DbSet<Duel> Duels { get; set; }
+    public DbSet<Duel?> Duels { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
