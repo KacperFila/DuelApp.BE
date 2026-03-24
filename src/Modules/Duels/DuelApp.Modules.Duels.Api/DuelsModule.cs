@@ -1,5 +1,7 @@
 using DuelApp.Modules.Duels.Application;
+using DuelApp.Modules.Duels.Domain;
 using DuelApp.Modules.Duels.Infrastructure;
+using DuelApp.Modules.Duels.Infrastructure.Realtime;
 using DuelApp.Shared.Abstractions.Modules;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
@@ -20,11 +22,16 @@ internal class DuelsModule : IModule
     public void Register(IServiceCollection services)
     {
         services.AddApplication();
-        services.AddApplication();
+        services.AddDomain();
         services.AddInfrastructure();
     }
         
     public void Use(IApplicationBuilder app)
     {
+        app.UseRouting();
+        app.UseEndpoints(endpoints =>
+        {
+            endpoints.MapHub<DuelHub>("/duelhub");
+        });
     }
 }

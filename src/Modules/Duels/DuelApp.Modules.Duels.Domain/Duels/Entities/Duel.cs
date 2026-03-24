@@ -8,7 +8,7 @@ public sealed class Duel : AggregateRoot<Guid>
 {
     public Guid PlayerOneId { get; private set; } = Guid.Empty;
     public Guid PlayerTwoId { get; private set; } = Guid.Empty;
-    public DuelStatus Status { get; private set; } = DuelStatus.None;
+    public string Status { get; private set; } = DuelStatus.None;
     public int CurrentRound { get; private set; } = 0;
     public int TotalRounds { get; private set; } = 0;
     public List<DuelRound> Rounds { get; private set; } = [];

@@ -9,6 +9,7 @@
     <ItemGroup>
       <ProjectReference Include="..\..\..\Shared\DuelApp.Shared.Infrastructure\DuelApp.Shared.Infrastructure.csproj" />
       <ProjectReference Include="..\DuelApp.Modules.Matchmaking.Application\DuelApp.Modules.Matchmaking.Application.csproj" />
+      <ProjectReference Include="..\DuelApp.Modules.Matchmaking.Shared\DuelApp.Modules.Matchmaking.Shared.csproj" />
     </ItemGroup>
 
 </Project>
