@@ -168,6 +168,8 @@ resource "azurerm_linux_web_app" "keycloak" {
     }
   }
 
+  always_on = false
+
   identity {
     type = "SystemAssigned"
   }
