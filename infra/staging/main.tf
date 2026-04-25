@@ -156,7 +156,7 @@ resource "azurerm_linux_web_app" "keycloak" {
   location            = azurerm_resource_group.rg_duelapp_be_staging.location
   resource_group_name = azurerm_resource_group.rg_duelapp_be_staging.name
 
-  service_plan_id         = azurerm_service_plan.spshared.id
+  service_plan_id         = azurerm_service_plan.spkeycloak.id
   https_only              = true
 
   site_config {
@@ -185,6 +185,18 @@ resource "azurerm_linux_web_app" "keycloak" {
     "KEYCLOAK_ADMIN" = "admin"
     "KEYCLOAK_ADMIN_PASSWORD" = "@Microsoft.KeyVault(SecretUri=${azurerm_key_vault_secret.keycloak_admin_password.id})"
   }
+}
+
+# =====================================================
+# Keycloak service plan
+# =====================================================
+resource "azurerm_service_plan" "spkeycloak" {
+  name                = "sp-duelapp-keycloak"
+  location            = azurerm_resource_group.rg_duelapp_be_staging.location
+  resource_group_name = azurerm_resource_group.rg_duelapp_be_staging.name
+
+  os_type  = "Linux"
+  sku_name = "F1"
 }
 
 # =====================================================
