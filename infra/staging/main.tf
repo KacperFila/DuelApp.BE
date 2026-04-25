@@ -7,6 +7,11 @@ resource "random_password" "postgres_admin_password" {
   special = true
 }
 
+resource "random_password" "keycloak_admin_password" {
+  length  = 24
+  special = true
+}
+
 # =====================================================
 # Resource Group
 # =====================================================
@@ -106,6 +111,20 @@ resource "azurerm_postgresql_flexible_server" "postgres" {
 }
 
 # =====================================================
+# Keycloak database
+# =====================================================
+resource "azurerm_postgresql_flexible_server_database" "keycloak_db" {
+  name      = "keycloak_db"
+  server_id = azurerm_postgresql_flexible_server.postgres.id
+  collation = "en_US.utf8"
+  charset   = "UTF8"
+
+  lifecycle {
+    prevent_destroy = true
+  }
+}
+
+# =====================================================
 # PostgreSQL Firewall Rules
 # =====================================================
 resource "azurerm_postgresql_flexible_server_firewall_rule" "allowed" {
@@ -130,6 +149,49 @@ locals {
 }
 
 # =====================================================
+# Keycloak Web App Service
+# =====================================================
+resource "azurerm_linux_web_app" "keycloak" {
+  name                = "appkeycloak"
+  location            = azurerm_resource_group.rg_duelapp_be_staging.location
+  resource_group_name = azurerm_resource_group.rg_duelapp_be_staging.name
+
+  service_plan_id         = azurerm_service_plan.spshared.id
+  https_only              = true
+
+  site_config {
+    container_registry_use_managed_identity = true
+
+    application_stack {
+      docker_image     = "${azurerm_container_registry.duelapp_acr.login_server}/keycloak"
+      docker_image_tag = "latest"
+    }
+  }
+
+  identity {
+    type = "SystemAssigned"
+  }
+
+  depends_on = [
+    azurerm_role_assignment.keycloak_kv_access
+  ]
+
+  app_settings = {
+    "DOCKER_REGISTRY_SERVER_URL" = "https://${azurerm_container_registry.duelapp_acr.name}.azurecr.io"
+    "KC_DB": "postgres"
+    "KC_DB_URL_HOST": azurerm_postgresql_flexible_server.postgres.fqdn
+    "KC_DB_URL_PORT": 5432
+    "KC_DB_URL_DATABASE": azurerm_postgresql_flexible_server_database.keycloak_db.name
+    "KC_DB_USERNAME": "psqladmin"
+    "KC_DB_PASSWORD" = "@Microsoft.KeyVault(SecretUri=${azurerm_key_vault_secret.postgres_admin_password.id})"
+    "KC_PROXY": "edge"
+    "WEBSITES_PORT": 8080
+    "KEYCLOAK_ADMIN" = "admin"
+    "KEYCLOAK_ADMIN_PASSWORD" = "@Microsoft.KeyVault(SecretUri=${azurerm_key_vault_secret.keycloak_admin_password.id})"
+  }
+}
+
+# =====================================================
 # Key Vault Secrets
 # =====================================================
 resource "azurerm_key_vault_secret" "postgres_connection_string" {
@@ -145,6 +207,21 @@ resource "azurerm_key_vault_secret" "postgres_connection_string" {
     ignore_changes = [value]
   }
 }
+
+resource "azurerm_key_vault_secret" "keycloak_admin_password" {
+  name         = "postgres--keycloak_admin_password"
+  value        = random_password.keycloak_admin_password.result
+  key_vault_id = azurerm_key_vault.duelapp_kv.id
+
+  depends_on = [
+    azurerm_role_assignment.terraform_kv_secret_officer
+  ]
+
+  lifecycle {
+    ignore_changes = [value]
+  }
+}
+
 
 resource "azurerm_key_vault_secret" "postgres_admin_password" {
   name         = "postgres--admin-password"
@@ -204,6 +281,18 @@ resource "azurerm_role_assignment" "terraform_kv_secret_officer" {
   scope                = azurerm_key_vault.duelapp_kv.id
   role_definition_name = "Key Vault Secrets Officer"
   principal_id         = data.azurerm_client_config.current.object_id
+}
+
+resource "azurerm_role_assignment" "keycloak_kv_access" {
+  scope                = azurerm_key_vault.duelapp_kv.id
+  role_definition_name = "Key Vault Secrets User"
+  principal_id         = azurerm_linux_web_app.keycloak.identity[0].principal_id
+}
+
+resource "azurerm_role_assignment" "keycloak_acr_pull" {
+  scope                = azurerm_container_registry.duelapp_acr.id
+  role_definition_name = "AcrPull"
+  principal_id         = azurerm_linux_web_app.keycloak.identity[0].principal_id
 }
 
 # =====================================================
