@@ -172,10 +172,6 @@ resource "azurerm_linux_web_app" "keycloak" {
     type = "SystemAssigned"
   }
 
-  depends_on = [
-    azurerm_role_assignment.keycloak_kv_access
-  ]
-
   app_settings = {
     "DOCKER_REGISTRY_SERVER_URL" = "https://${azurerm_container_registry.duelapp_acr.name}.azurecr.io"
     "KC_DB": "postgres"
