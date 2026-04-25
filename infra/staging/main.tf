@@ -160,6 +160,7 @@ resource "azurerm_linux_web_app" "keycloak" {
   https_only              = true
 
   site_config {
+    always_on = false
     container_registry_use_managed_identity = true
 
     application_stack {
@@ -167,8 +168,6 @@ resource "azurerm_linux_web_app" "keycloak" {
       docker_image_tag = "latest"
     }
   }
-
-  always_on = false
 
   identity {
     type = "SystemAssigned"
