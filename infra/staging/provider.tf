@@ -4,6 +4,11 @@ terraform {
       source  = "hashicorp/azurerm"
       version = "~> 3.0"
     }
+
+    keycloak = {
+      source  = "mrparkers/keycloak"
+      version = "~> 4.0"
+    }
   }
 
   backend "azurerm" {
@@ -16,4 +21,11 @@ terraform {
 
 provider "azurerm" {
   features {}
+}
+
+provider "keycloak" {
+  client_id     = var.keycloak_client_id
+  client_secret = var.keycloak_client_secret
+  url           = var.keycloak_url
+  realm         = "master"
 }

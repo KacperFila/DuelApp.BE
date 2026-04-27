@@ -241,7 +241,7 @@ resource "keycloak_realm" "duelapp-realm" {
 # Keycloak clients
 # =====================================================
 resource "keycloak_openid_client" "duelapp_fe_keycloak_client" {
-  realm_id  = keycloak_realm.duelapp-realm.id
+  realm_id  = keycloak_realm.duelapp_realm.id
   client_id = "duelapp-fe-keycloak-client"
 
   name    = "DuelApp FE"
@@ -259,7 +259,7 @@ resource "keycloak_openid_client" "duelapp_fe_keycloak_client" {
 }
 
 resource "keycloak_openid_client" "duelapp_be_keycloak_client" {
-  realm_id  = keycloak_realm.duelapp-realm.id
+  realm_id  = keycloak_realm.duelapp_realm.id
   client_id = "duelapp-be-keycloak-client"
 
   name    = "DuelApp BE"
@@ -296,7 +296,7 @@ resource "azurerm_key_vault_secret" "postgres_connection_string" {
 }
 
 resource "azurerm_key_vault_secret" "keycloak_admin_password" {
-  name         = "postgres-keycloak-admin-password"
+  name         = "keycloak-admin-password"
   value        = random_password.keycloak_admin_password.result
   key_vault_id = azurerm_key_vault.duelapp_kv.id
 
