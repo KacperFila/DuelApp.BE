@@ -1,4 +1,4 @@
-using DuelApp.Modules.Duels.Domain.Duels.Entities.Enums;
+using DuelApp.Modules.Duels.Domain.Duels.Enums;
 using DuelApp.Modules.Duels.Domain.Duels.ValueObjects;
 using DuelApp.Shared.Abstractions.Kernel.Types;
 

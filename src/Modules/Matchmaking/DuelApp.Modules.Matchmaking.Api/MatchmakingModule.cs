@@ -1,3 +1,4 @@
+using DuelApp.Modules.Matchmaking.Api.Hubs;
 using DuelApp.Modules.Matchmaking.Application;
 using DuelApp.Modules.Matchmaking.Infrastructure;
 using DuelApp.Shared.Abstractions.Modules;
@@ -26,5 +27,9 @@ internal class MatchmakingModule : IModule
         
     public void Use(IApplicationBuilder app)
     {
+        app.UseEndpoints(endpoints =>
+        {
+            endpoints.MapHub<MatchmakingHub>("matchmaking");
+        });
     }
 }

@@ -1,38 +1,17 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using System.Linq;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System.Threading.Tasks;
-using DuelApp.Modules.Users.Core.DTO;
-using DuelApp.Modules.Users.Core.Services;
-using DuelApp.Shared.Abstractions.Auth;
-using DuelApp.Shared.Abstractions.Contexts;
 
-namespace DuelApp.Modules.Users.Api.Controllers
+namespace DuelApp.Modules.Users.Api.Controllers;
+
+internal class AccountController : BaseController
 {
-    internal class AccountController : BaseController
+    [HttpGet("me")]
+    [Authorize]
+    public IActionResult GetMe()
     {
-        private readonly IIdentityService _identityService;
-        private readonly IContext _context;
+        var claims = HttpContext.User.Claims.ToDictionary(c => c.Type, c => c.Value);
 
-        public AccountController(IIdentityService identityService, IContext context)
-        {
-            _identityService = identityService;
-            _context = context;
-        }
-
-        [HttpGet]
-        [Authorize]
-        public async Task<ActionResult<AccountDto>> GetAsync()
-            => OkOrNotFound(await _identityService.GetAsync(_context.Identity.Id));
-
-        [HttpPost("sign-up")]
-        public async Task<ActionResult> SignUpAsync(SignUpDto dto)
-        {
-            await _identityService.SignUpAsync(dto);
-            return NoContent();
-        }
-
-        [HttpPost("sign-in")]
-        public async Task<ActionResult<JsonWebToken>> SignInAsync(SignInDto dto)
-            => Ok(await _identityService.SignInAsync(dto));
+        return Ok(claims);
     }
 }

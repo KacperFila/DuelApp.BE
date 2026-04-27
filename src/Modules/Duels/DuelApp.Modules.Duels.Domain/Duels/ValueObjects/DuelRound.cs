@@ -1,4 +1,4 @@
-using DuelApp.Modules.Duels.Domain.Duels.Entities.Enums;
+using DuelApp.Modules.Duels.Domain.Duels.Enums;
 
 namespace DuelApp.Modules.Duels.Domain.Duels.ValueObjects;
 
