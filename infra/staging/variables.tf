@@ -11,11 +11,3 @@ variable "allowed_ips" {
   ]
   description = "Allowed IPs by PostgreSQL Firewall"
 }
-
-variable "keycloak_client_id" {}
-
-variable "keycloak_client_secret" {
-  sensitive = true
-}
-
-variable "keycloak_url" {}
