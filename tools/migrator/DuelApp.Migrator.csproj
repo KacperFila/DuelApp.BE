@@ -3,6 +3,7 @@
   <ItemGroup>
     <ProjectReference Include="..\..\src\Modules\Users\DuelApp.Modules.Users.Core\DuelApp.Modules.Users.Core.csproj" />
     <ProjectReference Include="..\..\src\Modules\Duels\DuelApp.Modules.Duels.Infrastructure\DuelApp.Modules.Duels.Infrastructure.csproj" />
+    <ProjectReference Include="..\..\src\Modules\Matchmaking\DuelApp.Modules.Matchmaking.Infrastructure\DuelApp.Modules.Matchmaking.Infrastructure.csproj" />
   </ItemGroup>
 
   <ItemGroup>

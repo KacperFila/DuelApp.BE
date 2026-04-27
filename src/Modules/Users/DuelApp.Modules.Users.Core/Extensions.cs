@@ -1,24 +1,15 @@
-﻿using Microsoft.AspNetCore.Identity;
-using Microsoft.Extensions.DependencyInjection;
-using DuelApp.Modules.Users.Core.DAL.Repositories;
+﻿using System.Runtime.CompilerServices;
 using DuelApp.Modules.Users.Core.DAL;
-using DuelApp.Modules.Users.Core.Entities;
-using DuelApp.Modules.Users.Core.Repositories;
-using DuelApp.Modules.Users.Core.Services;
-using System.Runtime.CompilerServices;
 using DuelApp.Shared.Infrastructure.Postgres;
+using Microsoft.Extensions.DependencyInjection;
 
 [assembly: InternalsVisibleTo("DuelApp.Modules.Users.Api")]
 
-namespace DuelApp.Modules.Users.Core
+namespace DuelApp.Modules.Users.Core;
+
+internal static class Extensions
 {
-    internal static class Extensions
-    {
-        public static IServiceCollection AddCore(this IServiceCollection services)
-            => services
-                .AddScoped<IUserRepository, UserRepository>()
-                .AddSingleton<IPasswordHasher<User>, PasswordHasher<User>>()
-                .AddTransient<IIdentityService, IdentityService>()
-                .AddPostgres<UsersDbContext>();
-    }
+    public static IServiceCollection AddCore(this IServiceCollection services)
+        => services
+            .AddPostgres<UsersDbContext>();
 }

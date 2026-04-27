@@ -1,4 +1,4 @@
-namespace DuelApp.Modules.Duels.Domain.Duels.Entities.Enums;
+namespace DuelApp.Modules.Duels.Domain.Duels.Enums;
 
 public enum DuelStatus
 {

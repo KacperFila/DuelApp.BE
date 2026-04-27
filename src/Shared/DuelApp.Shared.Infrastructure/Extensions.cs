@@ -23,6 +23,7 @@ using DuelApp.Shared.Infrastructure.Messaging;
 using DuelApp.Shared.Infrastructure.Modules;
 using DuelApp.Shared.Infrastructure.Postgres;
 using DuelApp.Shared.Infrastructure.Queries;
+using DuelApp.Shared.Infrastructure.RealTime;
 using DuelApp.Shared.Infrastructure.Services;
 using DuelApp.Shared.Infrastructure.Storage;
 using DuelApp.Shared.Infrastructure.Time;
@@ -61,9 +62,10 @@ namespace DuelApp.Shared.Infrastructure
             {
                 cors.AddPolicy(CorsPolicy, x =>
                 {
-                    x.WithOrigins("*")
-                        .WithMethods("POST", "PUT", "DELETE")
-                        .WithHeaders("Content-Type", "Authorization");
+                    x.WithOrigins("http://localhost:4200")
+                        .AllowAnyHeader()
+                        .AllowAnyMethod()
+                        .AllowCredentials();
                 });
             });
             services.AddSwaggerGen(swagger =>
@@ -76,6 +78,7 @@ namespace DuelApp.Shared.Infrastructure
                 });
             });
 
+            services.AddRealTime();
             services.AddMemoryCache();
             services.AddSingleton<IRequestStorage, RequestStorage>();
             services.AddSingleton<IContextFactory, ContextFactory>();

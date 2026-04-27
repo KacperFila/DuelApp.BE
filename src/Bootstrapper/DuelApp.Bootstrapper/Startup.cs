@@ -17,16 +17,18 @@ namespace DuelApp.Bootstrapper
     {
         private readonly IList<IModule> _modules;
         private readonly IList<Assembly> _assemblies;
-
+        private readonly IConfiguration _configuration;
+        
         public Startup(IConfiguration configuration)
         {
+            _configuration = configuration;
             _assemblies = ModuleLoader.LoadAssemblies(configuration);
             _modules = ModuleLoader.LoadModules(_assemblies);
         }
 
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddInfrastructure(_assemblies, _modules);
+            services.AddInfrastructure(_assemblies,_modules);
 
             foreach (var module in _modules)
             {
@@ -34,7 +36,7 @@ namespace DuelApp.Bootstrapper
             }
         }
 
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env, ILogger<Startup> logger)
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env, ILogger<Startup> logger, IConfiguration configuration)
         {
             app.UseInfrastructure();
             app.UseEndpoints(endpoints =>

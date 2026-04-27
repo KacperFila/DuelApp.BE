@@ -1,4 +1,5 @@
 using DuelApp.Modules.Duels.Application;
+using DuelApp.Modules.Duels.Domain;
 using DuelApp.Modules.Duels.Infrastructure;
 using DuelApp.Shared.Abstractions.Modules;
 using Microsoft.AspNetCore.Builder;
@@ -20,7 +21,7 @@ internal class DuelsModule : IModule
     public void Register(IServiceCollection services)
     {
         services.AddApplication();
-        services.AddApplication();
+        services.AddDomain();
         services.AddInfrastructure();
     }
         
