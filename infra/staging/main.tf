@@ -63,12 +63,12 @@ resource "azurerm_container_app_environment" "duelapp_env" {
 data "azurerm_client_config" "current" {}
 
 resource "azurerm_key_vault" "duelapp_kv" {
-  name                     = "staging-duelapp-kv"
-  location                 = azurerm_resource_group.rg_duelapp_be_staging.location
-  resource_group_name      = azurerm_resource_group.rg_duelapp_be_staging.name
-  tenant_id                = data.azurerm_client_config.current.tenant_id
-  sku_name                 = "standard"
-  purge_protection_enabled = false
+  name                      = "staging-duelapp-kv"
+  location                  = azurerm_resource_group.rg_duelapp_be_staging.location
+  resource_group_name       = azurerm_resource_group.rg_duelapp_be_staging.name
+  tenant_id                 = data.azurerm_client_config.current.tenant_id
+  sku_name                  = "standard"
+  purge_protection_enabled  = false
   enable_rbac_authorization = true
 
   tags = {
@@ -156,10 +156,11 @@ resource "azurerm_linux_web_app" "keycloak" {
   location            = azurerm_resource_group.rg_duelapp_be_staging.location
   resource_group_name = azurerm_resource_group.rg_duelapp_be_staging.name
 
-  service_plan_id         = azurerm_service_plan.spshared.id
-  https_only              = true
+  service_plan_id = azurerm_service_plan.spkeycloak.id
+  https_only      = true
 
   site_config {
+    always_on                               = false
     container_registry_use_managed_identity = true
 
     application_stack {
@@ -174,24 +175,36 @@ resource "azurerm_linux_web_app" "keycloak" {
 
   app_settings = {
     "DOCKER_REGISTRY_SERVER_URL" = "https://${azurerm_container_registry.duelapp_acr.name}.azurecr.io"
-    "KC_DB": "postgres"
-    "KC_DB_URL_HOST": azurerm_postgresql_flexible_server.postgres.fqdn
-    "KC_DB_URL_PORT": 5432
-    "KC_DB_URL_DATABASE": azurerm_postgresql_flexible_server_database.keycloak_db.name
-    "KC_DB_USERNAME": "psqladmin"
+    "KC_DB" : "postgres"
+    "KC_DB_URL_HOST" : azurerm_postgresql_flexible_server.postgres.fqdn
+    "KC_DB_URL_PORT" : 5432
+    "KC_DB_URL_DATABASE" : azurerm_postgresql_flexible_server_database.keycloak_db.name
+    "KC_DB_USERNAME" : "psqladmin"
     "KC_DB_PASSWORD" = "@Microsoft.KeyVault(SecretUri=${azurerm_key_vault_secret.postgres_admin_password.id})"
-    "KC_PROXY": "edge"
-    "WEBSITES_PORT": 8080
-    "KEYCLOAK_ADMIN" = "admin"
+    "KC_PROXY" : "edge"
+    "WEBSITES_PORT" : 8080
+    "KEYCLOAK_ADMIN"          = "admin"
     "KEYCLOAK_ADMIN_PASSWORD" = "@Microsoft.KeyVault(SecretUri=${azurerm_key_vault_secret.keycloak_admin_password.id})"
   }
+}
+
+# =====================================================
+# Keycloak service plan
+# =====================================================
+resource "azurerm_service_plan" "spkeycloak" {
+  name                = "sp-duelapp-keycloak"
+  location            = azurerm_resource_group.rg_duelapp_be_staging.location
+  resource_group_name = azurerm_resource_group.rg_duelapp_be_staging.name
+
+  os_type  = "Linux"
+  sku_name = "F1"
 }
 
 # =====================================================
 # Key Vault Secrets
 # =====================================================
 resource "azurerm_key_vault_secret" "postgres_connection_string" {
-  name         = "postgres--connection-string"
+  name         = "postgres-connection-string"
   value        = local.postgres_connection_string
   key_vault_id = azurerm_key_vault.duelapp_kv.id
 
@@ -205,7 +218,7 @@ resource "azurerm_key_vault_secret" "postgres_connection_string" {
 }
 
 resource "azurerm_key_vault_secret" "keycloak_admin_password" {
-  name         = "postgres--keycloak_admin_password"
+  name         = "keycloak-admin-password"
   value        = random_password.keycloak_admin_password.result
   key_vault_id = azurerm_key_vault.duelapp_kv.id
 
@@ -218,9 +231,8 @@ resource "azurerm_key_vault_secret" "keycloak_admin_password" {
   }
 }
 
-
 resource "azurerm_key_vault_secret" "postgres_admin_password" {
-  name         = "postgres--admin-password"
+  name         = "postgres-admin-password"
   value        = random_password.postgres_admin_password.result
   key_vault_id = azurerm_key_vault.duelapp_kv.id
 
@@ -322,7 +334,7 @@ resource "azurerm_container_app" "duelapp_be" {
   }
 
   secret {
-    name                = "postgres--connection-string"
+    name                = "postgres-connection-string"
     key_vault_secret_id = azurerm_key_vault_secret.postgres_connection_string.id
     identity            = azurerm_user_assigned_identity.duelapp_uami.id
   }
@@ -339,7 +351,7 @@ resource "azurerm_container_app" "duelapp_be" {
 
       env {
         name        = "Postgres__ConnectionString"
-        secret_name = "postgres--connection-string"
+        secret_name = "postgres-connection-string"
       }
 
       env {
