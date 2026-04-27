@@ -60,7 +60,7 @@ jobs:
         run: |
           CONNECTION_STRING=$(az keyvault secret show \
             --vault-name ${{ vars.AZURE_KEY_VAULT_NAME }} \
-            --name "postgres--connection-string" \
+            --name "postgres-connection-string" \
             --query value -o tsv)
           echo "::add-mask::$CONNECTION_STRING"
           echo "CONNECTION_STRING=$CONNECTION_STRING" >> $GITHUB_ENV
