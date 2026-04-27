@@ -203,7 +203,7 @@ resource "azurerm_service_plan" "spkeycloak" {
 # =====================================================
 # Keycloak realm
 # =====================================================
-resource "keycloak_realm" "duelapp-realm" {
+resource "keycloak_realm" "duelapp_realm" {
   realm        = "duelapp-realm"
   enabled      = true
   display_name = "duelapp-realm"
