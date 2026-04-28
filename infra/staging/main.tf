@@ -355,11 +355,6 @@ resource "azurerm_container_app" "duelapp_be" {
       }
 
       env {
-        name  = "Auth__IssuerSigningKey"
-        value = "placeholder-for-testing"
-      }
-
-      env {
         name  = "KEYVAULT_NAME"
         value = azurerm_key_vault.duelapp_kv.name
       }
@@ -372,6 +367,36 @@ resource "azurerm_container_app" "duelapp_be" {
       env {
         name  = "Cors__AllowedOrigins__0"
         value = "https://staging-duelapp-fe98179.azurewebsites.net"
+      }
+
+      env {
+        name  = "Keycloak__Authority"
+        value = "https://appkeycloak.azurewebsites.net/realms/duelapp-realm"
+      }
+
+      env {
+        name  = "Keycloak__ClientId"
+        value = "duelapp-be-keycloak-client"
+      }
+
+      env {
+        name  = "Keycloak__Audience"
+        value = "duelapp-be-audience"
+      }
+
+      env {
+        name  = "Keycloak__Issuer"
+        value = "https://appkeycloak.azurewebsites.net/realms/duelapp-realm"
+      }
+
+      env {
+        name  = "Keycloak__MetadataAddress"
+        value = "https://appkeycloak.azurewebsites.net/realms/duelapp-realm/.well-known/openid-configuration"
+      }
+
+      env {
+        name  = "Keycloak__RequireHttpsMetadata"
+        value = "true"
       }
     }
   }
