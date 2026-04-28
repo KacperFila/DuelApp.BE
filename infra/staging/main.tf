@@ -368,6 +368,11 @@ resource "azurerm_container_app" "duelapp_be" {
         name  = "ASPNETCORE_ENVIRONMENT"
         value = "Staging"
       }
+
+      env {
+        name  = "Cors__AllowedOrigins__0"
+        value = "https://staging-duelapp-fe98179.azurewebsites.net"
+      }
     }
   }
 
