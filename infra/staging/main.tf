@@ -381,7 +381,7 @@ resource "azurerm_container_app" "duelapp_be" {
 
       env {
         name  = "Keycloak__Audience"
-        value = "duelapp-be-audience"
+        value = "account"
       }
 
       env {
