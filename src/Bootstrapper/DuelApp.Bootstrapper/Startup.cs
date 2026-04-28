@@ -28,7 +28,7 @@ namespace DuelApp.Bootstrapper
 
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddInfrastructure(_assemblies,_modules);
+            services.AddInfrastructure(_assemblies, _modules, _configuration);
 
             foreach (var module in _modules)
             {

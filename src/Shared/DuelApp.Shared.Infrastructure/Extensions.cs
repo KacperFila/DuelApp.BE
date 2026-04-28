@@ -1,10 +1,4 @@
-﻿using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc.ApplicationParts;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.OpenApi.Models;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
@@ -27,6 +21,13 @@ using DuelApp.Shared.Infrastructure.RealTime;
 using DuelApp.Shared.Infrastructure.Services;
 using DuelApp.Shared.Infrastructure.Storage;
 using DuelApp.Shared.Infrastructure.Time;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc.ApplicationParts;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.OpenApi.Models;
+using CorsOptions = DuelApp.Shared.Infrastructure.Cors.CorsOptions;
 
 [assembly: InternalsVisibleTo("DuelApp.Bootstrapper")]
 [assembly: InternalsVisibleTo("DuelApp.Services.Tickets.Core")]
@@ -38,31 +39,33 @@ namespace DuelApp.Shared.Infrastructure
         private const string CorsPolicy = "cors";
         
         public static IServiceCollection AddInfrastructure(this IServiceCollection services,
-            IList<Assembly> assemblies, IList<IModule> modules)
+            IList<Assembly> assemblies, IList<IModule> modules, IConfiguration configuration)
         {
             var disabledModules = new List<string>();
-            using (var serviceProvider = services.BuildServiceProvider())
+        
+            foreach (var (key, value) in configuration.AsEnumerable())
             {
-                var configuration = serviceProvider.GetRequiredService<IConfiguration>();
-                foreach (var (key, value) in configuration.AsEnumerable())
+                if (!key.Contains(":module:enabled"))
                 {
-                    if (!key.Contains(":module:enabled"))
-                    {
-                        continue;
-                    }
+                    continue;
+                }
 
-                    if (!bool.Parse(value))
-                    {
-                        disabledModules.Add(key.Split(":")[0]);
-                    }
+                if (!bool.Parse(value))
+                {
+                    disabledModules.Add(key.Split(":")[0]);
                 }
             }
-
-            services.AddCors(cors =>
+            
+            services.AddCors(options =>
             {
-                cors.AddPolicy(CorsPolicy, x =>
+                options.AddPolicy("CorsPolicy", policy =>
                 {
-                    x.WithOrigins("http://localhost:4200")
+                    var corsOptions = configuration
+                        .GetSection("Cors")
+                        .Get<CorsOptions>();
+
+                    policy
+                        .WithOrigins(corsOptions!.AllowedOrigins)
                         .AllowAnyHeader()
                         .AllowAnyMethod()
                         .AllowCredentials();
