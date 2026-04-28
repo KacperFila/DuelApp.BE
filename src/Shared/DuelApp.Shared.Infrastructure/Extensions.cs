@@ -36,7 +36,7 @@ namespace DuelApp.Shared.Infrastructure
 {
     internal static class Extensions
     {
-        private const string CorsPolicy = "cors";
+        private const string AngularClientCorsPolicy = nameof(AngularClientCorsPolicy);
         
         public static IServiceCollection AddInfrastructure(this IServiceCollection services,
             IList<Assembly> assemblies, IList<IModule> modules, IConfiguration configuration)
@@ -58,7 +58,7 @@ namespace DuelApp.Shared.Infrastructure
             
             services.AddCors(options =>
             {
-                options.AddPolicy("CorsPolicy", policy =>
+                options.AddPolicy(AngularClientCorsPolicy, policy =>
                 {
                     var corsOptions = configuration
                         .GetSection("Cors")
@@ -124,7 +124,7 @@ namespace DuelApp.Shared.Infrastructure
 
         public static IApplicationBuilder UseInfrastructure(this IApplicationBuilder app)
         {
-            app.UseCors(CorsPolicy);
+            app.UseCors(AngularClientCorsPolicy);
             app.UseErrorHandling();
             app.UseSwagger();
             app.UseReDoc(reDoc =>
