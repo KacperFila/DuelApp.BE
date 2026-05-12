@@ -9,11 +9,11 @@
     <ItemGroup>
       <ProjectReference Include="..\..\..\Shared\DuelApp.Shared.Infrastructure\DuelApp.Shared.Infrastructure.csproj" />
       <ProjectReference Include="..\DuelApp.Modules.Duels.Application\DuelApp.Modules.Duels.Application.csproj" />
+      <ProjectReference Include="..\DuelApp.Modules.Duels.Shared\DuelApp.Modules.Duels.Shared.csproj" />
     </ItemGroup>
 
     <ItemGroup>
       <Folder Include="EF\Migrations\" />
-      <Folder Include="EF\Repositories\" />
     </ItemGroup>
 
 </Project>

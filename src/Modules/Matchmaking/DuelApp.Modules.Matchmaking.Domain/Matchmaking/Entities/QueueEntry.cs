@@ -3,16 +3,16 @@ using DuelApp.Shared.Abstractions.Kernel.Types;
 
 namespace DuelApp.Modules.Matchmaking.Domain.Matchmaking.Entities;
 
-public sealed class MatchmakingQueueEntry : AggregateRoot<Guid>
+public sealed class QueueEntry : AggregateRoot<Guid>
 {
     public Guid PlayerId { get; private set; } = Guid.Empty;
     public MatchmakingStatus Status { get; private set; }
     public DateTime StartedAt { get; private set; } = DateTime.MinValue;
     public DateTime? ExpiresAt { get; private set; }
     
-    public static MatchmakingQueueEntry Create(Guid playerId)
+    public static QueueEntry Create(Guid playerId)
     {
-        return new MatchmakingQueueEntry
+        return new QueueEntry
         {
             Id = Guid.NewGuid(),
             PlayerId = playerId,
@@ -21,20 +21,10 @@ public sealed class MatchmakingQueueEntry : AggregateRoot<Guid>
             ExpiresAt = DateTime.UtcNow.AddMinutes(2)
         };
     }
-    
-    public void MarkAsInMatch()
-    {
-        if (Status != MatchmakingStatus.Queued)
-        {
-            return;
-        }
-
-        Status = MatchmakingStatus.InMatch;
-    }
 
     public void MarkAsMatched()
     {
-        if (Status != MatchmakingStatus.InMatch)
+        if (Status != MatchmakingStatus.Queued)
         {
             return;
         }

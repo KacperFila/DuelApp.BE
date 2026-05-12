@@ -2,6 +2,7 @@ namespace DuelApp.Modules.Matchmaking.Application.Services;
 
 public interface IMatchmakingService
 {
-    Task JoinQueueAsync(Guid playerId);
+    Task<bool> TryJoinQueueAsync();
     Task LeaveQueueAsync(Guid playerId);
+    Task TryMatchPlayersAsync(CancellationToken cancellationToken);
 }

@@ -11,4 +11,8 @@
       <ProjectReference Include="..\DuelApp.Modules.Questions.Application\DuelApp.Modules.Questions.Application.csproj" />
     </ItemGroup>
 
+    <ItemGroup>
+      <Folder Include="EF\Migrations\" />
+    </ItemGroup>
+
 </Project>

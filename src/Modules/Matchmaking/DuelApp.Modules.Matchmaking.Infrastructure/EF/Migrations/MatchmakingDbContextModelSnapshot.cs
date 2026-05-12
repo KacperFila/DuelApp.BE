@@ -17,13 +17,13 @@ namespace DuelApp.Modules.Matchmaking.Infrastructure.EF.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasDefaultSchema("MatchmakingQueueEntries")
+                .HasDefaultSchema("Matchmaking")
                 .HasAnnotation("ProductVersion", "8.0.2")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
-            modelBuilder.Entity("DuelApp.Modules.Matchmaking.Domain.Matchmaking.Entities.MatchmakingQueueEntry", b =>
+            modelBuilder.Entity("DuelApp.Modules.Matchmaking.Domain.Matchmaking.Entities.QueueEntry", b =>
                 {
                     b.Property<Guid>("Id")
                         .HasColumnType("uuid");
@@ -51,16 +51,11 @@ namespace DuelApp.Modules.Matchmaking.Infrastructure.EF.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("PlayerId")
-                        .IsUnique();
-
                     b.HasIndex("StartedAt");
 
-                    b.HasIndex("Status");
+                    b.HasIndex("PlayerId", "Status");
 
-                    b.HasIndex("Status", "StartedAt");
-
-                    b.ToTable("matchmaking_queue_entries", "MatchmakingQueueEntries");
+                    b.ToTable("queue_entries", "Matchmaking");
                 });
 #pragma warning restore 612, 618
         }

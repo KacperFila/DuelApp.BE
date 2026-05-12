@@ -39,15 +39,6 @@ namespace DuelApp.Bootstrapper
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env, ILogger<Startup> logger, IConfiguration configuration)
         {
             app.UseInfrastructure();
-            app.UseEndpoints(endpoints =>
-            {
-                endpoints.MapControllers();
-                endpoints.MapGet("/", async context =>
-                {
-                    await context.Response.WriteAsync("DuelApp API!");
-                });
-                endpoints.MapModuleInfo();
-            });
 
             foreach (var module in _modules)
             {

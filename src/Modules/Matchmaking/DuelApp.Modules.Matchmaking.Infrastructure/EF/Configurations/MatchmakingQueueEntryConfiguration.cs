@@ -1,14 +1,15 @@
 using DuelApp.Modules.Matchmaking.Domain.Matchmaking.Entities;
+using DuelApp.Modules.Matchmaking.Domain.Matchmaking.Enums;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace DuelApp.Modules.Matchmaking.Infrastructure.EF.Configurations;
 
-internal sealed class MatchmakingQueueEntryConfiguration : IEntityTypeConfiguration<MatchmakingQueueEntry>
+internal sealed class MatchmakingQueueEntryConfiguration : IEntityTypeConfiguration<QueueEntry>
 {
-    public void Configure(EntityTypeBuilder<MatchmakingQueueEntry> builder)
+    public void Configure(EntityTypeBuilder<QueueEntry> builder)
     {
-        builder.ToTable("matchmaking_queue_entries");
+        builder.ToTable("queue_entries");
 
         builder.HasKey(x => x.Id);
 
@@ -19,7 +20,9 @@ internal sealed class MatchmakingQueueEntryConfiguration : IEntityTypeConfigurat
             .IsRequired();
 
         builder.Property(x => x.Status)
-            .HasConversion<string>()
+            .HasConversion(
+                v => v.ToString(),
+                v => Enum.Parse<MatchmakingStatus>(v))
             .IsRequired();
 
         builder.Property(x => x.StartedAt)
@@ -28,16 +31,11 @@ internal sealed class MatchmakingQueueEntryConfiguration : IEntityTypeConfigurat
         builder.Property(x => x.ExpiresAt)
             .IsRequired(false);
 
-        builder.HasIndex(x => x.Status);
+        builder.HasIndex(x => new { x.PlayerId, x.Status });
 
         builder.HasIndex(x => x.StartedAt);
-
-        builder.HasIndex(x => new { x.Status, x.StartedAt });
         
         builder.Property<byte[]>("RowVersion")
             .IsRowVersion();
-        
-        builder.HasIndex(x => x.PlayerId)
-            .IsUnique();
     }
 }

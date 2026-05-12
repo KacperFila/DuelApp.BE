@@ -74,10 +74,36 @@ namespace DuelApp.Shared.Infrastructure
             services.AddSwaggerGen(swagger =>
             {
                 swagger.CustomSchemaIds(x => x.FullName);
+
                 swagger.SwaggerDoc("v1", new OpenApiInfo
                 {
                     Title = "DuelApp API",
                     Version = "v1"
+                });
+
+                swagger.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+                {
+                    Name = "Authorization",
+                    Type = SecuritySchemeType.Http,
+                    Scheme = "bearer",
+                    BearerFormat = "JWT",
+                    In = ParameterLocation.Header,
+                    Description = "Enter JWT token"
+                });
+
+                swagger.AddSecurityRequirement(new OpenApiSecurityRequirement
+                {
+                    {
+                        new OpenApiSecurityScheme
+                        {
+                            Reference = new OpenApiReference
+                            {
+                                Type = ReferenceType.SecurityScheme,
+                                Id = "Bearer"
+                            }
+                        },
+                        Array.Empty<string>()
+                    }
                 });
             });
 
@@ -97,7 +123,6 @@ namespace DuelApp.Shared.Infrastructure
             services.AddDomainEvents(assemblies);
             services.AddMessaging();
             services.AddPostgres();
-            services.AddTransactionalDecorators();
             services.AddSingleton<IClock, UtcClock>();
             services.AddHostedService<AppInitializer>();
             services.AddControllers()
@@ -127,15 +152,25 @@ namespace DuelApp.Shared.Infrastructure
             app.UseCors(AngularClientCorsPolicy);
             app.UseErrorHandling();
             app.UseSwagger();
-            app.UseReDoc(reDoc =>
+            app.UseSwaggerUI(options =>
             {
-                reDoc.RoutePrefix = "docs";
-                reDoc.SpecUrl("/swagger/v1/swagger.json");
-                reDoc.DocumentTitle = "DuelApp API";
+                options.SwaggerEndpoint("/swagger/v1/swagger.json", "DuelApp API");
             });
+
             app.UseAuthentication();
             app.UseRouting();
             app.UseAuthorization();
+            
+            app.UseEndpoints(endpoints =>
+            {
+                endpoints.MapControllers();
+                endpoints.MapGet("/", async context =>
+                {
+                    await context.Response.WriteAsync("DuelApp API!");
+                });
+                endpoints.MapModuleInfo();
+                endpoints.MapHub<GameHub>("/gamehub");
+            });
             
             return app;
         }

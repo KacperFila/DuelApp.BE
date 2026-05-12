@@ -14,29 +14,46 @@ public sealed class MatchmakingRepository : IMatchmakingRepository
         _dbContext = dbContext;
     }
 
-    public async Task AddAsync(MatchmakingQueueEntry entry, CancellationToken ct = default)
+    public async Task AddAsync(QueueEntry entry)
     {
-        await _dbContext.MatchmakingQueueEntries.AddAsync(entry, ct);
-        await _dbContext.SaveChangesAsync(ct);
+        await _dbContext.QueueEntries.AddAsync(entry);
+        await _dbContext.SaveChangesAsync();
     }
 
-    public async Task<MatchmakingQueueEntry?> GetByPlayerIdAsync(Guid playerId, CancellationToken ct = default)
+    public async Task<QueueEntry?> GetByPlayerIdAsync(Guid playerId)
     {
-        return await _dbContext.MatchmakingQueueEntries
-            .FirstOrDefaultAsync(x => x.PlayerId == playerId, ct);
+        return await _dbContext.QueueEntries
+            .FirstOrDefaultAsync(x => x.PlayerId == playerId);
     }
 
-    public async Task<List<MatchmakingQueueEntry>> GetQueuedAsync(CancellationToken ct = default)
+    public async Task<bool> IsUserInQueueAsync(Guid playerId)
     {
-        return await _dbContext.MatchmakingQueueEntries
-            .Where(x => x.Status == MatchmakingStatus.Queued)
-            .OrderBy(x => x.StartedAt)
-            .ToListAsync(ct);
+        return await _dbContext.QueueEntries.AnyAsync(
+            x => x.PlayerId == playerId 
+                 && x.Status == MatchmakingStatus.Queued);
     }
 
-    public async Task UpdateAsync(MatchmakingQueueEntry entry, CancellationToken ct = default)
+    public async Task<List<QueueEntry>> GetQueuedBatchAsync(int batchSize)
     {
-        _dbContext.MatchmakingQueueEntries.Update(entry);
-        await _dbContext.SaveChangesAsync(ct);
+        return await _dbContext.QueueEntries
+            .FromSqlRaw("""
+                        
+                                    SELECT *
+                                    FROM "Matchmaking".queue_entries
+                                    WHERE "Status" = {0}
+                                    ORDER BY "StartedAt"
+                                    FOR UPDATE SKIP LOCKED
+                                    LIMIT {1}
+                                    
+                        """,
+            MatchmakingStatus.Queued.ToString(),
+            batchSize)
+            .ToListAsync();
+    }
+
+    public async Task UpdateAsync(QueueEntry entry)
+    {
+        _dbContext.QueueEntries.Update(entry);
+        await _dbContext.SaveChangesAsync();
     }
 }

@@ -12,11 +12,11 @@ public class MatchmakingDbContext : DbContext
     {
     }
 
-    public DbSet<MatchmakingQueueEntry> MatchmakingQueueEntries { get; set; }
+    public DbSet<QueueEntry> QueueEntries { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        modelBuilder.HasDefaultSchema("MatchmakingQueueEntries");
+        modelBuilder.HasDefaultSchema("Matchmaking");
         modelBuilder.ApplyConfigurationsFromAssembly(GetType().Assembly);
     }
 }

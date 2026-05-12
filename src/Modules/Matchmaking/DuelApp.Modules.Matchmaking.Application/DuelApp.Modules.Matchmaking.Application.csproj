@@ -8,6 +8,7 @@
 
     <ItemGroup>
       <ProjectReference Include="..\..\..\Shared\DuelApp.Shared.Abstractions\DuelApp.Shared.Abstractions.csproj" />
+      <ProjectReference Include="..\..\Duels\DuelApp.Modules.Duels.Shared\DuelApp.Modules.Duels.Shared.csproj" />
       <ProjectReference Include="..\DuelApp.Modules.Matchmaking.Domain\DuelApp.Modules.Matchmaking.Domain.csproj" />
     </ItemGroup>
 

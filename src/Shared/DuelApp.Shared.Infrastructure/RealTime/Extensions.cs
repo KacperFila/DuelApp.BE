@@ -1,3 +1,4 @@
+using DuelApp.Shared.Abstractions.RealTime;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -9,6 +10,7 @@ internal static class Extensions
     {
         services.AddSignalR();
         services.AddSingleton<IUserIdProvider, CustomUserIdProvider>();
+        services.AddScoped<IRealTimeNotifier, RealTimeNotifier>();
         
         return services;
     }
