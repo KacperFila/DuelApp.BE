@@ -1,5 +1,6 @@
 using DuelApp.Modules.Duels.Shared;
 using DuelApp.Modules.Matchmaking.Application.Abstractions;
+using DuelApp.Modules.Matchmaking.Application.Constants;
 using DuelApp.Modules.Matchmaking.Application.Events;
 using DuelApp.Modules.Matchmaking.Domain.Matchmaking.Entities;
 using DuelApp.Shared.Abstractions.Contexts;
@@ -104,40 +105,40 @@ public sealed class MatchmakingService : IMatchmakingService
         await _unitOfWork.ExecuteAsync(async () =>
         {            
             var enqueuedPlayers = await _matchmakingRepository.GetQueuedBatchAsync(50);
-            if (enqueuedPlayers.Count == 0)
+            if (enqueuedPlayers.Count < 2)
             {
                 return;
             }
             
             foreach (var pair in enqueuedPlayers.Chunk(2))
             {
-                if (pair.Length < 2)
+                if (pair.Length != 2)
                 {
                     break;
                 }
-
-                var playerOne = pair[0];
-                var playerTwo = pair[1];
-
-                await MarkPairAsMatchedAsync(playerOne, playerTwo);
+                
+                await MarkPairAsMatchedAsync(pair);
                 
                 await _messageBroker.PublishAsync(
-                    new MatchFoundEvent(playerOne.PlayerId, playerTwo.PlayerId)
+                    new MatchFoundEvent(
+                        pair[0].PlayerId,
+                        pair[1].PlayerId)
                 );
-                
-                await _realTimeNotifier.SendToUserAsync(playerOne.PlayerId, "MatchFound", "example payload");
-                await _realTimeNotifier.SendToUserAsync(playerTwo.PlayerId, "MatchFound", "example payload");
+
+                await _realTimeNotifier.NotifyMultipleUsersAsync(
+                    pair.Select(x => x.PlayerId),
+                    RealTimeNotificationEventTypes.MatchFound);
             }
         }, cancellationToken);
     }
 
-    private async Task MarkPairAsMatchedAsync(
-        QueueEntry playerOne,
-        QueueEntry playerTwo)
+    private async Task MarkPairAsMatchedAsync(IEnumerable<QueueEntry> players)
     {
-        playerOne.MarkAsMatched();
-        playerTwo.MarkAsMatched();
-        await _matchmakingRepository.UpdateAsync(playerOne);
-        await _matchmakingRepository.UpdateAsync(playerTwo);
+        foreach (var player in players)
+        {
+            player.MarkAsMatched();
+        }
+
+        await _matchmakingRepository.BulkUpdateAsync(players);
     }
 }

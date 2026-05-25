@@ -9,19 +9,25 @@ public sealed class DuelRound
     public bool? HasPlayerOneAnsweredCorrectly { get; set; }
     public bool? HasPlayerTwoAnsweredCorrectly { get; set; }
 
-    private DuelRound(int number)
+    private DuelRound(int number, Guid questionId)
     {
         if (number <= 0)
         {
             throw new ArgumentException("Round number must be greater than zero.");
         }
 
+        if (questionId == Guid.Empty)
+        {
+            throw new ArgumentException("Question ID must be set.");
+        }
+        
         Number = number;
+        QuestionId = questionId;
     }
 
-    public static DuelRound Create(int number)
+    public static DuelRound Create(int number, Guid questionId)
     {
-        return new DuelRound(number);
+        return new DuelRound(number, questionId);
     }
 
     public bool IsCompleted()

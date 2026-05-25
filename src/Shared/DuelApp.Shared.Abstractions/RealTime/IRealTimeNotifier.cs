@@ -6,6 +6,8 @@ namespace DuelApp.Shared.Abstractions.RealTime;
 
 public interface IRealTimeNotifier
 {
-    Task SendToUserAsync(Guid userId, string eventName, object payload);
-    Task SendToMultipleUsersAsync(IEnumerable<Guid> userIds, string eventName, object payload);
+    Task NotifyUserAsync(Guid userId, string eventName, object payload);
+    Task NotifyUserAsync(Guid userId, string eventName);
+    Task NotifyMultipleUsersAsync(IEnumerable<Guid> userIds, string eventName, object payload);
+    Task NotifyMultipleUsersAsync(IEnumerable<Guid> userIds, string eventName);
 }

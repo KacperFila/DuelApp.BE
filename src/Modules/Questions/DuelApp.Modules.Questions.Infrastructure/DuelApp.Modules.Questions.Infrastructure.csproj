@@ -9,10 +9,15 @@
     <ItemGroup>
       <ProjectReference Include="..\..\..\Shared\DuelApp.Shared.Infrastructure\DuelApp.Shared.Infrastructure.csproj" />
       <ProjectReference Include="..\DuelApp.Modules.Questions.Application\DuelApp.Modules.Questions.Application.csproj" />
+      <ProjectReference Include="..\DuelApp.Modules.Questions.Shared\DuelApp.Modules.Questions.Shared.csproj" />
     </ItemGroup>
 
     <ItemGroup>
       <Folder Include="EF\Migrations\" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="8.0.2" />
     </ItemGroup>
 
 </Project>

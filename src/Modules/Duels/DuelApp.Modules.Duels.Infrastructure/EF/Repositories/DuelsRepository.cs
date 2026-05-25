@@ -13,14 +13,33 @@ public class DuelsRepository : IDuelsRepository
         _dbContext = dbContext;
     }
 
+    public async Task<Duel?> GetByIdAsync(Guid duelId)
+    {
+        return await _dbContext.Duels.FirstOrDefaultAsync(x => x.Id == duelId);
+    }
+
     public async Task<bool> IsPlayerCurrentlyInDuelAsync(Guid playerId)
     {
         return await _dbContext.Duels.AnyAsync(x => x.Id == playerId);
     }
 
-    public async Task CreateDuelAsync(Duel duel)
+    public async Task CreateDuelAsync(Duel? duel)
     {
         _dbContext.Duels.Add(duel);
         await _dbContext.SaveChangesAsync();
+    }
+
+    public async Task UpdateDuelAsync(Duel duel)
+    {
+        _dbContext.Duels.Update(duel);
+        await _dbContext.SaveChangesAsync();
+    }
+
+    public async Task<Duel?> GetCurrentDuelForPlayerAsync(Guid playerId)
+    {
+        return await _dbContext.Duels.FirstOrDefaultAsync(
+            x => x.PlayerOneId == playerId
+                    || x.PlayerTwoId == playerId
+            );
     }
 }

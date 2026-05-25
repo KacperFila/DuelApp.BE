@@ -1,5 +1,7 @@
 ﻿using DuelApp.Modules.Questions.Application.Abstractions;
 using DuelApp.Modules.Questions.Infrastructure.EF.Repositories;
+using DuelApp.Modules.Questions.Infrastructure.Services;
+using DuelApp.Modules.Questions.Shared;
 using DuelApp.Shared.Infrastructure.Postgres;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -12,6 +14,7 @@ public static class Extensions
         services.AddPostgres<QuestionsDbContext>();
         services.AddScoped<IAnswersRepository, AnswersRepository>();
         services.AddScoped<IQuestionsRepository, QuestionsRepository>();
+        services.AddScoped<IQuestionsModuleApi, QuestionsModuleApi>();
         
         return services;
     }

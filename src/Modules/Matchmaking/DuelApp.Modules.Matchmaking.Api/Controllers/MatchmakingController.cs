@@ -18,7 +18,7 @@ public class MatchmakingController : ControllerBase
     }
     
     [Authorize]
-    [HttpPost("start")]
+    [HttpPost]
     public async Task<IActionResult> StartMatchmaking()
     {
         var didMatchmakingStart = await _matchmakingService.TryJoinQueueAsync();

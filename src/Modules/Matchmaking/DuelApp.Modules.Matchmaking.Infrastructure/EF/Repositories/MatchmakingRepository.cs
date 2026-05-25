@@ -56,4 +56,10 @@ public sealed class MatchmakingRepository : IMatchmakingRepository
         _dbContext.QueueEntries.Update(entry);
         await _dbContext.SaveChangesAsync();
     }
+
+    public async Task BulkUpdateAsync(IEnumerable<QueueEntry> entries)
+    {
+        _dbContext.UpdateRange(entries);
+        await _dbContext.SaveChangesAsync();
+    }
 }

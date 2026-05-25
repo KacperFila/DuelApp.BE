@@ -16,17 +16,32 @@ public class RealTimeNotifier : IRealTimeNotifier
         _hub = hub;
     }
 
-    public Task SendToUserAsync(Guid userId, string eventName, object payload)
+    public Task NotifyUserAsync(Guid userId, string eventName, object payload)
     {
         return _hub.Clients.User(userId.ToString())
             .SendAsync(eventName, payload);
     }
 
-    public Task SendToMultipleUsersAsync(IEnumerable<Guid> userIds, string eventName, object payload)
+    public Task NotifyUserAsync(Guid userId, string eventName)
+    {
+        return _hub.Clients.User(userId.ToString())
+            .SendAsync(eventName);
+    }
+
+    public Task NotifyMultipleUsersAsync(IEnumerable<Guid> userIds, string eventName, object payload)
     {
         var tasks = userIds
             .Select(userId => _hub.Clients.User(userId.ToString())
             .SendAsync(eventName, payload));
+
+        return Task.WhenAll(tasks);
+    }
+
+    public Task NotifyMultipleUsersAsync(IEnumerable<Guid> userIds, string eventName)
+    {
+        var tasks = userIds
+            .Select(userId => _hub.Clients.User(userId.ToString())
+            .SendAsync(eventName));
 
         return Task.WhenAll(tasks);
     }
