@@ -1,5 +1,6 @@
 using DuelApp.Modules.Duels.Application.Abstractions;
 using DuelApp.Modules.Duels.Domain.Duels.Entities;
+using DuelApp.Modules.Duels.Domain.Duels.Enums;
 using Microsoft.EntityFrameworkCore;
 
 namespace DuelApp.Modules.Duels.Infrastructure.EF.Repositories;
@@ -20,7 +21,9 @@ public class DuelsRepository : IDuelsRepository
 
     public async Task<bool> IsPlayerCurrentlyInDuelAsync(Guid playerId)
     {
-        return await _dbContext.Duels.AnyAsync(x => x.Id == playerId);
+        return await _dbContext.Duels
+            .AnyAsync(x => x.Id == playerId 
+                    && x.Status == DuelStatus.InProgress);
     }
 
     public async Task CreateDuelAsync(Duel? duel)
@@ -38,8 +41,8 @@ public class DuelsRepository : IDuelsRepository
     public async Task<Duel?> GetCurrentDuelForPlayerAsync(Guid playerId)
     {
         return await _dbContext.Duels.FirstOrDefaultAsync(
-            x => x.PlayerOneId == playerId
-                    || x.PlayerTwoId == playerId
-            );
+            x => x.Status == DuelStatus.InProgress &&
+                 (x.PlayerOneId == playerId || x.PlayerTwoId == playerId)
+        );
     }
 }

@@ -3,6 +3,7 @@ using System;
 using DuelApp.Modules.Duels.Infrastructure;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace DuelApp.Modules.Duels.Infrastructure.EF.Migrations
 {
     [DbContext(typeof(DuelsDbContext))]
-    partial class DuelsDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260527141444_AddPropertiesToCheckIfPlayerSubmittedAnswerForRound")]
+    partial class AddPropertiesToCheckIfPlayerSubmittedAnswerForRound
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -86,23 +89,20 @@ namespace DuelApp.Modules.Duels.Infrastructure.EF.Migrations
 
                             NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b1.Property<int>("Number"));
 
-                            b1.Property<bool>("HasPlayerOneAnsweredCorrectly")
+                            b1.Property<bool?>("HasPlayerOneAnsweredCorrectly")
                                 .HasColumnType("boolean");
 
-                            b1.Property<bool>("HasPlayerOneSubmittedAnswer")
+                            b1.Property<bool?>("HasPlayerOneSubmittedAnswer")
                                 .HasColumnType("boolean");
 
-                            b1.Property<bool>("HasPlayerTwoAnsweredCorrectly")
+                            b1.Property<bool?>("HasPlayerTwoAnsweredCorrectly")
                                 .HasColumnType("boolean");
 
-                            b1.Property<bool>("HasPlayerTwoSubmittedAnswer")
+                            b1.Property<bool?>("HasPlayerTwoSubmittedAnswer")
                                 .HasColumnType("boolean");
 
                             b1.Property<Guid>("QuestionId")
                                 .HasColumnType("uuid");
-
-                            b1.Property<int>("Status")
-                                .HasColumnType("integer");
 
                             b1.HasKey("DuelId", "Number");
 

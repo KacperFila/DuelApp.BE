@@ -6,6 +6,7 @@ using DuelApp.Modules.Questions.Domain.Questions.Entities;
 using DuelApp.Shared.Abstractions.Time;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
+using Answer = DuelApp.Modules.Questions.Application.Models.Answer;
 
 namespace DuelApp.Modules.Questions.Application.Services.Implementations;
 
@@ -39,9 +40,9 @@ public class QuestionsService : IQuestionsService
         await using var stream = questionsJson.OpenReadStream();
 
         var questions = new List<Question>();
-        var answers = new List<Answer>();
+        var answers = new List<DuelApp.Modules.Questions.Domain.Questions.Entities.Answer>();
 
-        await foreach (var item in JsonSerializer.DeserializeAsyncEnumerable<GeneratedQuestionModel>(
+        await foreach (var item in JsonSerializer.DeserializeAsyncEnumerable<GeneratedQuestion>(
                            stream,
                            new JsonSerializerOptions
                            {
@@ -56,7 +57,7 @@ public class QuestionsService : IQuestionsService
 
             var questionId = Guid.NewGuid();
 
-            var questionAnswers = item.Answers.Select(a => new Answer
+            var questionAnswers = item.Answers.Select(a => new DuelApp.Modules.Questions.Domain.Questions.Entities.Answer
             {
                 Id = Guid.NewGuid(),
                 QuestionId = questionId,
@@ -78,6 +79,23 @@ public class QuestionsService : IQuestionsService
         await _questionsRepository.BulkUploadAsync(questions, ct);
 
         _logger.LogInformation("Uploading questions finished at {DateTime}", _clock.CurrentDate());
+    }
+
+    public async Task<IEnumerable<QuestionWithAnswer>> GetQuestionsWithAnswersBatch(int questionsAmount, CancellationToken ct)
+    {
+        var questions = await _questionsRepository.GetQuestionsWithAnswersAsync(questionsAmount, ct);
+
+        return questions.Select(x => new QuestionWithAnswer(
+        
+            x.Id,
+            x.Title,
+            x.Answers.Select(answer => new Answer
+            (
+                answer.Id,
+                answer.Content,
+                answer.IsCorrect
+            )).ToList()
+        )).ToList();
     }
 
     private bool IsValidQuestionsFile(IFormFile questionsJson)

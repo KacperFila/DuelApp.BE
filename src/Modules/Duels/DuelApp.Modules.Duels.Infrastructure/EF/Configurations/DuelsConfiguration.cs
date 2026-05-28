@@ -51,6 +51,10 @@ internal sealed class DuelConfiguration : IEntityTypeConfiguration<Duel>
             rounds.Property(x => x.HasPlayerOneAnsweredCorrectly);
 
             rounds.Property(x => x.HasPlayerTwoAnsweredCorrectly);
+            
+            rounds.Property(x => x.HasPlayerOneSubmittedAnswer);
+
+            rounds.Property(x => x.HasPlayerTwoSubmittedAnswer);
         });
         
         builder.HasIndex(x => new { x.PlayerOneId, x.Status });

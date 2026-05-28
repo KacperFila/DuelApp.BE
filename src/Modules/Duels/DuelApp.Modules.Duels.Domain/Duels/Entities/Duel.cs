@@ -19,22 +19,27 @@ public sealed class Duel : AggregateRoot<Guid>
     public DateTime FinishedAt { get; private set; } = DateTime.MinValue;
 
     /// <summary>
-    /// Creates a new duel between two players with the specified number of rounds.
-    /// Initializes the duel with the first round and sets its status to InProgress.
+    /// Creates a new duel between two different players using the provided rounds.
+    /// Initializes the duel with a status of <see cref="DuelStatus.InProgress"/>.
     /// </summary>
     /// <param name="player1Id">The unique identifier of the first player.</param>
     /// <param name="player2Id">The unique identifier of the second player.</param>
-    /// <param name="totalRounds">The total number of rounds in the duel. Must be greater than zero.</param>
-    /// <exception cref="InvalidOperationException">Thrown when both player IDs are the same.</exception>
-    /// <exception cref="ArgumentException">Thrown when totalRounds is less than or equal to zero.</exception>
-    public static Duel Create(Guid player1Id, Guid player2Id, int totalRounds)
+    /// <param name="rounds">The collection of rounds that will be part of the duel. Must contain at least one round.</param>
+    /// <returns>A newly created <see cref="Duel"/> instance.</returns>
+    /// <exception cref="InvalidOperationException">
+    /// Thrown when both player IDs are the same.
+    /// </exception>
+    /// <exception cref="ArgumentException">
+    /// Thrown when the rounds collection is empty.
+    /// </exception>
+    public static Duel Create(Guid player1Id, Guid player2Id, List<DuelRound> rounds)
     {
         if (player1Id == player2Id)
         {
             throw new InvalidOperationException("Players must be different.");
         }
 
-        if (totalRounds <= 0)
+        if (rounds.Count <= 0)
         {
             throw new ArgumentException("Total rounds must be greater than zero.");
         }
@@ -44,9 +49,9 @@ public sealed class Duel : AggregateRoot<Guid>
             Id = Guid.NewGuid(),
             PlayerOneId = player1Id,
             PlayerTwoId = player2Id,
-            TotalRounds = totalRounds,
-            CurrentRound = 0,
-            Rounds = [],
+            TotalRounds = rounds.Count,
+            CurrentRound = 1,
+            Rounds = rounds.ToList(),
             StartedAt = DateTime.UtcNow,
             Status = DuelStatus.InProgress
         };
@@ -83,27 +88,22 @@ public sealed class Duel : AggregateRoot<Guid>
             return;
         }
         
-        ApplyRoundResult(round, isCorrect);
-
-        if (IsLastRound())
-        {
-            Finish();
-        }
+        AddPoints(round, isCorrect);
     }
     
-    private void ApplyRoundResult(DuelRound round, bool isCorrect)
+    private void AddPoints(DuelRound round, bool isCorrect)
     {
         if (!isCorrect)
         {
             return;
         }
 
-        if (round.HasPlayerOneAnsweredCorrectly == true)
+        if (round.HasPlayerOneAnsweredCorrectly)
         {
             PlayerOneScore++;
         }
         
-        if (round.HasPlayerTwoAnsweredCorrectly == true)
+        if (round.HasPlayerTwoAnsweredCorrectly)
         {
             PlayerTwoScore++;
         }
@@ -124,12 +124,12 @@ public sealed class Duel : AggregateRoot<Guid>
         throw new InvalidOperationException("Player does not belong to this duel.");
     }
     
-    private bool IsLastRound()
+    public bool IsLastRound()
     {
         return CurrentRound >= TotalRounds;
     }
     
-    private void Finish()
+    public void Complete()
     {
         Status = DuelStatus.Completed;
         FinishedAt = DateTime.UtcNow;
@@ -149,15 +149,15 @@ public sealed class Duel : AggregateRoot<Guid>
         }
     }
 
-    private DuelRound GetCurrentRound()
+    public DuelRound GetCurrentRound()
     {
         return Rounds.Single(x => x.Number == CurrentRound);
     }
-
-    public void CreateNextRound(Guid questionId)
+    
+    public DuelRound GetNextRound()
     {
-        Rounds.Add(DuelRound.Create(
-            CurrentRound + 1,
-            questionId));
+        CurrentRound++;
+
+        return Rounds.Single(x => x.Number == CurrentRound);
     }
 }

@@ -1,7 +1,7 @@
 namespace DuelApp.Modules.Questions.Application.Models;
 
-public class GeneratedQuestionModel
+public class GeneratedQuestion
 {
     public string Title { get; init; }
-    public List<GeneratedAnswerModel> Answers { get; init; }
+    public List<GeneratedAnswer> Answers { get; init; }
 }

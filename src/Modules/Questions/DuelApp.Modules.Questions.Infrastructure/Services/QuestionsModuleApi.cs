@@ -1,26 +1,21 @@
+using DuelApp.Modules.Questions.Application.Abstractions;
 using DuelApp.Modules.Questions.Shared;
 using DuelApp.Modules.Questions.Shared.Dto;
-using Microsoft.EntityFrameworkCore;
 
 namespace DuelApp.Modules.Questions.Infrastructure.Services;
 
 public class QuestionsModuleApi : IQuestionsModuleApi
 {
-    private readonly QuestionsDbContext _questionsDbContext;
+    private readonly IQuestionsRepository _questionsRepository;
 
-    public QuestionsModuleApi(QuestionsDbContext questionsDbContext)
+    public QuestionsModuleApi(IQuestionsRepository questionsRepository)
     {
-        _questionsDbContext = questionsDbContext;
+        _questionsRepository = questionsRepository;
     }
 
     public async Task<List<QuestionWithAnswerDto>> GetQuestionsWithAnswersAsync(int questionsAmount = 5)
     {
-        var questionsWithAnswers = await _questionsDbContext
-            .Questions
-            .OrderBy(x => Microsoft.EntityFrameworkCore.EF.Functions.Random())
-            .Take(questionsAmount)
-            .Include(x => x.Answers)
-            .ToListAsync();
+        var questionsWithAnswers = await _questionsRepository.GetQuestionsWithAnswersAsync(questionsAmount);
 
         return questionsWithAnswers.Select(x => new QuestionWithAnswerDto(
             Id: x.Id,
@@ -31,5 +26,28 @@ public class QuestionsModuleApi : IQuestionsModuleApi
                 IsCorrect: a.IsCorrect
             )).ToList()
         )).ToList();
+    }
+
+    public async Task<QuestionWithAnswerDto?> GetQuestionWithAnswersByIdAsync(Guid questionId)
+    {
+        var question = await _questionsRepository.GetQuestionWithAnswersByIdAsync(questionId);
+
+        return question is null
+            ? null
+            : new QuestionWithAnswerDto
+            (
+                question.Id,
+                question.Title,
+                question.Answers.Select(x => new AnswerDto(
+                    x.Id,
+                    x.Content,
+                    x.IsCorrect))
+                    .ToList()
+            );
+    }
+
+    public Task<bool> CheckAnswerAsync(Guid answerId)
+    {
+        return _questionsRepository.CheckAnswerAsync(answerId);
     }
 }

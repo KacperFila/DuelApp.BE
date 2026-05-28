@@ -1,3 +1,4 @@
+using DuelApp.Modules.Duels.Api.Models;
 using DuelApp.Modules.Duels.Application.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -17,11 +18,12 @@ public class DuelsController : ControllerBase
 
     [Authorize]
     [HttpPost("answer")]
-    public async Task<IActionResult> SubmitAnswer()
+    
+    public async Task<IActionResult> SubmitAnswer([FromBody] SubmitAnswerRequest request)
     {
-        var result = await _duelsService.AbandonDuelAsync();
+        await _duelsService.SubmitAnswerAsync(request.AnswerId);
 
-        return result ? Ok() : NotFound();
+        return Ok();
     }
     
     [Authorize]
@@ -31,5 +33,16 @@ public class DuelsController : ControllerBase
         var result = await _duelsService.AbandonDuelAsync();
 
         return result ? Ok() : NotFound();
+    }
+    
+    [Authorize]
+    [HttpGet("round/current")]
+    public async Task<IActionResult> GetDuelCurrentRound()
+    {
+        var result = await _duelsService.GetCurrentRoundAsync();
+
+        return result is not null
+            ? Ok(result)
+            : NotFound();
     }
 }

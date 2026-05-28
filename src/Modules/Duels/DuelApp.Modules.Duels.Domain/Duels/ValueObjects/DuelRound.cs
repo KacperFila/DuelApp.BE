@@ -6,8 +6,12 @@ public sealed class DuelRound
 {
     public int Number { get; }
     public Guid QuestionId { get; set; } = Guid.Empty;
-    public bool? HasPlayerOneAnsweredCorrectly { get; set; }
-    public bool? HasPlayerTwoAnsweredCorrectly { get; set; }
+    public bool HasPlayerOneSubmittedAnswer { get; set; }
+    public bool HasPlayerTwoSubmittedAnswer { get; set; }
+    public bool HasPlayerOneAnsweredCorrectly { get; set; }
+    public bool HasPlayerTwoAnsweredCorrectly { get; set; }
+    
+    public DuelRoundStatus Status { get; set; }
 
     private DuelRound(int number, Guid questionId)
     {
@@ -23,6 +27,7 @@ public sealed class DuelRound
         
         Number = number;
         QuestionId = questionId;
+        Status = DuelRoundStatus.InProgress;
     }
 
     public static DuelRound Create(int number, Guid questionId)
@@ -32,7 +37,7 @@ public sealed class DuelRound
 
     public bool IsCompleted()
     {
-        return HasPlayerOneAnsweredCorrectly.HasValue && HasPlayerTwoAnsweredCorrectly.HasValue;
+        return Status == DuelRoundStatus.Completed;
     }
     
     public void SubmitAnswer(DuelPlayer player, bool isCorrect)
@@ -45,19 +50,26 @@ public sealed class DuelRound
         var hasPlayerAnswered = HasPlayerAnswered(player);
         if (hasPlayerAnswered)
         {
-            throw new InvalidOperationException("Player has already been answered.");
+            throw new InvalidOperationException("Player has already answered.");
         }
 
         switch (player)
         {
             case DuelPlayer.Player1:
                 HasPlayerOneAnsweredCorrectly = isCorrect;
+                HasPlayerOneSubmittedAnswer = true;
                 break;
             case DuelPlayer.Player2:
                 HasPlayerTwoAnsweredCorrectly = isCorrect;
+                HasPlayerTwoSubmittedAnswer = true;
                 break;
             default:
                 throw new ArgumentOutOfRangeException(nameof(player), player, null);
+        }
+
+        if (HasPlayerOneSubmittedAnswer && HasPlayerTwoSubmittedAnswer)
+        {
+            Status = DuelRoundStatus.Completed;
         }
     }
 
@@ -65,8 +77,8 @@ public sealed class DuelRound
     {
         return player switch
         {
-            DuelPlayer.Player1 => HasPlayerOneAnsweredCorrectly.HasValue,
-            DuelPlayer.Player2 => HasPlayerTwoAnsweredCorrectly.HasValue,
+            DuelPlayer.Player1 => HasPlayerOneSubmittedAnswer is true,
+            DuelPlayer.Player2 => HasPlayerTwoSubmittedAnswer is true,
             _ => throw new ArgumentOutOfRangeException(nameof(player), player, null)
         };
     }

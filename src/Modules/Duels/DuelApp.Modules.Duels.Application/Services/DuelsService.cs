@@ -1,6 +1,9 @@
 using DuelApp.Modules.Duels.Application.Abstractions;
 using DuelApp.Modules.Duels.Application.Constants;
+using DuelApp.Modules.Duels.Application.Exceptions;
+using DuelApp.Modules.Duels.Application.Models;
 using DuelApp.Modules.Duels.Domain.Duels.Entities;
+using DuelApp.Modules.Duels.Domain.Duels.ValueObjects;
 using DuelApp.Modules.Questions.Shared;
 using DuelApp.Shared.Abstractions.Contexts;
 using DuelApp.Shared.Abstractions.RealTime;
@@ -42,7 +45,15 @@ public class DuelsService : IDuelsService
             return null;
         }
         
-        var duel = Duel.Create(playerOneId, playerTwoId, RoundsCount);
+        var questions = await _questionsModuleApi.GetQuestionsWithAnswersAsync(RoundsCount);
+
+        var rounds = new List<DuelRound>();
+        foreach (var (question, index) in questions.Select((value, index) => (value, index)))
+        {
+            rounds.Add(DuelRound.Create(index + 1, question.Id));
+        }
+        
+        var duel = Duel.Create(playerOneId, playerTwoId, rounds);
         await _duelsRepository.CreateDuelAsync(duel);
         
         return duel.Id;
@@ -60,24 +71,69 @@ public class DuelsService : IDuelsService
         return duel;
     }
 
-    public async Task<bool> CreateNextRoundAsync(Guid duelId, Guid questionId)
+    public async Task SubmitAnswerAsync(Guid answerId)
     {
-        var duel = await _duelsRepository.GetByIdAsync(duelId);
-        if (duel is null)
+        var userId = _context.Identity.Id;
+        
+        var duelInProgress = await _duelsRepository.GetCurrentDuelForPlayerAsync(userId);
+        if (duelInProgress is null)
         {
-            return false;
+            return;
         }
 
-        var questionWithAnswers = await _questionsModuleApi.GetQuestionsWithAnswersAsync(questionsAmount: 1);
-        if (!questionWithAnswers.Any())
+        var isAnswerValid = await _questionsModuleApi.CheckAnswerAsync(answerId);
+        
+        duelInProgress.SubmitAnswer(userId, isAnswerValid);
+        
+        if (duelInProgress.GetCurrentRound().IsCompleted())
         {
-            return false;
+            if (duelInProgress.IsLastRound())
+            {
+                await _realTimeNotifier.NotifyMultipleUsersAsync(
+                    [duelInProgress.PlayerOneId, duelInProgress.PlayerTwoId],
+                    RealTimeNotificationEventTypes.DuelCompleted);
+                
+                duelInProgress.Complete();
+            }
+            else
+            {
+                var nextRound = duelInProgress.GetNextRound();
+                var nextRoundDto = await BuildNextRoundDto(nextRound);
+            
+                await _realTimeNotifier.NotifyMultipleUsersAsync(
+                    [duelInProgress.PlayerOneId, duelInProgress.PlayerTwoId],
+                    RealTimeNotificationEventTypes.RoundCompleted,
+                    nextRoundDto);
+            }
         }
         
-        duel.CreateNextRound(questionWithAnswers.First().Id);
-        await _duelsRepository.UpdateDuelAsync(duel);
+        await _duelsRepository.UpdateDuelAsync(duelInProgress);
+    }
+    
+    public async Task<DuelRoundDto?> GetCurrentRoundAsync()
+    {
+        var userId = _context.Identity.Id;
         
-        return true;
+        var duelInProgress = await _duelsRepository.GetCurrentDuelForPlayerAsync(userId);
+        if (duelInProgress is null)
+        {
+            return null;
+        }
+
+        var currentQuestionId = duelInProgress.GetCurrentRound().QuestionId;
+        var currentQuestionWithAnswers =  await _questionsModuleApi.GetQuestionWithAnswersByIdAsync(currentQuestionId);
+
+        if (currentQuestionWithAnswers is null)
+        {
+            throw new QuestionNotFoundException(currentQuestionId);
+        }
+        
+        return new DuelRoundDto(
+            duelInProgress.CurrentRound,
+            currentQuestionId,
+            currentQuestionWithAnswers.Title,
+            currentQuestionWithAnswers.Answers.Select(x => new AnswerDto(x.Id, x.Content)).ToList()
+        );
     }
 
     public async Task<bool> AbandonDuelAsync()
@@ -104,5 +160,20 @@ public class DuelsService : IDuelsService
     {
         return await _duelsRepository.IsPlayerCurrentlyInDuelAsync(playerOneId)
             || await _duelsRepository.IsPlayerCurrentlyInDuelAsync(playerTwoId);
+    }
+    
+    private async Task<DuelRoundDto> BuildNextRoundDto(DuelRound duelRound)
+    {
+        var questionWithAnswers = await _questionsModuleApi.GetQuestionWithAnswersByIdAsync(duelRound.QuestionId);
+        return new DuelRoundDto(
+            duelRound.Number,
+            duelRound.QuestionId,
+            questionWithAnswers!.Title,
+            questionWithAnswers.Answers.Select(x => new AnswerDto
+            (
+                x.Id,
+                x.Content
+            )).ToList()
+        );
     }
 }

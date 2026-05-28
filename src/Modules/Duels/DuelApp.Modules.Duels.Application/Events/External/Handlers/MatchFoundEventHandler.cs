@@ -1,6 +1,6 @@
 using DuelApp.Modules.Duels.Application.Constants;
 using DuelApp.Modules.Duels.Application.Exceptions;
-using DuelApp.Modules.Duels.Application.Responses;
+using DuelApp.Modules.Duels.Application.Models;
 using DuelApp.Modules.Duels.Application.Services;
 using DuelApp.Modules.Questions.Shared;
 using DuelApp.Shared.Abstractions.Events;
@@ -42,14 +42,6 @@ public class MatchFoundEventHandler : IEventHandler<MatchFoundEvent>
             throw new DuelNotFoundException(duelId.Value);
         }
         
-        var questionWithAnswers = await _questionsModuleApi.GetQuestionsWithAnswersAsync(questionsAmount: 1);
-        if (!questionWithAnswers.Any())
-        {
-            throw new NoQuestionsFoundException();
-        }
-        
-        await _duelsService.CreateNextRoundAsync(duelId.Value, questionWithAnswers.First().Id);
-
         await _realTimeNotifier.NotifyMultipleUsersAsync(
             [@event.PlayerOneId, @event.PlayerTwoId],
             RealTimeNotificationEventTypes.DuelStarted,
