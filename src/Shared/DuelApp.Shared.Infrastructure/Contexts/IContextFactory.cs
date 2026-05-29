@@ -1,9 +1,9 @@
 ﻿using DuelApp.Shared.Abstractions.Contexts;
+using Microsoft.AspNetCore.Http;
 
-namespace DuelApp.Shared.Infrastructure.Contexts
+namespace DuelApp.Shared.Infrastructure.Contexts;
+
+public interface IContextFactory
 {
-    internal interface IContextFactory
-    {
-        IContext Create();
-    }
+    IContext Create(HttpContext httpContext);
 }

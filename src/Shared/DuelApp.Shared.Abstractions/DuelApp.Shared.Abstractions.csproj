@@ -8,7 +8,6 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Auth\" />
-    <Folder Include="Contexts\" />
     <Folder Include="Events\" />
     <Folder Include="Kernel\Types\" />
     <Folder Include="Messaging\" />

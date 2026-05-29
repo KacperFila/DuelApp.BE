@@ -3,7 +3,6 @@ using DuelApp.Modules.Matchmaking.Application.Abstractions;
 using DuelApp.Modules.Matchmaking.Application.Constants;
 using DuelApp.Modules.Matchmaking.Application.Events;
 using DuelApp.Modules.Matchmaking.Domain.Matchmaking.Entities;
-using DuelApp.Shared.Abstractions.Contexts;
 using DuelApp.Shared.Abstractions.Messaging;
 using DuelApp.Shared.Abstractions.RealTime;
 using Microsoft.EntityFrameworkCore;
@@ -19,7 +18,6 @@ public sealed class MatchmakingService : IMatchmakingService
     private readonly ILogger<MatchmakingService> _logger;
     private readonly IDuelsModuleApi _duelsModuleApi;
     private readonly IRealTimeNotifier _realTimeNotifier;
-    private readonly IContext _context;
     
     public MatchmakingService(
         IMatchmakingRepository matchmakingRepository,
@@ -27,8 +25,7 @@ public sealed class MatchmakingService : IMatchmakingService
         IMessageBroker messageBroker,
         ILogger<MatchmakingService> logger,
         IDuelsModuleApi duelsModuleApi,
-        IRealTimeNotifier realTimeNotifier,
-        IContext context)
+        IRealTimeNotifier realTimeNotifier)
     {
         _matchmakingRepository = matchmakingRepository;
         _unitOfWork = unitOfWork;
@@ -36,21 +33,18 @@ public sealed class MatchmakingService : IMatchmakingService
         _logger = logger;
         _duelsModuleApi = duelsModuleApi;
         _realTimeNotifier = realTimeNotifier;
-        _context = context;
     }
 
     /// <summary>
-    /// Attempts to add a player to the matchmaking queue.
-    /// Returns false if the player is already queued or if a concurrency conflict occurs.
+    /// Attempts to enqueue a user into the matchmaking queue.
+    /// The operation fails if the user is already queued or currently in a duel.
     /// </summary>
-    /// <param name="playerId">The unique identifier of the player.</param>
+    /// <param name="userId">Unique identifier of the user.</param>
     /// <returns>
-    /// True if the player was successfully added to the queue; otherwise, false.
+    /// True if the user was enqueued successfully; otherwise false.
     /// </returns>
-    public async Task<bool> TryJoinQueueAsync()
+    public async Task<bool> TryJoinQueueAsync(Guid userId)
     {
-        var userId = _context.Identity.Id;
-        
         var isPlayerCurrentlyInQueue = await _matchmakingRepository.IsUserInQueueAsync(userId);
         if (isPlayerCurrentlyInQueue)
         {
@@ -93,52 +87,5 @@ public sealed class MatchmakingService : IMatchmakingService
         
         entry.MarkAsMatched();
         await _matchmakingRepository.UpdateAsync(entry);
-    }
-
-    /// <summary>
-    /// Attempts to match players from the queue in pairs and publishes match events.
-    /// Processes players in batches and pairs them sequentially.
-    /// </summary>
-    /// <param name="cancellationToken">Token to cancel the operation.</param>
-    public async Task TryMatchPlayersAsync(CancellationToken cancellationToken = default)
-    {
-        await _unitOfWork.ExecuteAsync(async () =>
-        {            
-            var enqueuedPlayers = await _matchmakingRepository.GetQueuedBatchAsync(50);
-            if (enqueuedPlayers.Count < 2)
-            {
-                return;
-            }
-            
-            foreach (var pair in enqueuedPlayers.Chunk(2))
-            {
-                if (pair.Length != 2)
-                {
-                    break;
-                }
-                
-                await MarkPairAsMatchedAsync(pair);
-                
-                await _messageBroker.PublishAsync(
-                    new MatchFoundEvent(
-                        pair[0].PlayerId,
-                        pair[1].PlayerId)
-                );
-
-                await _realTimeNotifier.NotifyMultipleUsersAsync(
-                    pair.Select(x => x.PlayerId),
-                    RealTimeNotificationEventTypes.MatchFound);
-            }
-        }, cancellationToken);
-    }
-
-    private async Task MarkPairAsMatchedAsync(IEnumerable<QueueEntry> players)
-    {
-        foreach (var player in players)
-        {
-            player.MarkAsMatched();
-        }
-
-        await _matchmakingRepository.BulkUpdateAsync(players);
     }
 }

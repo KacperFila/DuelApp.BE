@@ -2,30 +2,22 @@ using DuelApp.Modules.Duels.Application.Constants;
 using DuelApp.Modules.Duels.Application.Exceptions;
 using DuelApp.Modules.Duels.Application.Models;
 using DuelApp.Modules.Duels.Application.Services;
-using DuelApp.Modules.Questions.Shared;
 using DuelApp.Shared.Abstractions.Events;
 using DuelApp.Shared.Abstractions.RealTime;
-using Microsoft.Extensions.Logging;
 
 namespace DuelApp.Modules.Duels.Application.Events.External.Handlers;
 
 public class MatchFoundEventHandler : IEventHandler<MatchFoundEvent>
 {
     private readonly IDuelsService _duelsService;
-    private readonly IQuestionsModuleApi _questionsModuleApi;
-    private readonly ILogger<MatchFoundEventHandler> _logger;
     private readonly IRealTimeNotifier _realTimeNotifier;
     
     public MatchFoundEventHandler(
         IDuelsService duelsService,
-        ILogger<MatchFoundEventHandler> logger,
-        IRealTimeNotifier realTimeNotifier,
-        IQuestionsModuleApi questionsModuleApi)
+        IRealTimeNotifier realTimeNotifier)
     {
         _duelsService = duelsService;
-        _logger = logger;
         _realTimeNotifier = realTimeNotifier;
-        _questionsModuleApi = questionsModuleApi;
     }
 
     public async Task HandleAsync(MatchFoundEvent @event)

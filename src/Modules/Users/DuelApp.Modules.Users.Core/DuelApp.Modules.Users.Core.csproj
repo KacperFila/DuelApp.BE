@@ -2,6 +2,7 @@
   <PropertyGroup>
     <TargetFramework>net9.0</TargetFramework>
     <RootNamespace>DuelApp.Modules.Users.Core</RootNamespace>
+    <Nullable>enable</Nullable>
   </PropertyGroup>
   <ItemGroup>
     <Folder Include="DAL\Configurations\" />
@@ -13,5 +14,6 @@
   <ItemGroup>
     <ProjectReference Include="..\..\..\Shared\DuelApp.Shared.Abstractions\DuelApp.Shared.Abstractions.csproj" />
     <ProjectReference Include="..\..\..\Shared\DuelApp.Shared.Infrastructure\DuelApp.Shared.Infrastructure.csproj" />
+    <ProjectReference Include="..\DuelApp.Modules.Users.Shared\DuelApp.Modules.Users.Shared.csproj" />
   </ItemGroup>
 </Project>

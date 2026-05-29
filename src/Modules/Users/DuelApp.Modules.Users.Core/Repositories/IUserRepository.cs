@@ -2,13 +2,12 @@
 using System;
 using DuelApp.Modules.Users.Core.Entities;
 
-namespace DuelApp.Modules.Users.Core.Repositories
+namespace DuelApp.Modules.Users.Core.Repositories;
+
+public interface IUserRepository
 {
-    internal interface IUserRepository
-    {
-        Task<User> GetAsync(Guid id);
-        Task<User> GetAsync(string email);
-        Task AddAsync(User user);
-        Task UpdateAsync(User user);
-    }
+    Task<User?> GetByIdAsync(Guid id);
+    Task<User?> GetByKeycloakIdAsync(string id);
+    Task AddAsync(User user);
+    Task UpdateAsync(User user);
 }

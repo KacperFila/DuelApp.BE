@@ -24,14 +24,14 @@ public class DuelsService : IDuelsService
         IDuelsRepository duelsRepository,
         ILogger<DuelsService> logger,
         IRealTimeNotifier realTimeNotifier,
-        IContext context,
-        IQuestionsModuleApi questionsModuleApi)
+        IQuestionsModuleApi questionsModuleApi,
+        IContextAccessor contextAccessor)
     {
         _duelsRepository = duelsRepository;
         _logger = logger;
         _realTimeNotifier = realTimeNotifier;
-        _context = context;
         _questionsModuleApi = questionsModuleApi;
+        _context = contextAccessor.Current;
     }
     
     public async Task<Guid?> CreateDuelAsync(Guid playerOneId, Guid playerTwoId)

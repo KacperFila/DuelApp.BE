@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
+using Azure.Storage.Blobs;
 using DuelApp.Shared.Abstractions.Modules;
 using DuelApp.Shared.Abstractions.Storage;
 using DuelApp.Shared.Abstractions.Time;
@@ -110,12 +111,11 @@ namespace DuelApp.Shared.Infrastructure
             services.AddRealTime();
             services.AddMemoryCache();
             services.AddSingleton<IRequestStorage, RequestStorage>();
-            services.AddSingleton<IContextFactory, ContextFactory>();
             services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
-            services.AddTransient(sp => sp.GetRequiredService<IContextFactory>().Create());
             services.AddModuleInfo(modules);
             services.AddModuleRequests(assemblies);
-            services.AddAuth(modules);
+            services.AddAuth();
+            services.AddContextExtensions();
             services.AddErrorHandling();
             services.AddCommands(assemblies);
             services.AddQueries(assemblies);
@@ -125,6 +125,11 @@ namespace DuelApp.Shared.Infrastructure
             services.AddPostgres();
             services.AddSingleton<IClock, UtcClock>();
             services.AddHostedService<AppInitializer>();
+            services.AddSingleton(x =>
+            {
+                var config = x.GetRequiredService<IConfiguration>();
+                return new BlobServiceClient(config["Azure:BlobConnectionString"]);
+            });
             services.AddControllers()
                 .ConfigureApplicationPartManager(manager =>
                 {
@@ -156,9 +161,11 @@ namespace DuelApp.Shared.Infrastructure
             {
                 options.SwaggerEndpoint("/swagger/v1/swagger.json", "DuelApp API");
             });
-
-            app.UseAuthentication();
+            Microsoft.IdentityModel.Logging.IdentityModelEventSource.ShowPII = true;
             app.UseRouting();
+            app.UseAuthentication();
+            app.UseMiddleware<ContextMiddleware>();
+            app.UseMiddleware<AppUserMiddleware>();
             app.UseAuthorization();
             
             app.UseEndpoints(endpoints =>

@@ -11,17 +11,23 @@ namespace DuelApp.Modules.Matchmaking.Api.Controllers;
 public class MatchmakingController : ControllerBase
 {
     private readonly IMatchmakingService _matchmakingService;
+    private readonly IContext _context;
     
-    public MatchmakingController(IMatchmakingService matchmakingService)
+    public MatchmakingController(
+        IMatchmakingService matchmakingService,
+        IContextAccessor contextAccessor)
     {
         _matchmakingService = matchmakingService;
+        _context = contextAccessor.Current;
     }
     
     [Authorize]
     [HttpPost]
     public async Task<IActionResult> StartMatchmaking()
     {
-        var didMatchmakingStart = await _matchmakingService.TryJoinQueueAsync();
+        var userId = _context.Identity.Id;
+        
+        var didMatchmakingStart = await _matchmakingService.TryJoinQueueAsync(userId);
         if (!didMatchmakingStart)
         {
             return Ok(new { message = "User is currently during match or another matchmaking." });

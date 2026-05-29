@@ -1,6 +1,4 @@
-using System.Collections.Generic;
 using System.Threading.Tasks;
-using DuelApp.Shared.Abstractions.Modules;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
@@ -11,7 +9,7 @@ public static class Extensions
 {
     private const string SectionName = "Keycloak";
     
-    public static IServiceCollection AddAuth(this IServiceCollection services, IList<IModule> modules = null)
+    public static IServiceCollection AddAuth(this IServiceCollection services)
     {
         services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             .AddJwtBearer(options =>
@@ -42,7 +40,9 @@ public static class Extensions
                     }
                 };
             });
-            
+        
+        services.AddScoped<AppUserMiddleware>();
+        
         return services;
     }
 }

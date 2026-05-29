@@ -1,17 +1,68 @@
-﻿using System.Linq;
+﻿using System.Threading.Tasks;
+using DuelApp.Modules.Users.Core.Services;
+using DuelApp.Modules.Users.Shared;
+using DuelApp.Shared.Abstractions.Contexts;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace DuelApp.Modules.Users.Api.Controllers;
 
-internal class AccountController : BaseController
+[ApiController]
+[Route("api/users")]
+internal class AccountController : ControllerBase
 {
+    private readonly IUsersModuleApi _usersModuleApi;
+    private readonly IContextAccessor _contextAccessor;
+    private readonly IAccountService _accountService;
+    public AccountController(
+        IUsersModuleApi usersModuleApi,
+        IContextAccessor contextAccessor, 
+        IAccountService accountService)
+    {
+        _usersModuleApi = usersModuleApi;
+        _contextAccessor = contextAccessor;
+        _accountService = accountService;
+    }
+
     [HttpGet("me")]
     [Authorize]
-    public IActionResult GetMe()
+    public async Task<IActionResult> GetMe()
     {
-        var claims = HttpContext.User.Claims.ToDictionary(c => c.Type, c => c.Value);
+        var context = _contextAccessor.Current;
 
-        return Ok(claims);
+        var user = await _usersModuleApi.GetByKeycloakIdAsync(
+            context.Identity.KeycloakUserId);
+
+        return Ok(user);
+    }
+    
+    [HttpGet("me/avatar")]
+    [Authorize]
+    public IActionResult GetMyAvatar()
+    {
+        var context = _contextAccessor.Current;
+
+        var uri = _accountService.GetUserAvatar(context.Identity.Id);
+
+        return Ok(uri);
+    }
+    
+    [HttpPost("me/avatar")]
+    public async Task<IActionResult> Upload(
+        IFormFile file,
+        IContextAccessor contextAccessor,
+        IAccountService accountService)
+    {
+        var userId = contextAccessor.Current.Identity.Id;
+
+        var blobName = await accountService.UploadAvatar(userId, file);
+
+        return blobName is null
+            ? BadRequest()
+            : Ok(new
+            {
+                profileImageUrl = blobName
+            });
     }
 }

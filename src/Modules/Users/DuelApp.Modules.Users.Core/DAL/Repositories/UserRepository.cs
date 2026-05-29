@@ -17,9 +17,8 @@ namespace DuelApp.Modules.Users.Core.DAL.Repositories
             _users = dbContext.Users;
         }
 
-        public Task<User> GetAsync(Guid id) => _users.SingleOrDefaultAsync(x => x.Id == id);
-
-        public Task<User> GetAsync(string email) => _users.SingleOrDefaultAsync(x => x.Email == email);
+        public Task<User?> GetByIdAsync(Guid id) => _users.SingleOrDefaultAsync(x => x.Id == id);
+        public async Task<User?> GetByKeycloakIdAsync(string id) => await _users.FirstOrDefaultAsync(x => x.KeycloakUserId == id);
 
         public async Task AddAsync(User user)
         {

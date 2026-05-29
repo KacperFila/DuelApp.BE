@@ -1,22 +1,12 @@
 ﻿using DuelApp.Shared.Abstractions.Contexts;
 using Microsoft.AspNetCore.Http;
 
-namespace DuelApp.Shared.Infrastructure.Contexts
+namespace DuelApp.Shared.Infrastructure.Contexts;
+
+public class ContextFactory : IContextFactory
 {
-    internal class ContextFactory : IContextFactory
+    public IContext Create(HttpContext httpContext)
     {
-        private readonly IHttpContextAccessor _httpContextAccessor;
-
-        public ContextFactory(IHttpContextAccessor httpContextAccessor)
-        {
-            _httpContextAccessor = httpContextAccessor;
-        }
-        
-        public IContext Create()
-        {
-            var httpContext = _httpContextAccessor.HttpContext;
-
-            return httpContext is null ? Context.Empty : new Context(httpContext);
-        }
+        return new Context(httpContext);
     }
 }

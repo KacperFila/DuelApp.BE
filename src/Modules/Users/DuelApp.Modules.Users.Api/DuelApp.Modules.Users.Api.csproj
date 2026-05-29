@@ -20,5 +20,6 @@
   <ItemGroup>
     <ProjectReference Include="..\..\..\Shared\DuelApp.Shared.Abstractions\DuelApp.Shared.Abstractions.csproj" />
     <ProjectReference Include="..\DuelApp.Modules.Users.Core\DuelApp.Modules.Users.Core.csproj" />
+    <ProjectReference Include="..\DuelApp.Modules.Users.Shared\DuelApp.Modules.Users.Shared.csproj" />
   </ItemGroup>
 </Project>

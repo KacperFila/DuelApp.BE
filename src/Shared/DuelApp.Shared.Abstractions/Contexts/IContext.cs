@@ -1,9 +1,8 @@
-﻿namespace DuelApp.Shared.Abstractions.Contexts
+﻿namespace DuelApp.Shared.Abstractions.Contexts;
+
+public interface IContext
 {
-    public interface IContext
-    {
-        string RequestId { get; }
-        string TraceId { get; }
-        IIdentityContext Identity { get; }
-    }
+    string RequestId { get; }
+    string TraceId { get; }
+    IIdentityContext Identity { get; }
 }
