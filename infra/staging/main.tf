@@ -463,6 +463,6 @@ resource "azurerm_storage_account" "profile_pictures" {
 
 resource "azurerm_storage_container" "profile_pictures" {
   name                  = "profile-pictures"
-  storage_account_id    = azurerm_storage_account.profile_pictures.id
+  storage_account_name  = azurerm_storage_account.profile_pictures.name
   container_access_type = "private"
 }
