@@ -15,6 +15,7 @@ WORKDIR /src
 COPY ["src/Bootstrapper/DuelApp.Bootstrapper/DuelApp.Bootstrapper.csproj", "Bootstrapper/DuelApp.Bootstrapper/"]
 COPY ["src/Modules/Users/DuelApp.Modules.Users.Api/DuelApp.Modules.Users.Api.csproj", "Modules/Users/DuelApp.Modules.Users.Api/"]
 COPY ["src/Modules/Users/DuelApp.Modules.Users.Core/DuelApp.Modules.Users.Core.csproj", "Modules/Users/DuelApp.Modules.Users.Core/"]
+COPY ["src/Modules/Users/DuelApp.Modules.Users.Shared/DuelApp.Modules.Users.Shared.csproj", "Modules/Users/DuelApp.Modules.Users.Shared/"]
 COPY ["src/Modules/Questions/DuelApp.Modules.Questions.Api/DuelApp.Modules.Questions.Api.csproj", "Modules/Questions/DuelApp.Modules.Questions.Api/"]
 COPY ["src/Modules/Questions/DuelApp.Modules.Questions.Application/DuelApp.Modules.Questions.Application.csproj", "Modules/Questions/DuelApp.Modules.Questions.Application/"]
 COPY ["src/Modules/Questions/DuelApp.Modules.Questions.Domain/DuelApp.Modules.Questions.Domain.csproj", "Modules/Questions/DuelApp.Modules.Questions.Domain/"]
