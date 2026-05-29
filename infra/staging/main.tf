@@ -412,3 +412,52 @@ resource "azurerm_container_app" "duelapp_be" {
     component   = "backend"
   }
 }
+
+resource "azurerm_storage_account" "sa" {
+  name                = "profilepicturesstaging"
+  resource_group_name = azurerm_resource_group.rg.name
+  location            = azurerm_resource_group.rg.location
+
+  account_tier             = "Standard"
+  account_replication_type = "LRS"
+  account_kind             = "StorageV2"
+
+  min_tls_version = "TLS1_2"
+
+  public_network_access_enabled = true
+  shared_access_key_enabled     = true
+  is_hns_enabled                = false
+
+  cross_tenant_replication_enabled = false
+
+  access_tier = "Hot"
+
+  blob_properties {
+    delete_retention_policy {
+      days = 7
+    }
+
+    container_delete_retention_policy {
+      days = 7
+    }
+  }
+
+  share_properties {
+    retention_policy {
+      days = 7
+    }
+  }
+
+  network_rules {
+    default_action = "Allow"
+    bypass         = ["AzureServices"]
+  }
+
+  identity {
+    type = "SystemAssigned"
+  }
+
+  tags = {
+    environment = "staging"
+  }
+}
