@@ -245,6 +245,21 @@ resource "azurerm_key_vault_secret" "postgres_admin_password" {
   }
 }
 
+resource "azurerm_key_vault_secret" "profile_pictures_connection_string" {
+  name         = "profile-pictures-connection-string"
+  value        = azurerm_storage_account.profile_pictures.primary_connection_string
+  key_vault_id = azurerm_key_vault.duelapp_kv.id
+
+  depends_on = [
+    azurerm_role_assignment.terraform_kv_secret_officer,
+    azurerm_storage_account.profile_pictures
+  ]
+
+  lifecycle {
+    ignore_changes = [value]
+  }
+}
+
 # =====================================================
 # User Assigned Managed Identity
 # =====================================================
@@ -339,6 +354,12 @@ resource "azurerm_container_app" "duelapp_be" {
     identity            = azurerm_user_assigned_identity.duelapp_uami.id
   }
 
+  secret {
+    name                = "profile-pictures-connection-string"
+    key_vault_secret_id = azurerm_key_vault_secret.profile_pictures_connection_string.id
+    identity            = azurerm_user_assigned_identity.duelapp_uami.id
+  }
+
   template {
     min_replicas = 1
     max_replicas = 1
@@ -352,6 +373,11 @@ resource "azurerm_container_app" "duelapp_be" {
       env {
         name        = "Postgres__ConnectionString"
         secret_name = "postgres-connection-string"
+      }
+
+      env {
+        name        = "Azure__BlobConnectionString"
+        secret_name = "profile-pictures-connection-string"
       }
 
       env {
