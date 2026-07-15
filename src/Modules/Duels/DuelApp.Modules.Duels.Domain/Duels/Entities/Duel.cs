@@ -78,26 +78,13 @@ public sealed class Duel : AggregateRoot<Guid>
         EnsureInProgress();
 
         var player = ResolvePlayer(playerId);
-
         var round = GetCurrentRound();
 
         round.SubmitAnswer(player, isCorrect);
-
-        if (!round.IsCompleted())
-        {
-            return;
-        }
-        
-        AddPoints(round, isCorrect);
     }
     
-    private void AddPoints(DuelRound round, bool isCorrect)
+    private void AddPoints(DuelRound round)
     {
-        if (!isCorrect)
-        {
-            return;
-        }
-
         if (round.HasPlayerOneAnsweredCorrectly)
         {
             PlayerOneScore++;
@@ -134,6 +121,9 @@ public sealed class Duel : AggregateRoot<Guid>
         Status = DuelStatus.Completed;
         FinishedAt = DateTime.UtcNow;
 
+        PlayerOneScore = Rounds.Count(x => x.HasPlayerOneAnsweredCorrectly);
+        PlayerTwoScore = Rounds.Count(x => x.HasPlayerTwoAnsweredCorrectly);
+        
         WinnerId = PlayerOneScore > PlayerTwoScore
             ? PlayerOneId
             : PlayerTwoScore > PlayerOneScore

@@ -23,7 +23,8 @@ public sealed class MatchmakingRepository : IMatchmakingRepository
     public async Task<QueueEntry?> GetByPlayerIdAsync(Guid playerId)
     {
         return await _dbContext.QueueEntries
-            .FirstOrDefaultAsync(x => x.PlayerId == playerId);
+            .FirstOrDefaultAsync(x => x.PlayerId == playerId
+                                      && x.Status == MatchmakingStatus.Queued);
     }
 
     public async Task<bool> IsUserInQueueAsync(Guid playerId)

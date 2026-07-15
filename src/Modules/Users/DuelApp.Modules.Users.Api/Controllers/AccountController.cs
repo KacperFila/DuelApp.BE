@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Threading.Tasks;
 using DuelApp.Modules.Users.Core.Services;
 using DuelApp.Modules.Users.Shared;
 using DuelApp.Shared.Abstractions.Contexts;
@@ -44,6 +45,15 @@ internal class AccountController : ControllerBase
         var context = _contextAccessor.Current;
 
         var uri = _accountService.GetUserAvatar(context.Identity.Id);
+
+        return Ok(uri);
+    }
+    
+    [HttpGet("{userId:guid}/avatar")]
+    [Authorize]
+    public IActionResult GetUserAvatar(Guid userId)
+    {
+        var uri = _accountService.GetUserAvatar(userId);
 
         return Ok(uri);
     }

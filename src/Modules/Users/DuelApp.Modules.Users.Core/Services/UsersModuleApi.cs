@@ -31,12 +31,34 @@ public class UsersModuleApi : IUsersModuleApi
         {
             return null;
         }
+
+        var avatarUri = _avatarStorageService.GetAvatarUrl(user.Id);
         
         return new UserInfo
         (
             user.Id,
             user.KeycloakUserId,
-            user.Email
+            user.Email,
+            avatarUri
+        );
+    }
+
+    public async Task<UserInfo?> GetById(Guid userId)
+    {
+        var user = await _userRepository.GetByIdAsync(userId);
+        if (user is null)
+        {
+            return null;
+        }
+        
+        var avatarUri = _avatarStorageService.GetAvatarUrl(user.Id);
+        
+        return new UserInfo
+        (
+            user.Id,
+            user.KeycloakUserId,
+            user.Email,
+            avatarUri
         );
     }
 
@@ -55,10 +77,13 @@ public class UsersModuleApi : IUsersModuleApi
 
         await _userRepository.AddAsync(user);
         
+        var avatarUri = _avatarStorageService.GetAvatarUrl(user.Id);
+        
         return new UserInfo(
             user.Id,
             email,
-            keycloakId
+            keycloakId,
+            avatarUri
         );
     }
 }

@@ -25,7 +25,7 @@ public class MatchmakingController : ControllerBase
     [HttpPost]
     public async Task<IActionResult> StartMatchmaking()
     {
-        var userId = _context.Identity.Id;
+        var userId = Guid.Parse(_context.Identity.KeycloakUserId);
         
         var didMatchmakingStart = await _matchmakingService.TryJoinQueueAsync(userId);
         if (!didMatchmakingStart)
@@ -34,5 +34,16 @@ public class MatchmakingController : ControllerBase
         }
 
         return Ok(new { message = "MatchmakingStarted" });
+    }
+    
+    [Authorize]
+    [HttpDelete]
+    public async Task<IActionResult> CancelMatchmaking()
+    {
+        var userId = Guid.Parse(_context.Identity.KeycloakUserId);
+        
+        await _matchmakingService.LeaveQueueAsync(userId);
+
+        return Ok();
     }
 }
