@@ -5,7 +5,7 @@ using DuelApp.Modules.Duels.Application.Models;
 using DuelApp.Modules.Duels.Domain.Duels.Entities;
 using DuelApp.Modules.Duels.Domain.Duels.ValueObjects;
 using DuelApp.Modules.Questions.Shared;
-using DuelApp.Shared.Abstractions.Contexts;
+using DuelApp.Modules.Users.Shared;
 using DuelApp.Shared.Abstractions.RealTime;
 using Microsoft.Extensions.Logging;
 
@@ -17,7 +17,7 @@ public class DuelsService : IDuelsService
     private readonly ILogger<DuelsService> _logger;
     private readonly IRealTimeNotifier _realTimeNotifier;
     private readonly IQuestionsModuleApi _questionsModuleApi;
-    private readonly IContext _context;
+    private readonly IUsersModuleApi _usersModuleApi;
     private const int RoundsCount = 5;
 
     public DuelsService(
@@ -25,13 +25,13 @@ public class DuelsService : IDuelsService
         ILogger<DuelsService> logger,
         IRealTimeNotifier realTimeNotifier,
         IQuestionsModuleApi questionsModuleApi,
-        IContextAccessor contextAccessor)
+        IUsersModuleApi usersModuleApi)
     {
         _duelsRepository = duelsRepository;
         _logger = logger;
         _realTimeNotifier = realTimeNotifier;
         _questionsModuleApi = questionsModuleApi;
-        _context = contextAccessor.Current;
+        _usersModuleApi = usersModuleApi;
     }
     
     public async Task<Guid?> CreateDuelAsync(Guid playerOneId, Guid playerTwoId)
@@ -71,10 +71,8 @@ public class DuelsService : IDuelsService
         return duel;
     }
 
-    public async Task SubmitAnswerAsync(Guid answerId)
+    public async Task SubmitAnswerForUserAsync(Guid answerId, Guid userId)
     {
-        var userId = _context.Identity.Id;
-        
         var duelInProgress = await _duelsRepository.GetCurrentDuelForPlayerAsync(userId);
         if (duelInProgress is null)
         {
@@ -110,10 +108,8 @@ public class DuelsService : IDuelsService
         await _duelsRepository.UpdateDuelAsync(duelInProgress);
     }
     
-    public async Task<DuelRoundDto?> GetCurrentRoundAsync()
+    public async Task<DuelRoundDto?> GetCurrentRoundForUserAsync(Guid userId)
     {
-        var userId = _context.Identity.Id;
-        
         var duelInProgress = await _duelsRepository.GetCurrentDuelForPlayerAsync(userId);
         if (duelInProgress is null)
         {
@@ -136,10 +132,8 @@ public class DuelsService : IDuelsService
         );
     }
 
-    public async Task<bool> AbandonDuelAsync()
+    public async Task<bool> AbandonDuelForUserAsync(Guid userId)
     {
-        var userId = _context.Identity.Id;
-        
         var duelInProgress = await _duelsRepository.GetCurrentDuelForPlayerAsync(userId);
         if (duelInProgress is null)
         {
@@ -154,6 +148,46 @@ public class DuelsService : IDuelsService
         await _realTimeNotifier.NotifyMultipleUsersAsync(duelParticipants, RealTimeNotificationEventTypes.DuelAbandoned);
         
         return true;
+    }
+
+    public async Task<DuelPreview?> GetCurrentDuelPreviewAsync(Guid userId)
+    {
+        var duelInProgress = await _duelsRepository.GetCurrentDuelForPlayerAsync(userId);
+        if (duelInProgress is null)
+        {
+            _logger.LogWarning("No duel in progress found for user {userId}", userId);
+            return null;
+        }
+        
+        var player = await _usersModuleApi.GetByKeycloakIdAsync(userId.ToString());
+        var opponentId = duelInProgress.PlayerOneId == userId 
+            ?  duelInProgress.PlayerTwoId
+            : duelInProgress.PlayerOneId;
+        var opponent = await _usersModuleApi.GetByKeycloakIdAsync(opponentId.ToString());
+
+        if (player is null || opponent is null)
+        {
+            _logger.LogWarning("No pair of players found for duel with Id: {duelId}", duelInProgress);
+            return null;
+        }
+
+        var result = new DuelPreview
+        {
+            Player = new DuelPlayer
+            {
+                Email = player.Email,
+                TotalPoints = 0,
+                AvatarUri = player.AvatarUri
+            },
+            Opponent = new DuelPlayer
+            {
+                Email = opponent.Email,
+                TotalPoints = 0,
+                AvatarUri = opponent.AvatarUri
+            }
+        };
+
+        return result;
     }
 
     private async Task<bool> AnyPlayerCurrentlyInDuel(Guid playerOneId, Guid playerTwoId)

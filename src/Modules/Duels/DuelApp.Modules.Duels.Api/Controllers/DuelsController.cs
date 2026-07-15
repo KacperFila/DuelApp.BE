@@ -1,5 +1,6 @@
 using DuelApp.Modules.Duels.Api.Models;
 using DuelApp.Modules.Duels.Application.Services;
+using DuelApp.Shared.Abstractions.Contexts;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -10,10 +11,13 @@ namespace DuelApp.Modules.Duels.Api.Controllers;
 public class DuelsController : ControllerBase
 {
     private readonly IDuelsService _duelsService;
-
-    public DuelsController(IDuelsService duelsService)
+    private readonly IContext _context;
+    public DuelsController(
+        IDuelsService duelsService,
+        IContextAccessor contextAccessor)
     {
         _duelsService = duelsService;
+        _context = contextAccessor.Current;
     }
 
     [Authorize]
@@ -21,7 +25,9 @@ public class DuelsController : ControllerBase
     
     public async Task<IActionResult> SubmitAnswer([FromBody] SubmitAnswerRequest request)
     {
-        await _duelsService.SubmitAnswerAsync(request.AnswerId);
+        var userId = _context.Identity.KeycloakUserId;
+        
+        await _duelsService.SubmitAnswerForUserAsync(request.AnswerId, Guid.Parse(userId));
 
         return Ok();
     }
@@ -30,7 +36,8 @@ public class DuelsController : ControllerBase
     [HttpDelete]
     public async Task<IActionResult> AbandonDuel()
     {
-        var result = await _duelsService.AbandonDuelAsync();
+        var userId = _context.Identity.KeycloakUserId;
+        var result = await _duelsService.AbandonDuelForUserAsync(Guid.Parse(userId));
 
         return result ? Ok() : NotFound();
     }
@@ -39,7 +46,20 @@ public class DuelsController : ControllerBase
     [HttpGet("round/current")]
     public async Task<IActionResult> GetDuelCurrentRound()
     {
-        var result = await _duelsService.GetCurrentRoundAsync();
+        var userId = _context.Identity.KeycloakUserId;
+        var result = await _duelsService.GetCurrentRoundForUserAsync(Guid.Parse(userId));
+
+        return result is not null
+            ? Ok(result)
+            : NotFound();
+    }
+    
+    [Authorize]
+    [HttpGet("preview")]
+    public async Task<IActionResult> GetDuelPreview()
+    {
+        var userId = _context.Identity.KeycloakUserId;
+        var result = await _duelsService.GetCurrentDuelPreviewAsync(Guid.Parse(userId));
 
         return result is not null
             ? Ok(result)

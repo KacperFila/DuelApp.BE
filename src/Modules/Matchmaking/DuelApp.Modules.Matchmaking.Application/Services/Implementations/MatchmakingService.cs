@@ -85,7 +85,7 @@ public sealed class MatchmakingService : IMatchmakingService
             return;
         }
         
-        entry.MarkAsMatched();
+        entry.MarkAsCancelled();
         await _matchmakingRepository.UpdateAsync(entry);
     }
 }

@@ -22,6 +22,16 @@ public sealed class QueueEntry : AggregateRoot<Guid>
         };
     }
 
+    public void MarkAsCancelled()
+    {
+        if (Status != MatchmakingStatus.Queued)
+        {
+            return;
+        }
+
+        Status = MatchmakingStatus.Cancelled;
+    }
+    
     public void MarkAsMatched()
     {
         if (Status != MatchmakingStatus.Queued)
