@@ -4,5 +4,5 @@ public enum MatchmakingStatus
 {
     Queued,
     Matched,
-    Cancelled,
+    Cancelled
 }

@@ -9,11 +9,11 @@ public sealed class Duel : AggregateRoot<Guid>
     public Guid PlayerOneId { get; private set; } = Guid.Empty;
     public Guid PlayerTwoId { get; private set; } = Guid.Empty;
     public DuelStatus Status { get; private set; } = DuelStatus.None;
-    public int CurrentRound { get; private set; } = 0;
-    public int TotalRounds { get; private set; } = 0;
+    public int CurrentRound { get; private set; }
+    public int TotalRounds { get; private set; }
     public List<DuelRound> Rounds { get; private set; } = [];
-    public int PlayerOneScore { get; private set; } = 0;
-    public int PlayerTwoScore { get; private set; } = 0;
+    public int PlayerOneScore { get; private set; }
+    public int PlayerTwoScore { get; private set; }
     public Guid WinnerId { get; private set; } = Guid.Empty;
     public DateTime StartedAt { get; private set; } = DateTime.MinValue;
     public DateTime FinishedAt { get; private set; } = DateTime.MinValue;
@@ -81,19 +81,6 @@ public sealed class Duel : AggregateRoot<Guid>
         var round = GetCurrentRound();
 
         round.SubmitAnswer(player, isCorrect);
-    }
-    
-    private void AddPoints(DuelRound round)
-    {
-        if (round.HasPlayerOneAnsweredCorrectly)
-        {
-            PlayerOneScore++;
-        }
-        
-        if (round.HasPlayerTwoAnsweredCorrectly)
-        {
-            PlayerTwoScore++;
-        }
     }
     
     private DuelPlayer ResolvePlayer(Guid playerId)
