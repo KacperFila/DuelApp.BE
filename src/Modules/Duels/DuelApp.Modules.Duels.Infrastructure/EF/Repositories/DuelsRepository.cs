@@ -32,17 +32,46 @@ public class DuelsRepository : IDuelsRepository
         await _dbContext.SaveChangesAsync();
     }
 
-    public async Task UpdateDuelAsync(Duel duel)
+    public Task UpdateDuelAsync(Duel duel)
     {
         _dbContext.Duels.Update(duel);
-        await _dbContext.SaveChangesAsync();
+        return Task.CompletedTask;
     }
-
-    public async Task<Duel?> GetCurrentDuelForPlayerAsync(Guid playerId)
+    
+    public async Task<Guid?> GetCurrentDuelIdForPlayerAsync(Guid playerId)
     {
-        return await _dbContext.Duels.FirstOrDefaultAsync(
-            x => x.Status == DuelStatus.InProgress &&
-                 (x.PlayerOneId == playerId || x.PlayerTwoId == playerId)
-        );
+        return await _dbContext.Duels
+            .Where(x =>
+                x.Status == DuelStatus.InProgress &&
+                (x.PlayerOneId == playerId ||
+                 x.PlayerTwoId == playerId))
+            .Select(x => x.Id)
+            .SingleOrDefaultAsync();
+    }
+    
+    public async Task<Duel?> GetForUpdateById(Guid duelId)
+    {
+        if (duelId == Guid.Empty)
+        {
+            return null;
+        }
+        
+        await _dbContext.Database.ExecuteSqlInterpolatedAsync($@"
+            SELECT 1
+            FROM ""Duels"".""Duels""
+            WHERE ""Id"" = {duelId}
+            FOR UPDATE
+        ");
+
+        await _dbContext.Database.ExecuteSqlInterpolatedAsync($@"
+            SELECT 1
+            FROM ""Duels"".""DuelRounds""
+            WHERE ""DuelId"" = {duelId}
+            FOR UPDATE
+        ");
+        
+        return await _dbContext.Duels
+            .Include(x => x.Rounds)
+            .SingleAsync(x => x.Id == duelId);
     }
 }

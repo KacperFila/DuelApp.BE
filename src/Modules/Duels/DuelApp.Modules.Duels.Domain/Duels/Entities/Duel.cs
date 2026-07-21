@@ -1,4 +1,5 @@
 using DuelApp.Modules.Duels.Domain.Duels.Enums;
+using DuelApp.Modules.Duels.Domain.Duels.Events;
 using DuelApp.Modules.Duels.Domain.Duels.ValueObjects;
 using DuelApp.Shared.Abstractions.Kernel.Types;
 
@@ -81,6 +82,61 @@ public sealed class Duel : AggregateRoot<Guid>
         var round = GetCurrentRound();
 
         round.SubmitAnswer(player, isCorrect);
+
+        if (round.IsCompleted())
+        {
+            if (IsLastRound())
+            {
+                Complete();
+                AddEvent(new RoundCompletedEvent(Id, round.Number, PlayerOneId, PlayerTwoId, IsDuelCompleted: true));
+                return;
+            }
+
+            MoveToNextRound();
+            var nextRound = GetCurrentRound();
+            AddEvent(new RoundCompletedEvent(
+                Id,
+                round.Number,
+                PlayerOneId,
+                PlayerTwoId,
+                IsDuelCompleted: false,
+                NextRoundNumber: nextRound.Number,
+                TotalRounds: TotalRounds,
+                NextQuestionId: nextRound.QuestionId));
+        }
+    }
+    
+    public DuelRound GetCurrentRound()
+    {
+        return Rounds.Single(x => x.Number == CurrentRound);
+    }
+    
+    private void EnsureInProgress()
+    {
+        if (Status != DuelStatus.InProgress)
+        {
+            throw new InvalidOperationException("Duel is not in progress.");
+        }
+    }
+    
+    private void MoveToNextRound()
+    {
+        CurrentRound++;
+    }
+    
+    private void Complete()
+    {
+        Status = DuelStatus.Completed;
+        FinishedAt = DateTime.UtcNow;
+
+        PlayerOneScore = Rounds.Count(x => x.HasPlayerOneAnsweredCorrectly);
+        PlayerTwoScore = Rounds.Count(x => x.HasPlayerTwoAnsweredCorrectly);
+        
+        WinnerId = PlayerOneScore > PlayerTwoScore
+            ? PlayerOneId
+            : PlayerTwoScore > PlayerOneScore
+                ? PlayerTwoId
+                : Guid.Empty;
     }
     
     private DuelPlayer ResolvePlayer(Guid playerId)
@@ -98,43 +154,8 @@ public sealed class Duel : AggregateRoot<Guid>
         throw new InvalidOperationException("Player does not belong to this duel.");
     }
     
-    public bool IsLastRound()
+    private bool IsLastRound()
     {
         return CurrentRound >= TotalRounds;
-    }
-    
-    public void Complete()
-    {
-        Status = DuelStatus.Completed;
-        FinishedAt = DateTime.UtcNow;
-
-        PlayerOneScore = Rounds.Count(x => x.HasPlayerOneAnsweredCorrectly);
-        PlayerTwoScore = Rounds.Count(x => x.HasPlayerTwoAnsweredCorrectly);
-        
-        WinnerId = PlayerOneScore > PlayerTwoScore
-            ? PlayerOneId
-            : PlayerTwoScore > PlayerOneScore
-                ? PlayerTwoId
-                : Guid.Empty;
-    }
-    
-    private void EnsureInProgress()
-    {
-        if (Status != DuelStatus.InProgress)
-        {
-            throw new InvalidOperationException("Duel is not in progress.");
-        }
-    }
-
-    public DuelRound GetCurrentRound()
-    {
-        return Rounds.Single(x => x.Number == CurrentRound);
-    }
-    
-    public DuelRound GetNextRound()
-    {
-        CurrentRound++;
-
-        return Rounds.Single(x => x.Number == CurrentRound);
     }
 }

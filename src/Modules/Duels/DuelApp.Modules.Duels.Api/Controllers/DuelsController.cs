@@ -37,9 +37,9 @@ public class DuelsController : ControllerBase
     public async Task<IActionResult> AbandonDuel()
     {
         var userId = _context.Identity.KeycloakUserId;
-        var result = await _duelsService.AbandonDuelForUserAsync(Guid.Parse(userId));
+        await _duelsService.AbandonDuelForUserAsync(Guid.Parse(userId));
 
-        return result ? Ok() : NotFound();
+        return Ok();
     }
     
     [Authorize]
