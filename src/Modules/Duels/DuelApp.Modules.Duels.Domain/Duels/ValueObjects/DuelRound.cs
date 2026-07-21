@@ -5,12 +5,11 @@ namespace DuelApp.Modules.Duels.Domain.Duels.ValueObjects;
 public sealed class DuelRound
 {
     public int Number { get; }
-    public Guid QuestionId { get; set; } = Guid.Empty;
+    public Guid QuestionId { get; set; }
     public bool HasPlayerOneSubmittedAnswer { get; set; }
     public bool HasPlayerTwoSubmittedAnswer { get; set; }
     public bool HasPlayerOneAnsweredCorrectly { get; set; }
     public bool HasPlayerTwoAnsweredCorrectly { get; set; }
-    
     public DuelRoundStatus Status { get; set; }
 
     private DuelRound(int number, Guid questionId)

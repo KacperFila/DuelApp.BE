@@ -8,5 +8,6 @@ public interface IDuelsRepository
     public Task<bool> IsPlayerCurrentlyInDuelAsync(Guid playerId);
     public Task CreateDuelAsync(Duel? duel);
     public Task UpdateDuelAsync(Duel duel);
-    public Task<Duel?> GetCurrentDuelForPlayerAsync(Guid playerId);
+    public Task<Guid?> GetCurrentDuelIdForPlayerAsync(Guid playerId);
+    public Task<Duel?> GetForUpdateById(Guid duelId);
 }

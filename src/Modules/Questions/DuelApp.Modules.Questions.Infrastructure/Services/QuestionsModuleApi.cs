@@ -46,8 +46,8 @@ public class QuestionsModuleApi : IQuestionsModuleApi
             );
     }
 
-    public Task<bool> CheckAnswerAsync(Guid answerId)
+    public async Task<bool> CheckAnswerAsync(Guid answerId)
     {
-        return _questionsRepository.CheckAnswerAsync(answerId);
+        return await _questionsRepository.CheckAnswerAsync(answerId);
     }
 }
