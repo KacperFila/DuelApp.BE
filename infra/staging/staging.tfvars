@@ -1,4 +1,4 @@
-image_tag = "stagingduelappacr.azurecr.io/duelapp:3d45a44ed56a4bb3327a4462ede5e5bb39018471"
+image_tag = "stagingduelappacr.azurecr.io/duelapp:4deb0d75c4536609a79745493ad1d427923ade97"
 
 allowed_ips = [
     "0.0.0.0",        # Azure services
