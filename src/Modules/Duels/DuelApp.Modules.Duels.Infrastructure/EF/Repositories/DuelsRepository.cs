@@ -19,6 +19,11 @@ public class DuelsRepository : IDuelsRepository
         return await _dbContext.Duels.FirstOrDefaultAsync(x => x.Id == duelId);
     }
 
+    public async Task<Duel?> GetByRoundIdAsync(Guid roundId)
+    {
+        return await _dbContext.Duels.FirstOrDefaultAsync(x => x.Rounds.Any(x => x.Id == roundId));
+    }
+
     public async Task<bool> IsPlayerCurrentlyInDuelAsync(Guid playerId)
     {
         return await _dbContext.Duels

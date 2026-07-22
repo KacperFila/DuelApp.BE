@@ -22,17 +22,16 @@ public class MatchFoundEventHandler : IEventHandler<MatchFoundEvent>
 
     public async Task HandleAsync(MatchFoundEvent @event)
     {
-        var duelId = await _duelsService.CreateDuelAsync(@event.PlayerOneId, @event.PlayerTwoId);
+        var duelId = await _duelsService.CreateDuelAsync(
+            @event.PlayerOneId,
+            @event.PlayerTwoId);
+
         if (duelId is null)
         {
             return;
         }
-        
-        var duel = await _duelsService.GetDuelByIdAsync(duelId.Value);
-        if (duel is null)
-        {
-            throw new DuelNotFoundException(duelId.Value);
-        }
+
+        await _duelsService.StartDuelAsync(duelId.Value);
         
         await _realTimeNotifier.NotifyMultipleUsersAsync(
             [@event.PlayerOneId, @event.PlayerTwoId],

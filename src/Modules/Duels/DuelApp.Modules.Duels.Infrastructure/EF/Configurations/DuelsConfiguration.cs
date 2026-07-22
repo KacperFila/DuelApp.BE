@@ -43,6 +43,9 @@ internal sealed class DuelConfiguration : IEntityTypeConfiguration<Duel>
 
             rounds.HasKey("DuelId", "Number");
 
+            rounds.Property(x => x.Id)
+                .IsRequired();
+            
             rounds.Property(x => x.Number)
                 .IsRequired();
 
@@ -55,6 +58,14 @@ internal sealed class DuelConfiguration : IEntityTypeConfiguration<Duel>
             rounds.Property(x => x.HasPlayerOneSubmittedAnswer);
 
             rounds.Property(x => x.HasPlayerTwoSubmittedAnswer);
+            
+            rounds.Property(x => x.Status);
+
+            rounds.Property(x => x.EndsAt);
+            
+            rounds.Property(x => x.StartedAt);
+            
+            rounds.Property(x => x.FinishedAt);
         });
         
         builder.HasIndex(x => new { x.PlayerOneId, x.Status });

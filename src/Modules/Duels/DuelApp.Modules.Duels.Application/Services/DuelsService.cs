@@ -36,32 +36,55 @@ public class DuelsService : IDuelsService
         _usersModuleApi = usersModuleApi;
         _unitOfWork = unitOfWork;
     }
-    
+
     public async Task<Guid?> CreateDuelAsync(Guid playerOneId, Guid playerTwoId)
     {
-        if (await AnyPlayerCurrentlyInDuel(playerOneId, playerTwoId))
-        {
-            _logger.LogWarning("New duel cannot be created for players: {Player1} and {Player2}- at least one of the players is currently in duel.",
-                playerOneId,
-                playerTwoId);
-            
-            return null;
-        }
+        var createdDuelId = (Guid?)null;
         
-        var questions = await _questionsModuleApi.GetQuestionsWithAnswersAsync(RoundsCount);
+        await _unitOfWork.ExecuteAsync(async () =>
+        {
+            if (await AnyPlayerCurrentlyInDuel(playerOneId, playerTwoId))
+            {
+                _logger.LogWarning(
+                    "New duel cannot be created for players: {Player1} and {Player2}- at least one of the players is currently in duel.",
+                    playerOneId,
+                    playerTwoId);
+            }
 
-        var rounds = new List<DuelRound>();
-        foreach (var (question, index) in questions.Select((value, index) => (value, index)))
-        {
-            rounds.Add(DuelRound.Create(index + 1, question.Id));
-        }
-        
-        var duel = Duel.Create(playerOneId, playerTwoId, rounds);
-        await _duelsRepository.CreateDuelAsync(duel);
-        
-        return duel.Id;
+            var questions = await _questionsModuleApi.GetQuestionsWithAnswersAsync(RoundsCount);
+
+            var rounds = new List<DuelRound>();
+            foreach (var (question, index) in questions.Select((value, index) => (value, index)))
+            {
+                rounds.Add(DuelRound.Create(index + 1, question.Id));
+            }
+
+            var duel = Duel.Create(playerOneId, playerTwoId, rounds, TimeSpan.FromSeconds(10));
+
+            await _duelsRepository.CreateDuelAsync(duel);
+
+            createdDuelId = duel.Id;
+        });
+
+        return createdDuelId;
     }
 
+    public async Task StartDuelAsync(Guid duelId)
+    {
+        await _unitOfWork.ExecuteAsync(async () =>
+        {
+            var duel = await _duelsRepository.GetByIdAsync(duelId);
+            if (duel is null)
+            {
+                throw new DuelNotFoundException(duelId);
+            }
+
+            duel.Start();
+
+            await _duelsRepository.UpdateDuelAsync(duel);
+        });
+    }
+    
     public async Task<Duel?> GetDuelByIdAsync(Guid duelId)
     {
         var duel = await _duelsRepository.GetByIdAsync(duelId);
@@ -194,10 +217,25 @@ public class DuelsService : IDuelsService
         return result;
     }
 
+    public async Task ExpireCurrentRoundAsync(Guid roundId)
+    {
+        await _unitOfWork.ExecuteAsync(async () =>
+        {
+            var duel = await _duelsRepository.GetByRoundIdAsync(roundId);
+            if (duel is null)
+            {
+                return;
+            }
+            
+            duel.ExpireCurrentRound();
+            
+            await _duelsRepository.UpdateDuelAsync(duel);
+        });
+    }
+
     private async Task<bool> AnyPlayerCurrentlyInDuel(Guid playerOneId, Guid playerTwoId)
     {
         return await _duelsRepository.IsPlayerCurrentlyInDuelAsync(playerOneId)
             || await _duelsRepository.IsPlayerCurrentlyInDuelAsync(playerTwoId);
     }
-    
 }

@@ -13,4 +13,8 @@
       <ProjectReference Include="..\DuelApp.Modules.Duels.Domain\DuelApp.Modules.Duels.Domain.csproj" />
     </ItemGroup>
 
+    <ItemGroup>
+      <PackageReference Include="Quartz.Extensions.Hosting" Version="3.18.2" />
+    </ItemGroup>
+
 </Project>

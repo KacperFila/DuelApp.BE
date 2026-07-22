@@ -2,6 +2,7 @@ using DuelApp.Modules.Matchmaking.Application;
 using DuelApp.Modules.Matchmaking.Infrastructure;
 using DuelApp.Shared.Abstractions.Modules;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace DuelApp.Modules.Matchmaking.Api;
@@ -17,7 +18,7 @@ internal class MatchmakingModule : IModule
         "matchmaking"
     ];
 
-    public void Register(IServiceCollection services)
+    public void Register(IServiceCollection services, IConfiguration configuration)
     {
         services.AddApplication();
         services.AddApplication();
