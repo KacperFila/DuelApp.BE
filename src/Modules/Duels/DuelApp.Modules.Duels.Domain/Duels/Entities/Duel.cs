@@ -15,7 +15,8 @@ public sealed class Duel : AggregateRoot<Guid>
     public List<DuelRound> Rounds { get; private set; } = [];
     public int PlayerOneScore { get; private set; }
     public int PlayerTwoScore { get; private set; }
-    public Guid WinnerId { get; private set; } = Guid.Empty;
+    public Guid? WinnerId { get; private set; }
+    public bool IsDraw { get; private set; }
     public DateTime StartedAt { get; private set; } = DateTime.MinValue;
     public DateTime FinishedAt { get; private set; } = DateTime.MinValue;
     public TimeSpan RoundDuration { get; private set; } = TimeSpan.Zero;
@@ -70,9 +71,18 @@ public sealed class Duel : AggregateRoot<Guid>
         Status = DuelStatus.Completed;
         FinishedAt = DateTime.UtcNow;
 
-        WinnerId = abandoningPlayerId == PlayerOneId
-            ? PlayerTwoId
-            : PlayerOneId;
+        var isAbandonedByPlayerOne = abandoningPlayerId == PlayerOneId;
+
+        if (isAbandonedByPlayerOne)
+        {
+            WinnerId = PlayerTwoId;
+            PlayerTwoScore = Rounds.Count(x => x.HasPlayerTwoAnsweredCorrectly);
+        }
+        else
+        {
+            WinnerId = PlayerOneId;
+            PlayerOneScore = Rounds.Count(x => x.HasPlayerOneAnsweredCorrectly);
+        }
     }
     
     public void Start()
@@ -203,12 +213,17 @@ public sealed class Duel : AggregateRoot<Guid>
 
         PlayerOneScore = Rounds.Count(x => x.HasPlayerOneAnsweredCorrectly);
         PlayerTwoScore = Rounds.Count(x => x.HasPlayerTwoAnsweredCorrectly);
-        
-        WinnerId = PlayerOneScore > PlayerTwoScore
-            ? PlayerOneId
-            : PlayerTwoScore > PlayerOneScore
-                ? PlayerTwoId
-                : Guid.Empty;
+
+        if (PlayerOneScore == PlayerTwoScore)
+        {
+            IsDraw = true;
+        }
+        else
+        {
+            WinnerId = PlayerOneScore > PlayerTwoScore
+                ? PlayerOneId
+                : PlayerTwoId;
+        }
     }
     
     private DuelPlayer ResolvePlayer(Guid playerId)

@@ -14,7 +14,7 @@ public class MatchFoundEventHandler : IEventHandler<MatchFoundEvent>
     private readonly IRealTimeNotifier _realTimeNotifier;
     private readonly ISchedulerFactory _schedulerFactory;
 
-    private const int DuelPreviewSeconds = 1;
+    private const int DuelPreviewSeconds = 5;
     
     public MatchFoundEventHandler(
         IDuelsService duelsService,

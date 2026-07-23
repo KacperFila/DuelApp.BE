@@ -179,23 +179,27 @@ public class DuelsService : IDuelsService
 
     public async Task AbandonDuelForUserAsync(Guid userId)
     {
-        var currentDuelId = await _duelsRepository.GetCurrentDuelIdForPlayerAsync(userId);
-        if (currentDuelId is null)
+        await _unitOfWork.ExecuteAsync(async () =>
         {
-            return;
-        }
-        
-        var duelInProgress = await _duelsRepository.GetByIdAsync(currentDuelId.Value);
-        if (duelInProgress is null)
-        {
-            return;
-        }
-        
-        duelInProgress.Abandon(userId);
-        await _duelsRepository.UpdateDuelAsync(duelInProgress);
+            var currentDuelId = await _duelsRepository.GetCurrentDuelIdForPlayerAsync(userId);
+            if (currentDuelId is null)
+            {
+                return;
+            }
 
-        var duelParticipants = new List<Guid> { duelInProgress.PlayerOneId, duelInProgress.PlayerTwoId };
-        await _realTimeNotifier.NotifyMultipleUsersAsync(duelParticipants, RealTimeNotificationEventTypes.DuelAbandoned);
+            var duelInProgress = await _duelsRepository.GetByIdAsync(currentDuelId.Value);
+            if (duelInProgress is null)
+            {
+                return;
+            }
+
+            duelInProgress.Abandon(userId);
+            await _duelsRepository.UpdateDuelAsync(duelInProgress);
+
+            var duelParticipants = new List<Guid> { duelInProgress.PlayerOneId, duelInProgress.PlayerTwoId };
+            await _realTimeNotifier.NotifyMultipleUsersAsync(duelParticipants,
+                RealTimeNotificationEventTypes.DuelAbandoned);
+        });
     }
 
     public async Task<DuelPreview?> GetCurrentDuelPreviewAsync(Guid userId)

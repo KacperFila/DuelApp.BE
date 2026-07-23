@@ -4,6 +4,7 @@ using DuelApp.Modules.Duels.Application.Exceptions;
 using DuelApp.Modules.Duels.Application.Models;
 using DuelApp.Modules.Duels.Domain.Duels.Events;
 using DuelApp.Modules.Questions.Shared;
+using DuelApp.Modules.Users.Shared;
 using DuelApp.Shared.Abstractions.Kernel;
 using DuelApp.Shared.Abstractions.RealTime;
 
@@ -14,15 +15,18 @@ public sealed class RoundCompletedEventHandler : IDomainEventHandler<RoundComple
     private readonly IQuestionsModuleApi _questionsModuleApi;
     private readonly IRealTimeNotifier _realTimeNotifier;
     private readonly IDuelsRepository _duelsRepository;
+    private readonly IUsersModuleApi _usersModuleApi;
 
     public RoundCompletedEventHandler(
         IQuestionsModuleApi questionsModuleApi,
         IRealTimeNotifier realTimeNotifier,
-        IDuelsRepository duelsRepository)
+        IDuelsRepository duelsRepository,
+        IUsersModuleApi usersModuleApi)
     {
         _questionsModuleApi = questionsModuleApi;
         _realTimeNotifier = realTimeNotifier;
         _duelsRepository = duelsRepository;
+        _usersModuleApi = usersModuleApi;
     }
 
     public async Task HandleAsync(RoundCompletedEvent @event)
@@ -31,9 +35,34 @@ public sealed class RoundCompletedEventHandler : IDomainEventHandler<RoundComple
 
         if (@event.IsDuelCompleted)
         {
+            var duel = await _duelsRepository.GetByIdAsync(@event.DuelId);
+            if (duel == null)
+            {
+                throw new DuelNotFoundException(@event.DuelId);
+            }
+            
+            var playerOneDetails = await _usersModuleApi.GetByKeycloakIdAsync(duel.PlayerOneId.ToString());
+            var playerTwoDetails = await _usersModuleApi.GetByKeycloakIdAsync(duel.PlayerTwoId.ToString());
+
+            if (playerOneDetails is null)
+            {
+                throw new UserDetailsNotFoundException(duel.PlayerOneId);
+            }
+            if (playerTwoDetails is null)
+            {
+                throw new UserDetailsNotFoundException(duel.PlayerTwoId);
+            }
+            
             await _realTimeNotifier.NotifyMultipleUsersAsync(
                 participants,
-                RealTimeNotificationEventTypes.DuelCompleted);
+                RealTimeNotificationEventTypes.DuelCompleted,
+                new DuelCompletedDto(
+                    playerOneDetails,
+                    duel.PlayerOneScore,
+                    playerTwoDetails,
+                    duel.PlayerTwoScore,
+                    duel.IsDraw,
+                    duel.WinnerId));
             
             return;
         }
