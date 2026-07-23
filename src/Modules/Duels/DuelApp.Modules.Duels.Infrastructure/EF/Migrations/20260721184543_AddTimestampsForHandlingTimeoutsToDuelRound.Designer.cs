@@ -3,6 +3,7 @@ using System;
 using DuelApp.Modules.Duels.Infrastructure;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace DuelApp.Modules.Duels.Infrastructure.EF.Migrations
 {
     [DbContext(typeof(DuelsDbContext))]
-    partial class DuelsDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260721184543_AddTimestampsForHandlingTimeoutsToDuelRound")]
+    partial class AddTimestampsForHandlingTimeoutsToDuelRound
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -46,9 +49,6 @@ namespace DuelApp.Modules.Duels.Infrastructure.EF.Migrations
 
                     b.Property<int>("PlayerTwoScore")
                         .HasColumnType("integer");
-
-                    b.Property<TimeSpan>("RoundDuration")
-                        .HasColumnType("interval");
 
                     b.Property<DateTime>("StartedAt")
                         .HasColumnType("timestamp with time zone");

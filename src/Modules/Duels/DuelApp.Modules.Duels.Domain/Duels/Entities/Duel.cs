@@ -18,6 +18,8 @@ public sealed class Duel : AggregateRoot<Guid>
     public Guid WinnerId { get; private set; } = Guid.Empty;
     public DateTime StartedAt { get; private set; } = DateTime.MinValue;
     public DateTime FinishedAt { get; private set; } = DateTime.MinValue;
+    
+    public TimeSpan RoundDuration { get; private set; } = TimeSpan.Zero;
 
     /// <summary>
     /// Creates a new duel between two different players using the provided rounds.
@@ -33,7 +35,7 @@ public sealed class Duel : AggregateRoot<Guid>
     /// <exception cref="ArgumentException">
     /// Thrown when the rounds collection is empty.
     /// </exception>
-    public static Duel Create(Guid player1Id, Guid player2Id, List<DuelRound> rounds)
+    public static Duel Create(Guid player1Id, Guid player2Id, List<DuelRound> rounds, TimeSpan roundDuration)
     {
         if (player1Id == player2Id)
         {
@@ -53,8 +55,8 @@ public sealed class Duel : AggregateRoot<Guid>
             TotalRounds = rounds.Count,
             CurrentRound = 1,
             Rounds = rounds.ToList(),
-            StartedAt = DateTime.UtcNow,
-            Status = DuelStatus.InProgress
+            Status = DuelStatus.Pending,
+            RoundDuration = roundDuration
         };
     }
 
@@ -72,6 +74,63 @@ public sealed class Duel : AggregateRoot<Guid>
         WinnerId = abandoningPlayerId == PlayerOneId
             ? PlayerTwoId
             : PlayerOneId;
+    }
+    
+    public void Start()
+    {
+        if (Status != DuelStatus.Pending)
+        {
+            throw new InvalidOperationException(
+                "Duel already started.");
+        }
+
+        Status = DuelStatus.InProgress;
+        StartedAt = DateTime.UtcNow;
+
+        var round = GetCurrentRound();
+
+        round.Start(RoundDuration);
+
+        AddEvent(new RoundStartedEvent(
+            Id,
+            round.Id,
+            round.EndsAt!.Value));
+    }
+    
+    public void ExpireCurrentRound()
+    {
+        EnsureInProgress();
+
+        var round = GetCurrentRound();
+        round.Expire();
+
+        if (IsLastRound())
+        {
+            Complete();
+            AddEvent(new RoundCompletedEvent(Id, round.Number, PlayerOneId, PlayerTwoId, IsDuelCompleted: true));
+            
+            return;
+        }
+        
+        MoveToNextRound();
+        var nextRound = GetCurrentRound();
+        
+        AddEvent(new RoundCompletedEvent(
+            Id,
+            round.Number - 1,
+            PlayerOneId,
+            PlayerTwoId,
+            IsDuelCompleted: false,
+            NextRoundNumber: round.Number,
+            TotalRounds: Rounds.Count,
+            NextQuestionId: nextRound.QuestionId));
+        
+        nextRound.Start(duration: TimeSpan.FromSeconds(10));
+
+        AddEvent(new RoundStartedEvent(
+            Id,
+            nextRound.Id,
+            nextRound.EndsAt!.Value));
     }
     
     public void SubmitAnswer(Guid playerId, bool isCorrect)

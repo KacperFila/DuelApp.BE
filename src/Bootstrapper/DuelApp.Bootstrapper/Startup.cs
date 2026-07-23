@@ -32,7 +32,7 @@ namespace DuelApp.Bootstrapper
 
             foreach (var module in _modules)
             {
-                module.Register(services);
+                module.Register(services, _configuration);
             }
         }
 

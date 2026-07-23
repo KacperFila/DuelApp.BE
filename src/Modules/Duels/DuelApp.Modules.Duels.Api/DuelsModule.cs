@@ -3,6 +3,7 @@ using DuelApp.Modules.Duels.Domain;
 using DuelApp.Modules.Duels.Infrastructure;
 using DuelApp.Shared.Abstractions.Modules;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace DuelApp.Modules.Duels.Api;
@@ -18,9 +19,9 @@ internal class DuelsModule : IModule
         "duels"
     ];
 
-    public void Register(IServiceCollection services)
+    public void Register(IServiceCollection services, IConfiguration configuration)
     {
-        services.AddApplication();
+        services.AddApplication(configuration);
         services.AddDomain();
         services.AddInfrastructure();
     }

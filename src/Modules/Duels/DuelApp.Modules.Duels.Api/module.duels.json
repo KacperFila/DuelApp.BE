@@ -3,6 +3,10 @@
     "module": {
       "enabled": true,
       "name": "Duels"
+    },
+    "DuelConfiguration": {
+      "DuelRoundCount": 5,
+      "RoundDurationSeconds": 10
     }
   }
 }

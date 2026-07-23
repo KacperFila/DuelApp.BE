@@ -2,6 +2,7 @@ using DuelApp.Modules.Questions.Application;
 using DuelApp.Modules.Questions.Infrastructure;
 using DuelApp.Shared.Abstractions.Modules;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace DuelApp.Modules.Questions.Api;
@@ -17,7 +18,7 @@ internal class QuestionsModule : IModule
         "questions"
     ];
 
-    public void Register(IServiceCollection services)
+    public void Register(IServiceCollection services, IConfiguration configuration)
     {
         services.AddApplication();
         services.AddApplication();

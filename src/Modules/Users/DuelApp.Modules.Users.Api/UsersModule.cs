@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
 using DuelApp.Modules.Users.Core;
 using DuelApp.Shared.Abstractions.Modules;
+using Microsoft.Extensions.Configuration;
 
 namespace DuelApp.Modules.Users.Api
 {
@@ -17,7 +18,7 @@ namespace DuelApp.Modules.Users.Api
                 "users"
             };
 
-            public void Register(IServiceCollection services)
+            public void Register(IServiceCollection services, IConfiguration configuration)
             {
                 services.AddCore();
             }
