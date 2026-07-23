@@ -34,17 +34,18 @@ public sealed class RoundCompletedEventHandler : IDomainEventHandler<RoundComple
             return;
         }
 
-        if (@event.NextRoundNumber is null || @event.TotalRounds is null || @event.NextQuestionId is null)
+        if (!IsNextRoundDataValid(@event))
         {
-            throw new NoRoundDetailsFoundException(@event.DuelId, @event.RoundNumber);
+            throw new NoRoundDetailsFoundException(@event.DuelId, @event.CompletedRoundNumber);
         }
 
-        var question = await _questionsModuleApi.GetQuestionWithAnswersByIdAsync(@event.NextQuestionId.Value)
+        var question = await _questionsModuleApi.GetQuestionWithAnswersByIdAsync(@event.NextQuestionId!.Value)
             ?? throw new QuestionNotFoundException(@event.NextQuestionId.Value);
 
         var nextRound = new DuelRoundDto(
-            @event.NextRoundNumber.Value,
-            @event.TotalRounds.Value,
+            @event.NextRoundId!.Value,
+            @event.NextRoundNumber!.Value,
+            @event.TotalRounds!.Value,
             @event.NextQuestionId.Value,
             question.Title,
             question.Answers.Select(x => new AnswerDto(x.Id, x.Content)).ToList());
@@ -53,5 +54,13 @@ public sealed class RoundCompletedEventHandler : IDomainEventHandler<RoundComple
             participants,
             RealTimeNotificationEventTypes.RoundCompleted,
             nextRound);
+    }
+
+    private bool IsNextRoundDataValid(RoundCompletedEvent @event)
+    {
+        return @event.NextRoundNumber is not null &&
+               @event.TotalRounds is not null &&
+               @event.NextQuestionId is not null &&
+               @event.NextRoundId is not null;
     }
 }

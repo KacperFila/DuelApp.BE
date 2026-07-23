@@ -1,6 +1,3 @@
 namespace DuelApp.Modules.Duels.Application.Models;
 
-public class OpponentFoundResponse
-{
-    
-}
+public record OpponentFoundDto;

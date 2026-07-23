@@ -1,6 +1,7 @@
 namespace DuelApp.Modules.Duels.Api.Models;
 
-public class SubmitAnswerRequest
+public record SubmitAnswerRequest
 {
-    public Guid? AnswerId { get; set; }
+    public Guid RoundId { get; }
+    public Guid AnswerId { get; }
 }

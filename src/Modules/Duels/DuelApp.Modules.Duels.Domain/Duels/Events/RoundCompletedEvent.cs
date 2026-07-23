@@ -4,10 +4,11 @@ namespace DuelApp.Modules.Duels.Domain.Duels.Events;
 
 public record RoundCompletedEvent(
     Guid DuelId,
-    int RoundNumber,
+    int CompletedRoundNumber,
     Guid PlayerOneId,
     Guid PlayerTwoId,
     bool IsDuelCompleted,
     int? NextRoundNumber = null,
     int? TotalRounds = null,
-    Guid? NextQuestionId = null) : IDomainEvent;
+    Guid? NextQuestionId = null,
+    Guid? NextRoundId = null) : IDomainEvent;
