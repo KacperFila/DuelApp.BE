@@ -162,14 +162,18 @@ public class DuelsService : IDuelsService
         {
             throw new QuestionNotFoundException(currentQuestionId);
         }
+
+        var currentRound = duelInProgress.GetCurrentRound();
         
         return new DuelRoundDto(
-            duelInProgress.GetCurrentRound().Id,
+            currentRound.Id,
             duelInProgress.CurrentRound,
             duelInProgress.TotalRounds,
             currentQuestionId,
             currentQuestionWithAnswers.Title,
-            currentQuestionWithAnswers.Answers.Select(x => new AnswerDto(x.Id, x.Content)).ToList()
+            currentQuestionWithAnswers.Answers.Select(x => new AnswerDto(x.Id, x.Content)).ToList(),
+            currentRound.EndsAt!.Value,
+            duelInProgress.RoundDuration.Seconds
         );
     }
 

@@ -185,7 +185,10 @@ public sealed class Duel : AggregateRoot<Guid>
             NextRoundNumber: nextRound.Number,
             TotalRounds: TotalRounds,
             NextQuestionId: nextRound.QuestionId,
-            NextRoundId: nextRound.Id));
+            NextRoundId: nextRound.Id,
+            NextRoundEndsAtUtc: nextRound.EndsAt!.Value,
+            NextRoundDurationSeconds: RoundDuration.Seconds)
+            );
 
         AddEvent(new RoundStartedEvent(
             Id,
