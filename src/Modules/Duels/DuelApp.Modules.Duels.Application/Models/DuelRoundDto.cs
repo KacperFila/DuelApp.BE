@@ -7,5 +7,7 @@ public record DuelRoundDto
     int TotalRounds,
     Guid? QuestionId,
     string QuestionText,
-    List<AnswerDto> Answers
+    List<AnswerDto> Answers,
+    DateTime EndsAt,
+    int RoundDurationSeconds
 );

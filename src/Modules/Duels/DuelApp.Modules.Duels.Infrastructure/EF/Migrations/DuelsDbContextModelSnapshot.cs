@@ -78,7 +78,7 @@ namespace DuelApp.Modules.Duels.Infrastructure.EF.Migrations
 
             modelBuilder.Entity("DuelApp.Modules.Duels.Domain.Duels.Entities.Duel", b =>
                 {
-                    b.OwnsMany("DuelApp.Modules.Duels.Domain.Duels.ValueObjects.DuelRound", "Rounds", b1 =>
+                    b.OwnsMany("DuelApp.Modules.Duels.Domain.Duels.Entities.Duel.Rounds#DuelApp.Modules.Duels.Domain.Duels.ValueObjects.DuelRound", "Rounds", b1 =>
                         {
                             b1.Property<Guid>("DuelId")
                                 .HasColumnType("uuid");

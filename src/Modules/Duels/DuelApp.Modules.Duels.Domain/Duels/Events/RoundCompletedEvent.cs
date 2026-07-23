@@ -11,4 +11,6 @@ public record RoundCompletedEvent(
     int? NextRoundNumber = null,
     int? TotalRounds = null,
     Guid? NextQuestionId = null,
-    Guid? NextRoundId = null) : IDomainEvent;
+    Guid? NextRoundId = null,
+    DateTime? NextRoundEndsAtUtc = null,
+    int? NextRoundDurationSeconds = 0) : IDomainEvent;

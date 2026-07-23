@@ -54,6 +54,8 @@ public sealed class MatchmakingWorker : BackgroundService
             {
                 _logger.LogError(ex, "Matchmaking worker failed");
             }
+
+            await Task.Delay(1000, stoppingToken);
         }
     }
 
