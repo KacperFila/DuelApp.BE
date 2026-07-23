@@ -1,4 +1,5 @@
 using DuelApp.Modules.Duels.Application.Abstractions;
+using DuelApp.Modules.Duels.Application.Configuration;
 using DuelApp.Modules.Duels.Application.Constants;
 using DuelApp.Modules.Duels.Application.Exceptions;
 using DuelApp.Modules.Duels.Application.Models;
@@ -8,6 +9,7 @@ using DuelApp.Modules.Questions.Shared;
 using DuelApp.Modules.Users.Shared;
 using DuelApp.Shared.Abstractions.RealTime;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 
 namespace DuelApp.Modules.Duels.Application.Services;
 
@@ -19,7 +21,7 @@ public class DuelsService : IDuelsService
     private readonly IQuestionsModuleApi _questionsModuleApi;
     private readonly IUsersModuleApi _usersModuleApi;
     private readonly IDuelsUnitOfWork _unitOfWork;
-    private const int RoundsCount = 5;
+    private readonly DuelConfiguration _duelConfiguration;
 
     public DuelsService(
         IDuelsRepository duelsRepository,
@@ -27,7 +29,8 @@ public class DuelsService : IDuelsService
         IRealTimeNotifier realTimeNotifier,
         IQuestionsModuleApi questionsModuleApi,
         IUsersModuleApi usersModuleApi,
-        IDuelsUnitOfWork unitOfWork)
+        IDuelsUnitOfWork unitOfWork,
+        IOptionsSnapshot<DuelConfiguration> duelConfiguration)
     {
         _duelsRepository = duelsRepository;
         _logger = logger;
@@ -35,6 +38,7 @@ public class DuelsService : IDuelsService
         _questionsModuleApi = questionsModuleApi;
         _usersModuleApi = usersModuleApi;
         _unitOfWork = unitOfWork;
+        _duelConfiguration = duelConfiguration.Value;
     }
 
     public async Task<Guid?> CreateDuelAsync(Guid playerOneId, Guid playerTwoId)
@@ -51,7 +55,7 @@ public class DuelsService : IDuelsService
                     playerTwoId);
             }
 
-            var questions = await _questionsModuleApi.GetQuestionsWithAnswersAsync(RoundsCount);
+            var questions = await _questionsModuleApi.GetQuestionsWithAnswersAsync(_duelConfiguration.DuelRoundCount);
 
             var rounds = new List<DuelRound>();
             foreach (var (question, index) in questions.Select((value, index) => (value, index)))
@@ -59,8 +63,12 @@ public class DuelsService : IDuelsService
                 rounds.Add(DuelRound.Create(index + 1, question.Id));
             }
 
-            var duel = Duel.Create(playerOneId, playerTwoId, rounds, TimeSpan.FromSeconds(10));
-
+            var duel = Duel.Create(
+                playerOneId,
+                playerTwoId,
+                rounds,
+                TimeSpan.FromSeconds(_duelConfiguration.RoundDurationSeconds));
+            
             await _duelsRepository.CreateDuelAsync(duel);
 
             createdDuelId = duel.Id;
@@ -97,7 +105,7 @@ public class DuelsService : IDuelsService
         return duel;
     }
 
-    public async Task SubmitAnswerForUserAsync(Guid? answerId, Guid userId)
+    public async Task SubmitAnswerForUserAsync(Guid answerId, Guid roundId, Guid userId)
     {
         var currentDuelId = await _duelsRepository.GetCurrentDuelIdForPlayerAsync(userId);
         if (currentDuelId is null)
@@ -113,9 +121,22 @@ public class DuelsService : IDuelsService
                 return;
             }
 
-            var isAnswerValid = answerId is not null && await _questionsModuleApi.CheckAnswerAsync(answerId.Value);
+            var currentRound = duelInProgress.GetCurrentRound();
+            if (currentRound.Id != roundId)
+            {
+                return;
+            }
+            
+            var question = await _questionsModuleApi.GetQuestionWithAnswersByIdAsync(currentRound.QuestionId);
+            
+            var answer = question?.Answers.SingleOrDefault(x => x.Id == answerId);
+            if (answer is null)
+            {
+                return;
+            }
 
-            duelInProgress.SubmitAnswer(userId, isAnswerValid);
+            duelInProgress.SubmitAnswer(userId, roundId, answer.IsCorrect);
+            
             await _duelsRepository.UpdateDuelAsync(duelInProgress);
         });
     }
@@ -143,6 +164,7 @@ public class DuelsService : IDuelsService
         }
         
         return new DuelRoundDto(
+            duelInProgress.GetCurrentRound().Id,
             duelInProgress.CurrentRound,
             duelInProgress.TotalRounds,
             currentQuestionId,
@@ -221,13 +243,13 @@ public class DuelsService : IDuelsService
     {
         await _unitOfWork.ExecuteAsync(async () =>
         {
-            var duel = await _duelsRepository.GetByRoundIdAsync(roundId);
+            var duel = await _duelsRepository.GetForUpdateByRoundIdAsync(roundId);
             if (duel is null)
             {
                 return;
             }
             
-            duel.ExpireCurrentRound();
+            duel.ExpireRound(roundId);
             
             await _duelsRepository.UpdateDuelAsync(duel);
         });

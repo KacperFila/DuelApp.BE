@@ -19,9 +19,16 @@ public class DuelsRepository : IDuelsRepository
         return await _dbContext.Duels.FirstOrDefaultAsync(x => x.Id == duelId);
     }
 
-    public async Task<Duel?> GetByRoundIdAsync(Guid roundId)
+    public async Task<Duel?> GetForUpdateByRoundIdAsync(Guid roundId)
     {
-        return await _dbContext.Duels.FirstOrDefaultAsync(x => x.Rounds.Any(x => x.Id == roundId));
+        var duelId = await _dbContext.Duels
+            .Where(x => x.Rounds.Any(round => round.Id == roundId))
+            .Select(x => (Guid?)x.Id)
+            .SingleOrDefaultAsync();
+
+        return duelId is null
+            ? null
+            : await GetForUpdateById(duelId.Value);
     }
 
     public async Task<bool> IsPlayerCurrentlyInDuelAsync(Guid playerId)
@@ -31,7 +38,7 @@ public class DuelsRepository : IDuelsRepository
                     && x.Status == DuelStatus.InProgress);
     }
 
-    public async Task CreateDuelAsync(Duel? duel)
+    public async Task CreateDuelAsync(Duel duel)
     {
         _dbContext.Duels.Add(duel);
         await _dbContext.SaveChangesAsync();
@@ -47,7 +54,7 @@ public class DuelsRepository : IDuelsRepository
     {
         return await _dbContext.Duels
             .Where(x =>
-                x.Status == DuelStatus.InProgress &&
+                x.Status == DuelStatus.Pending || x.Status == DuelStatus.InProgress &&
                 (x.PlayerOneId == playerId ||
                  x.PlayerTwoId == playerId))
             .Select(x => x.Id)

@@ -18,7 +18,6 @@ public sealed class Duel : AggregateRoot<Guid>
     public Guid WinnerId { get; private set; } = Guid.Empty;
     public DateTime StartedAt { get; private set; } = DateTime.MinValue;
     public DateTime FinishedAt { get; private set; } = DateTime.MinValue;
-    
     public TimeSpan RoundDuration { get; private set; } = TimeSpan.Zero;
 
     /// <summary>
@@ -97,11 +96,20 @@ public sealed class Duel : AggregateRoot<Guid>
             round.EndsAt!.Value));
     }
     
-    public void ExpireCurrentRound()
+    public void ExpireRound(Guid roundId)
     {
-        EnsureInProgress();
+        if (Status != DuelStatus.InProgress)
+        {
+            return;
+        }
 
         var round = GetCurrentRound();
+
+        if (round.Id != roundId || round.Status != DuelRoundStatus.InProgress)
+        {
+            return;
+        }
+
         round.Expire();
 
         if (IsLastRound())
@@ -111,34 +119,24 @@ public sealed class Duel : AggregateRoot<Guid>
             
             return;
         }
-        
-        MoveToNextRound();
-        var nextRound = GetCurrentRound();
-        
-        AddEvent(new RoundCompletedEvent(
-            Id,
-            round.Number - 1,
-            PlayerOneId,
-            PlayerTwoId,
-            IsDuelCompleted: false,
-            NextRoundNumber: round.Number,
-            TotalRounds: Rounds.Count,
-            NextQuestionId: nextRound.QuestionId));
-        
-        nextRound.Start(duration: TimeSpan.FromSeconds(10));
 
-        AddEvent(new RoundStartedEvent(
-            Id,
-            nextRound.Id,
-            nextRound.EndsAt!.Value));
+        StartNextRound();
     }
     
-    public void SubmitAnswer(Guid playerId, bool isCorrect)
+    public void SubmitAnswer(Guid playerId, Guid roundId, bool isCorrect)
     {
-        EnsureInProgress();
+        if (!IsInProgress())
+        {
+            return;
+        }
 
         var player = ResolvePlayer(playerId);
         var round = GetCurrentRound();
+
+        if (round.Id != roundId || !round.IsInProgress())
+        {
+            return;
+        }
 
         round.SubmitAnswer(player, isCorrect);
 
@@ -151,17 +149,7 @@ public sealed class Duel : AggregateRoot<Guid>
                 return;
             }
 
-            MoveToNextRound();
-            var nextRound = GetCurrentRound();
-            AddEvent(new RoundCompletedEvent(
-                Id,
-                round.Number,
-                PlayerOneId,
-                PlayerTwoId,
-                IsDuelCompleted: false,
-                NextRoundNumber: nextRound.Number,
-                TotalRounds: TotalRounds,
-                NextQuestionId: nextRound.QuestionId));
+            StartNextRound();
         }
     }
     
@@ -170,17 +158,39 @@ public sealed class Duel : AggregateRoot<Guid>
         return Rounds.Single(x => x.Number == CurrentRound);
     }
     
-    private void EnsureInProgress()
+    private bool IsInProgress()
     {
-        if (Status != DuelStatus.InProgress)
-        {
-            throw new InvalidOperationException("Duel is not in progress.");
-        }
+        return Status == DuelStatus.InProgress;
     }
     
     private void MoveToNextRound()
     {
         CurrentRound++;
+    }
+
+    private void StartNextRound()
+    {
+        var completedRound = GetCurrentRound();
+        MoveToNextRound();
+        var nextRound = GetCurrentRound();
+
+        nextRound.Start(RoundDuration);
+
+        AddEvent(new RoundCompletedEvent(
+            Id,
+            CompletedRoundNumber: completedRound.Number,
+            PlayerOneId,
+            PlayerTwoId,
+            IsDuelCompleted: false,
+            NextRoundNumber: nextRound.Number,
+            TotalRounds: TotalRounds,
+            NextQuestionId: nextRound.QuestionId,
+            NextRoundId: nextRound.Id));
+
+        AddEvent(new RoundStartedEvent(
+            Id,
+            nextRound.Id,
+            nextRound.EndsAt!.Value));
     }
     
     private void Complete()

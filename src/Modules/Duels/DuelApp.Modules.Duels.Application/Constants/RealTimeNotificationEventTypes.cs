@@ -6,4 +6,5 @@ public static class RealTimeNotificationEventTypes
     public const string DuelStarted = nameof(DuelStarted);
     public const string RoundCompleted =  nameof(RoundCompleted);
     public const string DuelCompleted = nameof(DuelCompleted);
+    public const string OpponentFound = nameof(OpponentFound);
 }

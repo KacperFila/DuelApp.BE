@@ -4,17 +4,17 @@ namespace DuelApp.Modules.Duels.Domain.Duels.ValueObjects;
 
 public sealed class DuelRound
 {
-    public Guid Id { get; set; }
+    public Guid Id { get; }
     public int Number { get; }
-    public Guid QuestionId { get; set; }
-    public DateTime? StartedAt { get; set; }
-    public DateTime? EndsAt { get; set; }
-    public DateTime? FinishedAt { get; set; }
-    public bool HasPlayerOneSubmittedAnswer { get; set; }
-    public bool HasPlayerTwoSubmittedAnswer { get; set; }
-    public bool HasPlayerOneAnsweredCorrectly { get; set; }
-    public bool HasPlayerTwoAnsweredCorrectly { get; set; }
-    public DuelRoundStatus Status { get; set; }
+    public Guid QuestionId { get; }
+    public DateTime? StartedAt { get; private set; }
+    public DateTime? EndsAt { get; private set; }
+    public DateTime? FinishedAt { get; private set; }
+    public bool HasPlayerOneSubmittedAnswer { get; private set; }
+    public bool HasPlayerTwoSubmittedAnswer { get; private set; }
+    public bool HasPlayerOneAnsweredCorrectly { get; private set; }
+    public bool HasPlayerTwoAnsweredCorrectly { get; private set; }
+    public DuelRoundStatus Status { get; private set; }
 
     public DuelRound()
     {
@@ -72,6 +72,11 @@ public sealed class DuelRound
         return Status == DuelRoundStatus.Completed;
     }
     
+    public bool IsInProgress()
+    {
+        return Status == DuelRoundStatus.InProgress;
+    }
+    
     public void SubmitAnswer(DuelPlayer player, bool isCorrect)
     {
         if (IsCompleted())
@@ -109,8 +114,8 @@ public sealed class DuelRound
     {
         return player switch
         {
-            DuelPlayer.Player1 => HasPlayerOneSubmittedAnswer is true,
-            DuelPlayer.Player2 => HasPlayerTwoSubmittedAnswer is true,
+            DuelPlayer.Player1 => HasPlayerOneSubmittedAnswer,
+            DuelPlayer.Player2 => HasPlayerTwoSubmittedAnswer,
             _ => throw new ArgumentOutOfRangeException(nameof(player), player, null)
         };
     }

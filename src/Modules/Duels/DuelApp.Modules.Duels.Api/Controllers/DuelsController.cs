@@ -27,7 +27,10 @@ public class DuelsController : ControllerBase
     {
         var userId = _context.Identity.KeycloakUserId;
         
-        await _duelsService.SubmitAnswerForUserAsync(request.AnswerId, Guid.Parse(userId));
+        await _duelsService.SubmitAnswerForUserAsync(
+            request.AnswerId,
+            request.RoundId,
+            Guid.Parse(userId));
 
         return Ok();
     }
