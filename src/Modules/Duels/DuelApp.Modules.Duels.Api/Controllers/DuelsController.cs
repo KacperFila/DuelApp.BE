@@ -22,7 +22,6 @@ public class DuelsController : ControllerBase
 
     [Authorize]
     [HttpPost("answer")]
-    
     public async Task<IActionResult> SubmitAnswer([FromBody] SubmitAnswerRequest request)
     {
         var userId = _context.Identity.KeycloakUserId;
