@@ -92,18 +92,6 @@ public class DuelsService : IDuelsService
             await _duelsRepository.UpdateDuelAsync(duel);
         });
     }
-    
-    public async Task<Duel?> GetDuelByIdAsync(Guid duelId)
-    {
-        var duel = await _duelsRepository.GetByIdAsync(duelId);
-        if (duel is null)
-        {
-            _logger.LogWarning("No duel with id {DuelId} found", duelId);
-            return null;
-        }
-        
-        return duel;
-    }
 
     public async Task SubmitAnswerForUserAsync(Guid answerId, Guid roundId, Guid userId)
     {
@@ -198,7 +186,8 @@ public class DuelsService : IDuelsService
 
             var duelParticipants = new List<Guid> { duelInProgress.PlayerOneId, duelInProgress.PlayerTwoId };
             await _realTimeNotifier.NotifyMultipleUsersAsync(duelParticipants,
-                RealTimeNotificationEventTypes.DuelAbandoned);
+                RealTimeNotificationEventTypes.DuelAbandoned,
+                new DuelAbandonedDto(userId));
         });
     }
 
@@ -261,6 +250,11 @@ public class DuelsService : IDuelsService
             
             await _duelsRepository.UpdateDuelAsync(duel);
         });
+    }
+
+    public async Task<bool> CheckIfInActiveDuelByUserId(Guid userId)
+    {
+        return await _duelsRepository.IsPlayerCurrentlyInDuelAsync(userId);
     }
 
     private async Task<bool> AnyPlayerCurrentlyInDuel(Guid playerOneId, Guid playerTwoId)

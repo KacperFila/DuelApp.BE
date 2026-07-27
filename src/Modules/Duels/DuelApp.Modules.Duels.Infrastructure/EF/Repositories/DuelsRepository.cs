@@ -34,8 +34,11 @@ public class DuelsRepository : IDuelsRepository
     public async Task<bool> IsPlayerCurrentlyInDuelAsync(Guid playerId)
     {
         return await _dbContext.Duels
-            .AnyAsync(x => x.Id == playerId 
-                    && x.Status == DuelStatus.InProgress);
+            .AnyAsync(x =>
+                (x.PlayerOneId == playerId ||
+                 x.PlayerTwoId == playerId) &&
+                (x.Status == DuelStatus.InProgress ||
+                 x.Status == DuelStatus.Pending));
     }
 
     public async Task CreateDuelAsync(Duel duel)

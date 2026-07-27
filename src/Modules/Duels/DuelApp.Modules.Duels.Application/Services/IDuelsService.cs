@@ -11,4 +11,5 @@ public interface IDuelsService
     public Task AbandonDuelForUserAsync(Guid userId);
     public Task<DuelPreview?> GetCurrentDuelPreviewAsync(Guid userId);
     public Task ExpireCurrentRoundAsync(Guid roundId);
+    public Task<bool> CheckIfInActiveDuelByUserId(Guid userId);
 }

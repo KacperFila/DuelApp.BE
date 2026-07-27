@@ -67,4 +67,14 @@ public class DuelsController : ControllerBase
             ? Ok(result)
             : NotFound();
     }
+    
+    [Authorize]
+    [HttpGet("current")]
+    public async Task<IActionResult> CheckIfUserInActiveDuel()
+    {
+        var userId = _context.Identity.KeycloakUserId;
+        var result = await _duelsService.CheckIfInActiveDuelByUserId(Guid.Parse(userId));
+
+        return Ok(result);
+    }
 }
