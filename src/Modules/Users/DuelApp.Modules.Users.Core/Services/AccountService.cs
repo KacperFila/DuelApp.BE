@@ -1,9 +1,9 @@
 using System;
+using System.Linq;
 using System.Threading.Tasks;
 using DuelApp.Modules.Users.Core.Constants;
 using DuelApp.Modules.Users.Core.Repositories;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Http.HttpResults;
 
 namespace DuelApp.Modules.Users.Core.Services;
 
