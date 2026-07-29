@@ -65,6 +65,9 @@ namespace DuelApp.Shared.Infrastructure
                         .GetSection("Cors")
                         .Get<CorsOptions>();
 
+                    Console.WriteLine(
+                        $"CORS: {string.Join(",", corsOptions?.AllowedOrigins ?? [])}"
+                    );
                     policy
                         .WithOrigins(corsOptions!.AllowedOrigins)
                         .AllowAnyHeader()
