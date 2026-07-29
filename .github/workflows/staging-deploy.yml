@@ -46,7 +46,7 @@ jobs:
 
       - name: Set image output
         id: set-image
-        run: echo "image=${{ env.IMAGE }}" >> $GITHUB_OUTPUT
+        run: echo "image=${{ env.ACR_IMAGE }}" >> $GITHUB_OUTPUT
 
   migrate:
     runs-on: ubuntu-latest
