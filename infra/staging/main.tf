@@ -334,15 +334,17 @@ resource "azurerm_service_plan" "duelapp_plan" {
 # API App Service
 # =====================================================
 resource "azurerm_linux_web_app" "duelapp_be" {
-  name                = "staging-duelapp-be"
-  location            = azurerm_resource_group.rg_duelapp_be_staging.location
-  resource_group_name = azurerm_resource_group.rg_duelapp_be_staging.name
-  service_plan_id     = azurerm_service_plan.duelapp_plan.id
+  name                            = "staging-duelapp-be"
+  location                        = azurerm_resource_group.rg_duelapp_be_staging.location
+  resource_group_name             = azurerm_resource_group.rg_duelapp_be_staging.name
+  service_plan_id                 = azurerm_service_plan.duelapp_plan.id
+  key_vault_reference_identity_id = azurerm_user_assigned_identity.duelapp_uami.id
 
   identity {
     type         = "UserAssigned"
     identity_ids = [azurerm_user_assigned_identity.duelapp_uami.id]
   }
+
 
   site_config {
     container_registry_use_managed_identity       = true
