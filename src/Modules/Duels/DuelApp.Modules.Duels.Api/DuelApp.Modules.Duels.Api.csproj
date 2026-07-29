@@ -20,4 +20,8 @@
       </None>
     </ItemGroup>
 
+    <ItemGroup>
+      <PackageReference Include="Swashbuckle.AspNetCore.Annotations" Version="10.2.3" />
+    </ItemGroup>
+
 </Project>
