@@ -4,8 +4,8 @@ namespace DuelApp.Modules.Users.Core.Constants;
 
 public static class UserProfileConstants
 {
-    public static readonly string DefaultAvatarKey = "default.png";
-    public static readonly string ProfilePicturesContainerName = "profile-pictures";
-    public static readonly List<string> AllowedFileContentTypes = ["image/png"];
-    public static readonly int MaxFileSizeBytes = 2 * 1024 * 1024; // 2MB
+    public const string DefaultAvatarKey = "default.png";
+    public const string ProfilePicturesContainerName = "profile-pictures";
+    public static readonly IReadOnlyList<string> AllowedFileContentTypes = ["image/png"];
+    public const int MaxFileSizeBytes = 2 * 1024 * 1024; // 2MB
 }
