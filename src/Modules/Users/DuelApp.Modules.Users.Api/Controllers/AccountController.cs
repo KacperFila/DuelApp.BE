@@ -49,7 +49,7 @@ internal class AccountController : ControllerBase
     [HttpGet("me/avatar")]
     [Authorize]
     [SwaggerOperation(
-        Summary = "Get current user's avatar",
+        Summary = "Get current user's avatar URL",
         Description = "Returns the avatar URL of the currently authenticated user."
     )]
     [SwaggerResponse(StatusCodes.Status200OK, "Avatar URL returned successfully")]
