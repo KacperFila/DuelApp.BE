@@ -21,13 +21,18 @@ public class AccountService : IAccountService
     }
 
     /// <summary>
-    /// Uploads a new avatar for the specified user and updates their profile image reference.
+    /// Uploads a new avatar image for a user, stores it in blob storage,
+    /// and updates the user's profile image reference.
     /// </summary>
-    /// <param name="userId">The unique identifier of the user.</param>
-    /// <param name="file">The image file to upload as the avatar.</param>
+    /// <param name="userId">
+    /// The unique identifier of the user whose avatar is being uploaded.
+    /// </param>
+    /// <param name="file">
+    /// The image file to upload as the user's avatar.
+    /// </param>
     /// <returns>
-    /// A URL pointing to the uploaded avatar image if successful;
-    /// otherwise <c>null</c> if the user does not exist.
+    /// The URL of the uploaded avatar image if the upload succeeds;
+    /// otherwise, <c>null</c> if the file is invalid or the user does not exist.
     /// </returns>
     public async Task<string?> UploadAvatar(Guid userId, IFormFile file)
     {
@@ -55,11 +60,30 @@ public class AccountService : IAccountService
         return _avatarStorageService.GetBlobUrl(blobName);
     }
 
+    /// <summary>
+    /// Retrieves the avatar URL for the specified user.
+    /// </summary>
+    /// <param name="userId">
+    /// The unique identifier of the user whose avatar URL should be retrieved.
+    /// </param>
+    /// <returns>
+    /// A URL pointing to the user's avatar image.
+    /// </returns>
     public string GetUserAvatar(Guid userId)
     {
         return _avatarStorageService.GetAvatarUrl(userId);
     }
 
+    /// <summary>
+    /// Determines whether the uploaded file meets the allowed avatar requirements.
+    /// </summary>
+    /// <param name="file">
+    /// The uploaded file to validate.
+    /// </param>
+    /// <returns>
+    /// <c>true</c> if the file content type and size are allowed;
+    /// otherwise, <c>false</c>.
+    /// </returns>
     private bool IsFileAllowed(IFormFile file)
     {
         var isValidContentType = UserProfileConstants.AllowedFileContentTypes.Contains(file.ContentType);
