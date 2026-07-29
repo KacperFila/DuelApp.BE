@@ -1,4 +1,4 @@
-name: Build, Migrate, and Deploy to Azure Container Apps
+name: Build, Migrate, and Deploy
 
 on:
   push:
