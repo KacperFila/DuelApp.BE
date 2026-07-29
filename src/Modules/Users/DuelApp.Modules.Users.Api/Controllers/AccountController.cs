@@ -6,6 +6,7 @@ using DuelApp.Shared.Abstractions.Contexts;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Swashbuckle.AspNetCore.Annotations;
 
 namespace DuelApp.Modules.Users.Api.Controllers;
 
@@ -16,6 +17,7 @@ internal class AccountController : ControllerBase
     private readonly IUsersModuleApi _usersModuleApi;
     private readonly IContextAccessor _contextAccessor;
     private readonly IAccountService _accountService;
+
     public AccountController(
         IUsersModuleApi usersModuleApi,
         IContextAccessor contextAccessor, 
@@ -28,6 +30,12 @@ internal class AccountController : ControllerBase
 
     [HttpGet("me")]
     [Authorize]
+    [SwaggerOperation(
+        Summary = "Get current user profile",
+        Description = "Returns the profile information of the currently authenticated user."
+    )]
+    [SwaggerResponse(StatusCodes.Status200OK, "User profile returned successfully")]
+    [SwaggerResponse(StatusCodes.Status401Unauthorized, "User is not authenticated")]
     public async Task<IActionResult> GetMe()
     {
         var context = _contextAccessor.Current;
@@ -40,6 +48,12 @@ internal class AccountController : ControllerBase
     
     [HttpGet("me/avatar")]
     [Authorize]
+    [SwaggerOperation(
+        Summary = "Get current user's avatar",
+        Description = "Returns the avatar URL of the currently authenticated user."
+    )]
+    [SwaggerResponse(StatusCodes.Status200OK, "Avatar URL returned successfully")]
+    [SwaggerResponse(StatusCodes.Status401Unauthorized, "User is not authenticated")]
     public IActionResult GetMyAvatar()
     {
         var context = _contextAccessor.Current;
@@ -51,6 +65,13 @@ internal class AccountController : ControllerBase
     
     [HttpGet("{userId:guid}/avatar")]
     [Authorize]
+    [SwaggerOperation(
+        Summary = "Get user's avatar",
+        Description = "Returns the avatar URL for a specific user."
+    )]
+    [SwaggerResponse(StatusCodes.Status200OK, "Avatar URL returned successfully")]
+    [SwaggerResponse(StatusCodes.Status401Unauthorized, "User is not authenticated")]
+    [SwaggerResponse(StatusCodes.Status404NotFound, "User avatar not found")]
     public IActionResult GetUserAvatar(Guid userId)
     {
         var uri = _accountService.GetUserAvatar(userId);
@@ -59,6 +80,15 @@ internal class AccountController : ControllerBase
     }
     
     [HttpPost("me/avatar")]
+    [Authorize]
+    [Consumes("multipart/form-data")]
+    [SwaggerOperation(
+        Summary = "Upload current user's avatar",
+        Description = "Uploads a new avatar image for the currently authenticated user."
+    )]
+    [SwaggerResponse(StatusCodes.Status200OK, "Avatar uploaded successfully")]
+    [SwaggerResponse(StatusCodes.Status400BadRequest, "Invalid avatar file")]
+    [SwaggerResponse(StatusCodes.Status401Unauthorized, "User is not authenticated")]
     public async Task<IActionResult> Upload(
         IFormFile file,
         IContextAccessor contextAccessor,

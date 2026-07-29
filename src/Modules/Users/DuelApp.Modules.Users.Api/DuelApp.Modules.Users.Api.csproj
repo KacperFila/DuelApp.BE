@@ -22,4 +22,7 @@
     <ProjectReference Include="..\DuelApp.Modules.Users.Core\DuelApp.Modules.Users.Core.csproj" />
     <ProjectReference Include="..\DuelApp.Modules.Users.Shared\DuelApp.Modules.Users.Shared.csproj" />
   </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Swashbuckle.AspNetCore.Annotations" Version="10.2.3" />
+  </ItemGroup>
 </Project>
