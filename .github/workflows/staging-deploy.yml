@@ -31,12 +31,18 @@ jobs:
 
       - name: Build Docker image
         run: |
-          IMAGE_NAME=duelapp:${{ github.sha }}
-          docker build -t $IMAGE_NAME -f Dockerfile .
-          echo "IMAGE=$IMAGE_NAME" >> $GITHUB_ENV
+          IMAGE=duelapp:${{ github.sha }}
+          ACR_IMAGE=${{ vars.ACR_LOGIN_SERVER }}/$IMAGE
+
+          docker build -t $IMAGE -f Dockerfile .
+
+          docker tag $IMAGE $ACR_IMAGE
+
+          echo "IMAGE=$IMAGE" >> $GITHUB_ENV
+          echo "ACR_IMAGE=$ACR_IMAGE" >> $GITHUB_ENV
 
       - name: Push Docker image
-        run: docker push ${{ env.IMAGE }}
+        run: docker push ${{ env.ACR_IMAGE }}
 
       - name: Set image output
         id: set-image
