@@ -41,6 +41,16 @@ public class DuelsService : IDuelsService
         _duelConfiguration = duelConfiguration.Value;
     }
 
+    /// <summary>
+    /// Creates a new duel between two players.
+    /// Creates duel rounds using questions fetched from the Questions module
+    /// and persists the newly created duel.
+    /// </summary>
+    /// <param name="playerOneId">Identifier of the first player.</param>
+    /// <param name="playerTwoId">Identifier of the second player.</param>
+    /// <returns>
+    /// Identifier of the created duel, or null when the duel could not be created.
+    /// </returns>
     public async Task<Guid?> CreateDuelAsync(Guid playerOneId, Guid playerTwoId)
     {
         var createdDuelId = (Guid?)null;
