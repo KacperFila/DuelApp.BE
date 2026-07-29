@@ -4,8 +4,8 @@ on:
   push:
     branches: ["main"]
     paths-ignore:
-      - 'infra/**'
-      - '.github/workflows/**'
+      - "infra/**"
+      - ".github/workflows/**"
 
 permissions:
   id-token: write
@@ -31,7 +31,7 @@ jobs:
 
       - name: Build Docker image
         run: |
-          IMAGE_NAME=${{ vars.ACR_LOGIN_SERVER }}/duelapp:${{ github.sha }}
+          IMAGE_NAME=duelapp:${{ github.sha }}
           docker build -t $IMAGE_NAME -f Dockerfile .
           echo "IMAGE=$IMAGE_NAME" >> $GITHUB_ENV
 
