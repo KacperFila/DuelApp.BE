@@ -351,7 +351,8 @@ resource "azurerm_linux_web_app" "duelapp_be" {
     container_registry_managed_identity_client_id = azurerm_user_assigned_identity.duelapp_uami.client_id
 
     application_stack {
-      docker_image_name = var.image_tag
+      docker_image_name   = "duelapp:${var.image_tag}"
+      docker_registry_url = "https://${azurerm_container_registry.duelapp_acr.login_server}"
     }
 
     always_on = true
