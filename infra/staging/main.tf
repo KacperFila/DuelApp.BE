@@ -319,124 +319,68 @@ resource "azurerm_role_assignment" "keycloak_acr_pull" {
 }
 
 # =====================================================
-# Container App
+# API Service Plan
 # =====================================================
-resource "azurerm_container_app" "duelapp_be" {
-  name                         = "staging-duelapp-be"
-  resource_group_name          = azurerm_resource_group.rg_duelapp_be_staging.name
-  container_app_environment_id = azurerm_container_app_environment.duelapp_env.id
-  revision_mode                = "Single"
+resource "azurerm_service_plan" "duelapp_plan" {
+  name                = "staging-duelapp-plan"
+  location            = azurerm_resource_group.rg_duelapp_be_staging.location
+  resource_group_name = azurerm_resource_group.rg_duelapp_be_staging.name
+
+  os_type  = "Linux"
+  sku_name = "B1"
+}
+
+resource "azurerm_linux_web_app" "duelapp_be" {
+  name                = "staging-duelapp-be"
+  location            = azurerm_resource_group.rg_duelapp_be_staging.location
+  resource_group_name = azurerm_resource_group.rg_duelapp_be_staging.name
+  service_plan_id     = azurerm_service_plan.duelapp_plan.id
 
   identity {
     type         = "UserAssigned"
     identity_ids = [azurerm_user_assigned_identity.duelapp_uami.id]
   }
 
-  registry {
-    server   = azurerm_container_registry.duelapp_acr.login_server
-    identity = azurerm_user_assigned_identity.duelapp_uami.id
-  }
-
-  ingress {
-    external_enabled = true
-    target_port      = 8080
-    transport        = "auto"
-
-    traffic_weight {
-      latest_revision = true
-      percentage      = 100
+  site_config {
+    application_stack {
+      docker_image_name   = var.image_tag
+      docker_registry_url = "https://${azurerm_container_registry.duelapp_acr.login_server}"
     }
+
+    always_on = true
   }
 
-  secret {
-    name                = "postgres-connection-string"
-    key_vault_secret_id = azurerm_key_vault_secret.postgres_connection_string.id
-    identity            = azurerm_user_assigned_identity.duelapp_uami.id
+  app_settings = {
+    WEBSITES_PORT = "8080"
+
+    ASPNETCORE_ENVIRONMENT = "Staging"
+
+    KEYVAULT_NAME = azurerm_key_vault.duelapp_kv.name
+
+    Cors__AllowedOrigins__0 = "https://staging-duelapp-fe98179.azurewebsites.net"
+
+    Keycloak__Authority            = "https://appkeycloak.azurewebsites.net/realms/duelapp-realm"
+    Keycloak__ClientId             = "duelapp-be-keycloak-client"
+    Keycloak__Audience             = "account"
+    Keycloak__Issuer               = "https://appkeycloak.azurewebsites.net/realms/duelapp-realm"
+    Keycloak__MetadataAddress      = "https://appkeycloak.azurewebsites.net/realms/duelapp-realm/.well-known/openid-configuration"
+    Keycloak__RequireHttpsMetadata = "true"
+
+    Postgres__ConnectionString = "@Microsoft.KeyVault(SecretUri=${azurerm_key_vault_secret.postgres_connection_string.versionless_id})"
+
+    Azure__BlobConnectionString = "@Microsoft.KeyVault(SecretUri=${azurerm_key_vault_secret.profile_pictures_connection_string.versionless_id})"
   }
-
-  secret {
-    name                = "profile-pictures-connection-string"
-    key_vault_secret_id = azurerm_key_vault_secret.profile_pictures_connection_string.id
-    identity            = azurerm_user_assigned_identity.duelapp_uami.id
-  }
-
-  template {
-    min_replicas = 1
-    max_replicas = 1
-
-    container {
-      name   = "staging-duelapp-be"
-      image  = var.image_tag
-      cpu    = 0.25
-      memory = "0.5Gi"
-
-      env {
-        name        = "Postgres__ConnectionString"
-        secret_name = "postgres-connection-string"
-      }
-
-      env {
-        name        = "Azure__BlobConnectionString"
-        secret_name = "profile-pictures-connection-string"
-      }
-
-      env {
-        name  = "KEYVAULT_NAME"
-        value = azurerm_key_vault.duelapp_kv.name
-      }
-
-      env {
-        name  = "ASPNETCORE_ENVIRONMENT"
-        value = "Staging"
-      }
-
-      env {
-        name  = "Cors__AllowedOrigins__0"
-        value = "https://staging-duelapp-fe98179.azurewebsites.net"
-      }
-
-      env {
-        name  = "Keycloak__Authority"
-        value = "https://appkeycloak.azurewebsites.net/realms/duelapp-realm"
-      }
-
-      env {
-        name  = "Keycloak__ClientId"
-        value = "duelapp-be-keycloak-client"
-      }
-
-      env {
-        name  = "Keycloak__Audience"
-        value = "account"
-      }
-
-      env {
-        name  = "Keycloak__Issuer"
-        value = "https://appkeycloak.azurewebsites.net/realms/duelapp-realm"
-      }
-
-      env {
-        name  = "Keycloak__MetadataAddress"
-        value = "https://appkeycloak.azurewebsites.net/realms/duelapp-realm/.well-known/openid-configuration"
-      }
-
-      env {
-        name  = "Keycloak__RequireHttpsMetadata"
-        value = "true"
-      }
-    }
-  }
-
-  depends_on = [
-    azurerm_role_assignment.duelapp_uami_acr_pull,
-    azurerm_role_assignment.duelapp_uami_kv_access
-  ]
 
   tags = {
     environment = "staging"
     project     = "duelapp"
     component   = "backend"
   }
+
+  depends_on = [
+    azurerm_role_assignment.duelapp_uami_acr_pull,
+    azurerm_role_assignment.duelapp_uami_kv_access
+  ]
 }
 
 resource "azurerm_storage_account" "profile_pictures" {
