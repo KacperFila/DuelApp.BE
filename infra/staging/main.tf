@@ -330,6 +330,9 @@ resource "azurerm_service_plan" "duelapp_plan" {
   sku_name = "B1"
 }
 
+# =====================================================
+# API App Service
+# =====================================================
 resource "azurerm_linux_web_app" "duelapp_be" {
   name                = "staging-duelapp-be"
   location            = azurerm_resource_group.rg_duelapp_be_staging.location
@@ -342,6 +345,9 @@ resource "azurerm_linux_web_app" "duelapp_be" {
   }
 
   site_config {
+    container_registry_use_managed_identity       = true
+    container_registry_managed_identity_client_id = azurerm_user_assigned_identity.duelapp_uami.client_id
+
     application_stack {
       docker_image_name   = var.image_tag
       docker_registry_url = "https://${azurerm_container_registry.duelapp_acr.login_server}"
