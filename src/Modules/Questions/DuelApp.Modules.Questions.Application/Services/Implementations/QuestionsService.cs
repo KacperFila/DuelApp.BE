@@ -75,8 +75,8 @@ public class QuestionsService : IQuestionsService
             });
         }
 
-        await _answersRepository.BulkUploadAsync(answers, ct);
         await _questionsRepository.BulkUploadAsync(questions, ct);
+        await _answersRepository.BulkUploadAsync(answers, ct);
 
         _logger.LogInformation("Uploading questions finished at {DateTime}", _clock.CurrentDate());
     }
