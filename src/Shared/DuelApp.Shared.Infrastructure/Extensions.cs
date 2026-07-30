@@ -27,7 +27,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc.ApplicationParts;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.OpenApi.Models;
+using Microsoft.OpenApi;
 using CorsOptions = DuelApp.Shared.Infrastructure.Cors.CorsOptions;
 
 [assembly: InternalsVisibleTo("DuelApp.Bootstrapper")]
@@ -95,18 +95,11 @@ namespace DuelApp.Shared.Infrastructure
                     Description = "Enter JWT token"
                 });
 
-                swagger.AddSecurityRequirement(new OpenApiSecurityRequirement
+                swagger.AddSecurityRequirement(document => new OpenApiSecurityRequirement
                 {
                     {
-                        new OpenApiSecurityScheme
-                        {
-                            Reference = new OpenApiReference
-                            {
-                                Type = ReferenceType.SecurityScheme,
-                                Id = "Bearer"
-                            }
-                        },
-                        Array.Empty<string>()
+                        new OpenApiSecuritySchemeReference("Bearer", document),
+                        []
                     }
                 });
             });
