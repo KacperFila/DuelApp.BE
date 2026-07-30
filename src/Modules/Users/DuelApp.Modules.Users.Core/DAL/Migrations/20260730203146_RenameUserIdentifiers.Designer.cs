@@ -12,8 +12,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace DuelApp.Modules.Users.Core.DAL.Migrations
 {
     [DbContext(typeof(UsersDbContext))]
-    [Migration("20260730201559_ConvertUserIdToUuid")]
-    partial class ConvertUserIdToUuid
+    [Migration("20260730203146_RenameUserIdentifiers")]
+    partial class RenameUserIdentifiers
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
