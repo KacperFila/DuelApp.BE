@@ -95,18 +95,11 @@ jobs:
           tenant-id: ${{ secrets.AZURE_TENANT_ID }}
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
-      - name: Deploy to App Service
-        run: |
-          az webapp config container set \
-            --name staging-duelapp-be \
-            --resource-group rg-duelapp-be-staging \
-            --docker-custom-image-name "${{ vars.ACR_LOGIN_SERVER }}/duelapp:${{ needs.build.outputs.image }}"
-
-      - name: Restart App Service
-        run: |
-          az webapp restart \
-            --name staging-duelapp-be \
-            --resource-group rg-duelapp-be-staging
+      - name: Deploy container image to App Service
+        uses: azure/webapps-deploy@v3
+        with:
+          app-name: staging-duelapp-be
+          images: ${{ vars.ACR_LOGIN_SERVER }}/duelapp:${{ needs.build.outputs.image }}
 
       - name: Update staging.tfvars with new image
         working-directory: infra/staging
