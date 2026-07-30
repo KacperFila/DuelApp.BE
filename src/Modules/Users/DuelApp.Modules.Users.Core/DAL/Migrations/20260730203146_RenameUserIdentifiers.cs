@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore.Migrations;
+﻿using System;
+using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
@@ -10,13 +11,8 @@ namespace DuelApp.Modules.Users.Core.DAL.Migrations
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropIndex(
-                name: "IX_Users_Id",
-                schema: "users",
-                table: "Users");
-
-            migrationBuilder.DropColumn(
-                name: "KeycloakUserId",
+            migrationBuilder.DropPrimaryKey(
+                name: "PK_Users",
                 schema: "users",
                 table: "Users");
 
@@ -26,12 +22,26 @@ namespace DuelApp.Modules.Users.Core.DAL.Migrations
                 table: "Users",
                 newName: "ProfileId");
 
-            migrationBuilder.AddColumn<string>(
+            migrationBuilder.RenameColumn(
+                name: "KeycloakUserId",
+                schema: "users",
+                table: "Users",
+                newName: "UserId");
+
+            migrationBuilder.AlterColumn<Guid>(
                 name: "UserId",
                 schema: "users",
                 table: "Users",
-                type: "text",
-                nullable: true);
+                type: "uuid using \"UserId\"::uuid",
+                nullable: false,
+                oldClrType: typeof(string),
+                oldType: "text");
+
+            migrationBuilder.AddPrimaryKey(
+                name: "PK_Users",
+                schema: "users",
+                table: "Users",
+                column: "ProfileId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Users_UserId",
@@ -44,15 +54,30 @@ namespace DuelApp.Modules.Users.Core.DAL.Migrations
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.DropPrimaryKey(
+                name: "PK_Users",
+                schema: "users",
+                table: "Users");
+
             migrationBuilder.DropIndex(
                 name: "IX_Users_UserId",
                 schema: "users",
                 table: "Users");
 
-            migrationBuilder.DropColumn(
+            migrationBuilder.AlterColumn<string>(
                 name: "UserId",
                 schema: "users",
-                table: "Users");
+                table: "Users",
+                type: "text",
+                nullable: false,
+                oldClrType: typeof(Guid),
+                oldType: "uuid");
+
+            migrationBuilder.RenameColumn(
+                name: "UserId",
+                schema: "users",
+                table: "Users",
+                newName: "KeycloakUserId");
 
             migrationBuilder.RenameColumn(
                 name: "ProfileId",
@@ -60,20 +85,11 @@ namespace DuelApp.Modules.Users.Core.DAL.Migrations
                 table: "Users",
                 newName: "Id");
 
-            migrationBuilder.AddColumn<string>(
-                name: "KeycloakUserId",
+            migrationBuilder.AddPrimaryKey(
+                name: "PK_Users",
                 schema: "users",
                 table: "Users",
-                type: "text",
-                nullable: false,
-                defaultValue: "");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Users_Id",
-                schema: "users",
-                table: "Users",
-                column: "Id",
-                unique: true);
+                column: "Id");
         }
     }
 }
