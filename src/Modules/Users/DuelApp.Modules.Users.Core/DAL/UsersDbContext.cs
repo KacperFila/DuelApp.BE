@@ -15,7 +15,7 @@ namespace DuelApp.Modules.Users.Core.DAL
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            modelBuilder.HasDefaultSchema("users");
+            modelBuilder.HasDefaultSchema("Users");
             modelBuilder.ApplyConfigurationsFromAssembly(GetType().Assembly);
         }
     }
