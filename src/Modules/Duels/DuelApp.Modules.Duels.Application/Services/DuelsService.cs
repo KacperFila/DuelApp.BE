@@ -87,6 +87,10 @@ public class DuelsService : IDuelsService
         return createdDuelId;
     }
 
+    /// <summary>
+    /// Starts a pending duel and schedules expiration of its first round.
+    /// </summary>
+    /// <param name="duelId">Identifier of the duel to start.</param>
     public async Task StartDuelAsync(Guid duelId)
     {
         await _unitOfWork.ExecuteAsync(async () =>
@@ -103,6 +107,12 @@ public class DuelsService : IDuelsService
         });
     }
 
+    /// <summary>
+    /// Submits an authenticated player's answer for the current round of their active duel.
+    /// </summary>
+    /// <param name="answerId">Identifier of the selected answer.</param>
+    /// <param name="roundId">Identifier of the round for which the answer is submitted.</param>
+    /// <param name="userId">Identifier of the player submitting the answer.</param>
     public async Task SubmitAnswerForUserAsync(Guid answerId, Guid roundId, Guid userId)
     {
         var currentDuelId = await _duelsRepository.GetCurrentDuelIdForPlayerAsync(userId);
@@ -139,6 +149,14 @@ public class DuelsService : IDuelsService
         });
     }
     
+    /// <summary>
+    /// Gets the current round of the active duel for a player.
+    /// </summary>
+    /// <param name="userId">Identifier of the player.</param>
+    /// <returns>
+    /// Details of the current round, including whether the player has already submitted an answer;
+    /// otherwise, <see langword="null"/> when the player has no active duel.
+    /// </returns>
     public async Task<DuelRoundDto?> GetCurrentRoundForUserAsync(Guid userId)
     {
         var currentDuelId = await _duelsRepository.GetCurrentDuelIdForPlayerAsync(userId);
@@ -176,6 +194,10 @@ public class DuelsService : IDuelsService
         );
     }
 
+    /// <summary>
+    /// Abandons the player's active duel and notifies both participants.
+    /// </summary>
+    /// <param name="userId">Identifier of the player abandoning the duel.</param>
     public async Task AbandonDuelForUserAsync(Guid userId)
     {
         await _unitOfWork.ExecuteAsync(async () =>
@@ -202,6 +224,14 @@ public class DuelsService : IDuelsService
         });
     }
 
+    /// <summary>
+    /// Gets summary information about the player and opponent in the player's active duel.
+    /// </summary>
+    /// <param name="userId">Identifier of the player requesting the preview.</param>
+    /// <returns>
+    /// A preview of the active duel participants; otherwise, <see langword="null"/> when no active duel
+    /// or participant details are available.
+    /// </returns>
     public async Task<DuelPreview?> GetCurrentDuelPreviewAsync(Guid userId)
     {
         var currentDuelId = await _duelsRepository.GetCurrentDuelIdForPlayerAsync(userId);
@@ -247,6 +277,10 @@ public class DuelsService : IDuelsService
         return result;
     }
 
+    /// <summary>
+    /// Expires the specified active round when its scheduled duration has elapsed.
+    /// </summary>
+    /// <param name="roundId">Identifier of the round to expire.</param>
     public async Task ExpireCurrentRoundAsync(Guid roundId)
     {
         await _unitOfWork.ExecuteAsync(async () =>
@@ -263,6 +297,11 @@ public class DuelsService : IDuelsService
         });
     }
 
+    /// <summary>
+    /// Determines whether a player currently participates in an active duel.
+    /// </summary>
+    /// <param name="userId">Identifier of the player.</param>
+    /// <returns><see langword="true"/> when the player is in an active duel; otherwise, <see langword="false"/>.</returns>
     public async Task<bool> CheckIfInActiveDuelByUserId(Guid userId)
     {
         return await _duelsRepository.IsPlayerCurrentlyInDuelAsync(userId);
