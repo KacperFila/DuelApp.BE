@@ -41,8 +41,8 @@ public sealed class RoundCompletedEventHandler : IDomainEventHandler<RoundComple
                 throw new DuelNotFoundException(@event.DuelId);
             }
             
-            var playerOneDetails = await _usersModuleApi.GetByKeycloakIdAsync(duel.PlayerOneId.ToString());
-            var playerTwoDetails = await _usersModuleApi.GetByKeycloakIdAsync(duel.PlayerTwoId.ToString());
+            var playerOneDetails = await _usersModuleApi.GetByUserIdAsync(duel.PlayerOneId);
+            var playerTwoDetails = await _usersModuleApi.GetByUserIdAsync(duel.PlayerTwoId);
 
             if (playerOneDetails is null)
             {

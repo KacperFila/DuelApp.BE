@@ -25,13 +25,13 @@ public class AppUserMiddleware : IMiddleware
         
         if (context?.Identity?.IsAuthenticated == true)
         {
-            var keycloakId = context.Identity.KeycloakUserId;
-            var user =  await _usersModuleApi.GetByKeycloakIdAsync(keycloakId) 
+            var userId = context.Identity.UserId;
+            var user = await _usersModuleApi.GetByUserIdAsync(userId)
                         ?? await _usersModuleApi.CreateAsync(
-                            keycloakId,
+                            userId,
                             context.Identity.Claims);
             
-            var newIdentity = context.Identity.WithUserId(user.Id);
+            var newIdentity = context.Identity.WithProfileId(user.ProfileId);
 
             ContextAccessor.Set(
                 new Context(context.TraceId, newIdentity));

@@ -24,7 +24,7 @@ public class AccountService : IAccountService
     /// Uploads a new avatar image for a user, stores it in blob storage,
     /// and updates the user's profile image reference.
     /// </summary>
-    /// <param name="userId">
+    /// <param name="profileId">
     /// The unique identifier of the user whose avatar is being uploaded.
     /// </param>
     /// <param name="file">
@@ -34,20 +34,20 @@ public class AccountService : IAccountService
     /// The URL of the uploaded avatar image if the upload succeeds;
     /// otherwise, <c>null</c> if the file is invalid or the user does not exist.
     /// </returns>
-    public async Task<string?> UploadAvatar(Guid userId, IFormFile file)
+    public async Task<string?> UploadAvatar(Guid profileId, IFormFile file)
     {
         if (!IsFileAllowed(file))
         {
             return null;
         }
         
-        var user = await _userRepository.GetByIdAsync(userId);
+        var user = await _userRepository.GetByProfileIdAsync(profileId);
         if (user is null)
         {
             return null;
         }
         
-        var blobName = $"users/{user.Id}.png";
+        var blobName = $"users/{user.ProfileId}.png";
 
         await using var stream = file.OpenReadStream();
 

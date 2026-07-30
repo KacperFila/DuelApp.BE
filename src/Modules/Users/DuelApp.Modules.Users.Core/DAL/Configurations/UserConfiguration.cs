@@ -9,7 +9,8 @@ internal class UserConfiguration : IEntityTypeConfiguration<User>
     public void Configure(EntityTypeBuilder<User> builder)
     {
         builder.HasIndex(x => x.Email).IsUnique();
-        builder.HasIndex(x => x.Id).IsUnique();
+        builder.HasKey(x => x.ProfileId);
+        builder.HasIndex(x => x.UserId).IsUnique();
         builder.Property(x => x.CreatedAt).IsRequired();
     }
 }

@@ -6,8 +6,8 @@ namespace DuelApp.Modules.Users.Core.Repositories;
 
 public interface IUserRepository
 {
-    Task<User?> GetByIdAsync(Guid id);
-    Task<User?> GetByKeycloakIdAsync(string id);
+    Task<User?> GetByProfileIdAsync(Guid profileId);
+    Task<User?> GetByUserIdAsync(Guid userId);
     Task AddAsync(User user);
     Task UpdateAsync(User user);
 }

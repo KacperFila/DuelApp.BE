@@ -24,65 +24,65 @@ public class UsersModuleApi : IUsersModuleApi
         _avatarStorageService = avatarStorageService;
     }
 
-    public async Task<UserInfo?> GetByKeycloakIdAsync(string keycloakId)
+    public async Task<UserInfo?> GetByUserIdAsync(Guid userId)
     {
-        var user = await _userRepository.GetByKeycloakIdAsync(keycloakId);
+        var user = await _userRepository.GetByUserIdAsync(userId);
         if (user is null)
         {
             return null;
         }
 
-        var avatarUri = _avatarStorageService.GetAvatarUrl(user.Id);
+        var avatarUri = _avatarStorageService.GetAvatarUrl(user.ProfileId);
         
         return new UserInfo
         (
-            user.Id,
-            user.KeycloakUserId,
+            user.ProfileId,
+            user.UserId,
             user.Email,
             avatarUri
         );
     }
 
-    public async Task<UserInfo?> GetById(Guid userId)
+    public async Task<UserInfo?> GetByProfileIdAsync(Guid profileId)
     {
-        var user = await _userRepository.GetByIdAsync(userId);
+        var user = await _userRepository.GetByProfileIdAsync(profileId);
         if (user is null)
         {
             return null;
         }
         
-        var avatarUri = _avatarStorageService.GetAvatarUrl(user.Id);
+        var avatarUri = _avatarStorageService.GetAvatarUrl(user.ProfileId);
         
         return new UserInfo
         (
-            user.Id,
-            user.KeycloakUserId,
+            user.ProfileId,
+            user.UserId,
             user.Email,
             avatarUri
         );
     }
 
-    public async Task<UserInfo> CreateAsync(string keycloakId, Dictionary<string, IEnumerable<string>> claims)
+    public async Task<UserInfo> CreateAsync(Guid userId, Dictionary<string, IEnumerable<string>> claims)
     {
         claims.TryGetValue(ClaimTypes.Email, out var value);
         var email = value?.SingleOrDefault() ?? string.Empty;
         
         var user = new User
         {
-            Id = Guid.NewGuid(),
-            KeycloakUserId = keycloakId,
+            ProfileId = Guid.NewGuid(),
+            UserId = userId,
             Email = email,
             ProfileImageKey = UserProfileConstants.DefaultAvatarKey
         };
 
         await _userRepository.AddAsync(user);
         
-        var avatarUri = _avatarStorageService.GetAvatarUrl(user.Id);
+        var avatarUri = _avatarStorageService.GetAvatarUrl(user.ProfileId);
         
         return new UserInfo(
-            user.Id,
-            email,
-            keycloakId,
+            user.ProfileId,
+            user.UserId,
+            user.Email,
             avatarUri
         );
     }

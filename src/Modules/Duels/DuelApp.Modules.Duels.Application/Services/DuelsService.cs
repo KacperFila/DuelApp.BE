@@ -246,11 +246,11 @@ public class DuelsService : IDuelsService
             return null;
         }
         
-        var player = await _usersModuleApi.GetByKeycloakIdAsync(userId.ToString());
+        var player = await _usersModuleApi.GetByUserIdAsync(userId);
         var opponentId = duelInProgress.PlayerOneId == userId 
             ?  duelInProgress.PlayerTwoId
             : duelInProgress.PlayerOneId;
-        var opponent = await _usersModuleApi.GetByKeycloakIdAsync(opponentId.ToString());
+        var opponent = await _usersModuleApi.GetByUserIdAsync(opponentId);
 
         if (player is null || opponent is null)
         {

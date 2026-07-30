@@ -40,8 +40,7 @@ internal class AccountController : ControllerBase
     {
         var context = _contextAccessor.Current;
 
-        var user = await _usersModuleApi.GetByKeycloakIdAsync(
-            context.Identity.KeycloakUserId);
+        var user = await _usersModuleApi.GetByUserIdAsync(context.Identity.UserId);
 
         return Ok(user);
     }
@@ -58,7 +57,7 @@ internal class AccountController : ControllerBase
     {
         var context = _contextAccessor.Current;
 
-        var uri = _accountService.GetUserAvatar(context.Identity.Id);
+        var uri = _accountService.GetUserAvatar(context.Identity.ProfileId);
 
         return Ok(uri);
     }
@@ -72,9 +71,9 @@ internal class AccountController : ControllerBase
     [SwaggerResponse(StatusCodes.Status200OK, "Avatar URL returned successfully")]
     [SwaggerResponse(StatusCodes.Status401Unauthorized, "User is not authenticated")]
     [SwaggerResponse(StatusCodes.Status404NotFound, "User avatar not found")]
-    public IActionResult GetUserAvatar(Guid userId)
+    public IActionResult GetUserAvatar(Guid profileId)
     {
-        var uri = _accountService.GetUserAvatar(userId);
+        var uri = _accountService.GetUserAvatar(profileId);
 
         return Ok(uri);
     }
@@ -94,9 +93,9 @@ internal class AccountController : ControllerBase
         IContextAccessor contextAccessor,
         IAccountService accountService)
     {
-        var userId = contextAccessor.Current.Identity.Id;
+        var profileId = contextAccessor.Current.Identity.ProfileId;
 
-        var blobName = await accountService.UploadAvatar(userId, file);
+        var blobName = await accountService.UploadAvatar(profileId, file);
 
         return blobName is null
             ? BadRequest()

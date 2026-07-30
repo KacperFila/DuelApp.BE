@@ -32,7 +32,7 @@ public class MatchmakingController : ControllerBase
     [SwaggerResponse(StatusCodes.Status401Unauthorized, "User is not authenticated")]
     public async Task<IActionResult> StartMatchmaking()
     {
-        var userId = Guid.Parse(_context.Identity.KeycloakUserId);
+        var userId = _context.Identity.UserId;
         
         var didMatchmakingStart = await _matchmakingService.TryJoinQueueAsync(userId);
 
@@ -60,7 +60,7 @@ public class MatchmakingController : ControllerBase
     [SwaggerResponse(StatusCodes.Status401Unauthorized, "User is not authenticated")]
     public async Task<IActionResult> CancelMatchmaking()
     {
-        var userId = Guid.Parse(_context.Identity.KeycloakUserId);
+        var userId = _context.Identity.UserId;
         
         await _matchmakingService.LeaveQueueAsync(userId);
 

@@ -34,12 +34,12 @@ public class DuelsController : ControllerBase
     [SwaggerResponse(StatusCodes.Status400BadRequest, "Invalid answer or round data")]
     public async Task<IActionResult> SubmitAnswer([FromBody] SubmitAnswerRequest request)
     {
-        var userId = _context.Identity.KeycloakUserId;
+        var userId = _context.Identity.UserId;
 
         await _duelsService.SubmitAnswerForUserAsync(
             request.AnswerId,
             request.RoundId,
-            Guid.Parse(userId));
+            userId);
 
         return Ok();
     }
@@ -55,9 +55,9 @@ public class DuelsController : ControllerBase
     [SwaggerResponse(StatusCodes.Status404NotFound, "No active duel found")]
     public async Task<IActionResult> AbandonDuel()
     {
-        var userId = _context.Identity.KeycloakUserId;
+        var userId = _context.Identity.UserId;
 
-        await _duelsService.AbandonDuelForUserAsync(Guid.Parse(userId));
+        await _duelsService.AbandonDuelForUserAsync(userId);
 
         return Ok();
     }
@@ -73,9 +73,9 @@ public class DuelsController : ControllerBase
     [SwaggerResponse(StatusCodes.Status404NotFound, "No active duel round found")]
     public async Task<IActionResult> GetDuelCurrentRound()
     {
-        var userId = _context.Identity.KeycloakUserId;
+        var userId = _context.Identity.UserId;
 
-        var result = await _duelsService.GetCurrentRoundForUserAsync(Guid.Parse(userId));
+        var result = await _duelsService.GetCurrentRoundForUserAsync(userId);
 
         return result is not null
             ? Ok(result)
@@ -93,9 +93,9 @@ public class DuelsController : ControllerBase
     [SwaggerResponse(StatusCodes.Status404NotFound, "No active duel found")]
     public async Task<IActionResult> GetDuelPreview()
     {
-        var userId = _context.Identity.KeycloakUserId;
+        var userId = _context.Identity.UserId;
 
-        var result = await _duelsService.GetCurrentDuelPreviewAsync(Guid.Parse(userId));
+        var result = await _duelsService.GetCurrentDuelPreviewAsync(userId);
 
         return result is not null
             ? Ok(result)
@@ -112,9 +112,9 @@ public class DuelsController : ControllerBase
     [SwaggerResponse(StatusCodes.Status401Unauthorized, "User is not authenticated")]
     public async Task<IActionResult> CheckIfUserInActiveDuel()
     {
-        var userId = _context.Identity.KeycloakUserId;
+        var userId = _context.Identity.UserId;
 
-        var result = await _duelsService.CheckIfInActiveDuelByUserId(Guid.Parse(userId));
+        var result = await _duelsService.CheckIfInActiveDuelByUserId(userId);
 
         return Ok(result);
     }
