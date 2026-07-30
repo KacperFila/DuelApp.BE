@@ -1,10 +1,14 @@
 ﻿using System;
 using Microsoft.EntityFrameworkCore.Migrations;
 
+#nullable disable
+
 namespace DuelApp.Modules.Users.Core.DAL.Migrations
 {
-    public partial class usersmoduleinit : Migration
+    /// <inheritdoc />
+    public partial class InitialUsersSchema : Migration
     {
+        /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.EnsureSchema(
@@ -15,17 +19,15 @@ namespace DuelApp.Modules.Users.Core.DAL.Migrations
                 schema: "users",
                 columns: table => new
                 {
-                    Id = table.Column<Guid>(type: "uuid", nullable: false),
-                    Email = table.Column<string>(type: "text", nullable: true),
-                    Password = table.Column<string>(type: "text", nullable: false),
-                    Role = table.Column<string>(type: "text", nullable: false),
-                    IsActive = table.Column<bool>(type: "boolean", nullable: false),
-                    CreatedAt = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
-                    Claims = table.Column<string>(type: "text", nullable: true)
+                    ProfileId = table.Column<Guid>(type: "uuid", nullable: false),
+                    UserId = table.Column<Guid>(type: "uuid", nullable: false),
+                    Email = table.Column<string>(type: "text", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    ProfileImageKey = table.Column<string>(type: "text", nullable: true)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Users", x => x.Id);
+                    table.PrimaryKey("PK_Users", x => x.ProfileId);
                 });
 
             migrationBuilder.CreateIndex(
@@ -34,8 +36,16 @@ namespace DuelApp.Modules.Users.Core.DAL.Migrations
                 table: "Users",
                 column: "Email",
                 unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Users_UserId",
+                schema: "users",
+                table: "Users",
+                column: "UserId",
+                unique: true);
         }
 
+        /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
