@@ -9,5 +9,6 @@ public record DuelRoundDto
     string QuestionText,
     List<AnswerDto> Answers,
     DateTime EndsAt,
-    int RoundDurationSeconds
+    int RoundDurationSeconds,
+    bool HasUserSubmittedAnswer
 );

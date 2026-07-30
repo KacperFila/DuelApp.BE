@@ -167,7 +167,20 @@ public sealed class Duel : AggregateRoot<Guid>
     {
         return Rounds.Single(x => x.Number == CurrentRound);
     }
-    
+
+    public bool HasPlayerSubmittedAnswer(Guid playerId)
+    {
+        var player = ResolvePlayer(playerId);
+        var currentRound = GetCurrentRound();
+
+        return player switch
+        {
+            DuelPlayer.Player1 => currentRound.HasPlayerOneSubmittedAnswer,
+            DuelPlayer.Player2 => currentRound.HasPlayerTwoSubmittedAnswer,
+            _ => throw new ArgumentOutOfRangeException(nameof(player), player, null),
+        };
+    }
+
     private bool IsInProgress()
     {
         return Status == DuelStatus.InProgress;

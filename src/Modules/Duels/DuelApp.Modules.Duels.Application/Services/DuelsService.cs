@@ -171,7 +171,8 @@ public class DuelsService : IDuelsService
             currentQuestionWithAnswers.Title,
             currentQuestionWithAnswers.Answers.Select(x => new AnswerDto(x.Id, x.Content)).ToList(),
             currentRound.EndsAt!.Value,
-            duelInProgress.RoundDuration.Seconds
+            duelInProgress.RoundDuration.Seconds,
+            duelInProgress.HasPlayerSubmittedAnswer(userId)
         );
     }
 

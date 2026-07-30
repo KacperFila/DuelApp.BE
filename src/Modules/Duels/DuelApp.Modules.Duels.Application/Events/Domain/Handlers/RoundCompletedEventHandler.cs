@@ -83,7 +83,8 @@ public sealed class RoundCompletedEventHandler : IDomainEventHandler<RoundComple
             question.Title,
             question.Answers.Select(x => new AnswerDto(x.Id, x.Content)).ToList(),
             @event.NextRoundEndsAtUtc!.Value,
-            @event.NextRoundDurationSeconds!.Value
+            @event.NextRoundDurationSeconds!.Value,
+            HasUserSubmittedAnswer: false
             );
 
         await _realTimeNotifier.NotifyMultipleUsersAsync(
