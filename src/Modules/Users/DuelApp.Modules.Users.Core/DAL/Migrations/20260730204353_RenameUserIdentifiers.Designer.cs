@@ -12,7 +12,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace DuelApp.Modules.Users.Core.DAL.Migrations
 {
     [DbContext(typeof(UsersDbContext))]
-    [Migration("20260730203146_RenameUserIdentifiers")]
+    [Migration("20260730204353_RenameUserIdentifiers")]
     partial class RenameUserIdentifiers
     {
         /// <inheritdoc />

@@ -16,39 +16,36 @@ namespace DuelApp.Modules.Users.Core.DAL.Migrations
                 schema: "users",
                 table: "Users");
 
+            migrationBuilder.DropColumn(
+                name: "KeycloakUserId",
+                schema: "users",
+                table: "Users");
+
             migrationBuilder.RenameColumn(
                 name: "Id",
                 schema: "users",
                 table: "Users",
-                newName: "ProfileId");
-
-            migrationBuilder.RenameColumn(
-                name: "KeycloakUserId",
-                schema: "users",
-                table: "Users",
                 newName: "UserId");
 
-            migrationBuilder.AlterColumn<Guid>(
-                name: "UserId",
+            migrationBuilder.RenameIndex(
+                name: "IX_Users_Id",
                 schema: "users",
                 table: "Users",
-                type: "uuid using \"UserId\"::uuid",
+                newName: "IX_Users_UserId");
+
+            migrationBuilder.AddColumn<Guid>(
+                name: "ProfileId",
+                schema: "users",
+                table: "Users",
+                type: "uuid",
                 nullable: false,
-                oldClrType: typeof(string),
-                oldType: "text");
+                defaultValue: new Guid("00000000-0000-0000-0000-000000000000"));
 
             migrationBuilder.AddPrimaryKey(
                 name: "PK_Users",
                 schema: "users",
                 table: "Users",
                 column: "ProfileId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Users_UserId",
-                schema: "users",
-                table: "Users",
-                column: "UserId",
-                unique: true);
         }
 
         /// <inheritdoc />
@@ -59,31 +56,30 @@ namespace DuelApp.Modules.Users.Core.DAL.Migrations
                 schema: "users",
                 table: "Users");
 
-            migrationBuilder.DropIndex(
-                name: "IX_Users_UserId",
+            migrationBuilder.DropColumn(
+                name: "ProfileId",
                 schema: "users",
                 table: "Users");
 
-            migrationBuilder.AlterColumn<string>(
+            migrationBuilder.RenameColumn(
                 name: "UserId",
+                schema: "users",
+                table: "Users",
+                newName: "Id");
+
+            migrationBuilder.RenameIndex(
+                name: "IX_Users_UserId",
+                schema: "users",
+                table: "Users",
+                newName: "IX_Users_Id");
+
+            migrationBuilder.AddColumn<string>(
+                name: "KeycloakUserId",
                 schema: "users",
                 table: "Users",
                 type: "text",
                 nullable: false,
-                oldClrType: typeof(Guid),
-                oldType: "uuid");
-
-            migrationBuilder.RenameColumn(
-                name: "UserId",
-                schema: "users",
-                table: "Users",
-                newName: "KeycloakUserId");
-
-            migrationBuilder.RenameColumn(
-                name: "ProfileId",
-                schema: "users",
-                table: "Users",
-                newName: "Id");
+                defaultValue: "");
 
             migrationBuilder.AddPrimaryKey(
                 name: "PK_Users",
