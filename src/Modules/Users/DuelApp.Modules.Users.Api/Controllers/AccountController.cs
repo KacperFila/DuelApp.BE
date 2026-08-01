@@ -55,11 +55,11 @@ internal class AccountController : ControllerBase
     )]
     [SwaggerResponse(StatusCodes.Status200OK, "Avatar URL returned successfully")]
     [SwaggerResponse(StatusCodes.Status401Unauthorized, "User is not authenticated")]
-    public ActionResult<string> GetMyAvatar()
+    public async Task<ActionResult<string>> GetMyAvatar()
     {
         var context = _contextAccessor.Current;
 
-        var uri = _accountService.GetUserAvatar(context.Identity.ProfileId);
+        var uri = await _accountService.GetUserAvatarAsync(context.Identity.ProfileId);
 
         return Ok(uri);
     }
@@ -73,9 +73,9 @@ internal class AccountController : ControllerBase
     [SwaggerResponse(StatusCodes.Status200OK, "Avatar URL returned successfully")]
     [SwaggerResponse(StatusCodes.Status401Unauthorized, "User is not authenticated")]
     [SwaggerResponse(StatusCodes.Status404NotFound, "User avatar not found")]
-    public ActionResult<string> GetUserAvatar(Guid profileId)
+    public async Task<ActionResult<string>> GetUserAvatar(Guid profileId)
     {
-        var uri = _accountService.GetUserAvatar(profileId);
+        var uri = await _accountService.GetUserAvatarAsync(profileId);
 
         return Ok(uri);
     }

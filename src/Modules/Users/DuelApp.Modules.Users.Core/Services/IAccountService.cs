@@ -8,5 +8,5 @@ public interface IAccountService
 {
     public Task<string?> UploadAvatar(Guid userId, IFormFile file);
     
-    public string GetUserAvatar(Guid userId);
+    public Task<string> GetUserAvatarAsync(Guid profileId);
 }

@@ -36,15 +36,15 @@ internal static class Extensions
             if (hostEnvironment.IsDevelopment())
             {
                 var connectionString = configuration["Azure:Storage:ProfilePictures:LocalDevelopmentConnectionString"]
-                                       ?? throw new InvalidOperationException("Azure:Storage:ProfilePictures:LocalDevelopmentConnectionString configuration is required.");;
-            
+                                       ?? throw new InvalidOperationException("Azure:Storage:ProfilePictures:LocalDevelopmentConnectionString configuration is required.");
+
                 builder
                     .AddBlobServiceClient(connectionString)
                     .WithName(BlobServiceClients.ProfilePictures);
-            
+
                 return;
             }
-            
+
             var profilePicturesStorageAccountUri = new Uri(configuration["Azure:Storage:ProfilePictures:ServiceUri"]!);
 
             builder
@@ -53,15 +53,23 @@ internal static class Extensions
                 .WithCredential(new DefaultAzureCredential());
         });
 
-        services.AddKeyedSingleton<BlobContainerClient>(
-            BlobContainerClients.ProfilePictures,
+        services.AddKeyedSingleton<BlobServiceClient>(
+            BlobServiceClients.ProfilePictures,
             (serviceProvider, _) =>
             {
                 var factory = serviceProvider
                     .GetRequiredService<IAzureClientFactory<BlobServiceClient>>();
 
-                var serviceClient = factory.CreateClient(
-                    BlobServiceClients.ProfilePictures);
+                return factory.CreateClient(BlobServiceClients.ProfilePictures);
+            });
+
+        services.AddKeyedSingleton<BlobContainerClient>(
+            BlobContainerClients.ProfilePictures,
+            (serviceProvider, _) =>
+            {
+                var serviceClient = serviceProvider
+                    .GetRequiredKeyedService<BlobServiceClient>(
+                        BlobServiceClients.ProfilePictures);
 
                 return serviceClient.GetBlobContainerClient(
                     BlobContainerNames.ProfilePictures);

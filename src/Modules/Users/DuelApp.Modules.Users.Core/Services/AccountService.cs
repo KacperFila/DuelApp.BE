@@ -63,15 +63,15 @@ public class AccountService : IAccountService
     /// <summary>
     /// Retrieves the avatar URL for the specified user.
     /// </summary>
-    /// <param name="userId">
+    /// <param name="profileId">
     /// The unique identifier of the user whose avatar URL should be retrieved.
     /// </param>
     /// <returns>
     /// A URL pointing to the user's avatar image.
     /// </returns>
-    public string GetUserAvatar(Guid userId)
+    public Task<string> GetUserAvatarAsync(Guid profileId)
     {
-        return _avatarStorageService.GetAvatarUrl(userId);
+        return _avatarStorageService.GetAvatarUrlAsync(profileId);
     }
 
     /// <summary>

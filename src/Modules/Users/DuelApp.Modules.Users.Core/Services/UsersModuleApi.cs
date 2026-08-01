@@ -32,7 +32,7 @@ public class UsersModuleApi : IUsersModuleApi
             return null;
         }
 
-        var avatarUri = _avatarStorageService.GetAvatarUrl(user.ProfileId);
+        var avatarUri = await _avatarStorageService.GetAvatarUrlAsync(user.ProfileId);
         
         return new UserInfo
         (
@@ -51,7 +51,7 @@ public class UsersModuleApi : IUsersModuleApi
             return null;
         }
         
-        var avatarUri = _avatarStorageService.GetAvatarUrl(user.ProfileId);
+        var avatarUri = await _avatarStorageService.GetAvatarUrlAsync(user.ProfileId);
         
         return new UserInfo
         (
@@ -77,7 +77,7 @@ public class UsersModuleApi : IUsersModuleApi
 
         await _userRepository.AddAsync(user);
         
-        var avatarUri = _avatarStorageService.GetAvatarUrl(user.ProfileId);
+        var avatarUri = await _avatarStorageService.GetAvatarUrlAsync(user.ProfileId);
         
         return new UserInfo(
             user.ProfileId,
