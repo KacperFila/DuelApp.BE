@@ -1,4 +1,4 @@
-image_tag = "1c59e7f99ff076545dbc9eb945ff3ad1fc80088a"
+image_tag = "1b8031664d5d2e9eb0a2a222c71abc2ba8d81941"
 
 allowed_ips = [
   "0.0.0.0",     # Azure services
