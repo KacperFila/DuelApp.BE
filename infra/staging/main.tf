@@ -61,7 +61,7 @@ resource "azurerm_container_app_environment" "duelapp_env" {
 # Service Bus
 # =====================================================
 resource "azurerm_servicebus_namespace" "duelapp" {
-  name                = "staging-duelapp-sb"
+  name                = "staging-duelapp-messaging"
   location            = azurerm_resource_group.rg_duelapp_be_staging.location
   resource_group_name = azurerm_resource_group.rg_duelapp_be_staging.name
   sku                 = "Standard"
@@ -483,7 +483,7 @@ resource "azurerm_storage_container" "profile_pictures" {
 }
 
 resource "azurerm_storage_account" "question-imports" {
-  name                = "stgduelappquestionimports"
+  name                = "stgduelappqimports"
   resource_group_name = azurerm_resource_group.rg_duelapp_be_staging.name
   location            = azurerm_resource_group.rg_duelapp_be_staging.location
 
