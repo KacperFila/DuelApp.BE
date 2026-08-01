@@ -330,6 +330,12 @@ resource "azurerm_role_assignment" "duelapp_uami_question_imports_blob_contribut
   principal_id         = azurerm_user_assigned_identity.duelapp_uami.principal_id
 }
 
+resource "azurerm_role_assignment" "duelapp_uami_profile_pictures_blob_contributor" {
+  scope                = azurerm_storage_account.profile_pictures.id
+  role_definition_name = "Storage Blob Data Contributor"
+  principal_id         = azurerm_user_assigned_identity.duelapp_uami.principal_id
+}
+
 data "azuread_service_principal" "github_actions" {
   display_name = "github-actions-oidc"
 }
@@ -402,6 +408,7 @@ resource "azurerm_linux_web_app" "duelapp_be" {
     WEBSITES_PORT = "8080"
 
     ASPNETCORE_ENVIRONMENT = "Staging"
+    AZURE_CLIENT_ID        = azurerm_user_assigned_identity.duelapp_uami.client_id
 
     KEYVAULT_NAME = azurerm_key_vault.duelapp_kv.name
 
