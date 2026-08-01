@@ -324,6 +324,12 @@ resource "azurerm_role_assignment" "duelapp_uami_question_imports_receiver" {
   principal_id         = azurerm_user_assigned_identity.duelapp_uami.principal_id
 }
 
+resource "azurerm_role_assignment" "duelapp_uami_question_imports_blob_contributor" {
+  scope                = azurerm_storage_account.question-imports.id
+  role_definition_name = "Storage Blob Data Contributor"
+  principal_id         = azurerm_user_assigned_identity.duelapp_uami.principal_id
+}
+
 data "azuread_service_principal" "github_actions" {
   display_name = "github-actions-oidc"
 }
