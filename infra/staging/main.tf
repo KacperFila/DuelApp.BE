@@ -58,6 +58,34 @@ resource "azurerm_container_app_environment" "duelapp_env" {
 }
 
 # =====================================================
+# Service Bus
+# =====================================================
+resource "azurerm_servicebus_namespace" "duelapp" {
+  name                = "staging-duelapp-sb"
+  location            = azurerm_resource_group.rg_duelapp_be_staging.location
+  resource_group_name = azurerm_resource_group.rg_duelapp_be_staging.name
+  sku                 = "Standard"
+
+  tags = {
+    environment = "staging"
+    project     = "duelapp"
+    component   = "question-imports"
+  }
+}
+
+resource "azurerm_servicebus_queue" "question_imports" {
+  name         = "question-imports"
+  namespace_id = azurerm_servicebus_namespace.duelapp.id
+
+  lock_duration                           = "PT5M"
+  max_delivery_count                      = 5
+  default_message_ttl                     = "P14D"
+  dead_lettering_on_message_expiration    = true
+  requires_duplicate_detection            = true
+  duplicate_detection_history_time_window = "PT10M"
+}
+
+# =====================================================
 # Key Vault
 # =====================================================
 data "azurerm_client_config" "current" {}
@@ -290,6 +318,12 @@ resource "azurerm_role_assignment" "duelapp_uami_kv_access" {
   principal_id         = azurerm_user_assigned_identity.duelapp_uami.principal_id
 }
 
+resource "azurerm_role_assignment" "duelapp_uami_question_imports_receiver" {
+  scope                = azurerm_servicebus_queue.question_imports.id
+  role_definition_name = "Azure Service Bus Data Receiver"
+  principal_id         = azurerm_user_assigned_identity.duelapp_uami.principal_id
+}
+
 data "azuread_service_principal" "github_actions" {
   display_name = "github-actions-oidc"
 }
@@ -391,6 +425,9 @@ resource "azurerm_linux_web_app" "duelapp_be" {
   ]
 }
 
+# =====================================================
+# Storage Account
+# =====================================================
 resource "azurerm_storage_account" "profile_pictures" {
   name                = "stgduelappprofpic"
   resource_group_name = azurerm_resource_group.rg_duelapp_be_staging.name
@@ -442,5 +479,59 @@ resource "azurerm_storage_account" "profile_pictures" {
 resource "azurerm_storage_container" "profile_pictures" {
   name                  = "profile-pictures"
   storage_account_name  = azurerm_storage_account.profile_pictures.name
+  container_access_type = "private"
+}
+
+resource "azurerm_storage_account" "question-imports" {
+  name                = "stgduelappquestionimports"
+  resource_group_name = azurerm_resource_group.rg_duelapp_be_staging.name
+  location            = azurerm_resource_group.rg_duelapp_be_staging.location
+
+  account_tier             = "Standard"
+  account_replication_type = "LRS"
+  account_kind             = "StorageV2"
+
+  min_tls_version = "TLS1_2"
+
+  https_traffic_only_enabled = true
+
+  allow_nested_items_to_be_public = false
+
+  public_network_access_enabled = true
+
+  shared_access_key_enabled = true
+
+  cross_tenant_replication_enabled = false
+
+  access_tier = "Hot"
+
+  blob_properties {
+    delete_retention_policy {
+      days = 7
+    }
+
+    container_delete_retention_policy {
+      days = 7
+    }
+  }
+
+  network_rules {
+    default_action = "Allow"
+    bypass         = ["AzureServices"]
+  }
+
+  identity {
+    type = "SystemAssigned"
+  }
+
+  tags = {
+    environment = "staging"
+    component   = "question-imports"
+  }
+}
+
+resource "azurerm_storage_container" "question_imports" {
+  name                  = "question-imports"
+  storage_account_name  = azurerm_storage_account.question-imports.name
   container_access_type = "private"
 }
