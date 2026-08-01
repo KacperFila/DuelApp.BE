@@ -1,3 +1,5 @@
+using DuelApp.Modules.Questions.Api.Responses;
+using DuelApp.Modules.Questions.Application.Models;
 using DuelApp.Modules.Questions.Application.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -13,23 +15,20 @@ public class QuestionsController : ControllerBase
     [Authorize]
     [HttpPost]
     [SwaggerOperation(
-        Summary = "Upload questions",
-        Description = "Uploads a JSON file containing questions and stores them in the database."
+        Summary = "Start a question import",
+        Description = "Stores a JSON file in import storage for asynchronous processing."
     )]
-    [SwaggerResponse(StatusCodes.Status200OK, "Questions uploaded successfully")]
+    [SwaggerResponse(StatusCodes.Status202Accepted, "Question import accepted")]
     [SwaggerResponse(StatusCodes.Status400BadRequest, "Invalid questions file")]
     [SwaggerResponse(StatusCodes.Status401Unauthorized, "User is not authenticated")]
-    public async Task<IActionResult> UploadQuestions(
+    public async Task<ActionResult<StartQuestionImportResponse>> UploadQuestions(
         IFormFile questionsJson,
         IQuestionsService questionsService,
         CancellationToken ct = default)
     {
-        await questionsService.UploadQuestionsAsync(questionsJson, ct);
+        var importId = await questionsService.UploadQuestionsAsync(questionsJson, ct);
 
-        return Ok(new
-        {
-            message = "Questions has been uploaded"
-        });
+        return Accepted(new StartQuestionImportResponse(importId));
     }
     
     [Authorize]
@@ -41,7 +40,7 @@ public class QuestionsController : ControllerBase
     [SwaggerResponse(StatusCodes.Status200OK, "Questions returned successfully")]
     [SwaggerResponse(StatusCodes.Status401Unauthorized, "User is not authenticated")]
     [SwaggerResponse(StatusCodes.Status404NotFound, "No questions found")]
-    public async Task<IActionResult> GetQuestionsWithAnswers(
+    public async Task<ActionResult<IEnumerable<QuestionWithAnswer>>> GetQuestionsWithAnswers(
         [FromQuery] int questionsAmount,
         IQuestionsService questionsService,
         CancellationToken ct = default)

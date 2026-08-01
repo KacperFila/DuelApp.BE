@@ -4,6 +4,7 @@ using Microsoft.Extensions.DependencyInjection;
 using DuelApp.Modules.Users.Core;
 using DuelApp.Shared.Abstractions.Modules;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Hosting;
 
 namespace DuelApp.Modules.Users.Api
 {
@@ -18,9 +19,12 @@ namespace DuelApp.Modules.Users.Api
                 "users"
             };
 
-            public void Register(IServiceCollection services, IConfiguration configuration)
+            public void Register(
+                IServiceCollection services,
+                IConfiguration configuration,
+                IHostEnvironment hostEnvironment)
             {
-                services.AddCore();
+                services.AddCore(configuration, hostEnvironment);
             }
 
             public void Use(IApplicationBuilder app)

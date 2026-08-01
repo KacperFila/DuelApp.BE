@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Threading.Tasks;
+using DuelApp.Modules.Users.Api.Responses;
 using DuelApp.Modules.Users.Core.Services;
 using DuelApp.Modules.Users.Shared;
+using DuelApp.Modules.Users.Shared.Dto;
 using DuelApp.Shared.Abstractions.Contexts;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -36,7 +38,7 @@ internal class AccountController : ControllerBase
     )]
     [SwaggerResponse(StatusCodes.Status200OK, "User profile returned successfully")]
     [SwaggerResponse(StatusCodes.Status401Unauthorized, "User is not authenticated")]
-    public async Task<IActionResult> GetMe()
+    public async Task<ActionResult<UserInfo>> GetMe()
     {
         var context = _contextAccessor.Current;
 
@@ -53,7 +55,7 @@ internal class AccountController : ControllerBase
     )]
     [SwaggerResponse(StatusCodes.Status200OK, "Avatar URL returned successfully")]
     [SwaggerResponse(StatusCodes.Status401Unauthorized, "User is not authenticated")]
-    public IActionResult GetMyAvatar()
+    public ActionResult<string> GetMyAvatar()
     {
         var context = _contextAccessor.Current;
 
@@ -71,7 +73,7 @@ internal class AccountController : ControllerBase
     [SwaggerResponse(StatusCodes.Status200OK, "Avatar URL returned successfully")]
     [SwaggerResponse(StatusCodes.Status401Unauthorized, "User is not authenticated")]
     [SwaggerResponse(StatusCodes.Status404NotFound, "User avatar not found")]
-    public IActionResult GetUserAvatar(Guid profileId)
+    public ActionResult<string> GetUserAvatar(Guid profileId)
     {
         var uri = _accountService.GetUserAvatar(profileId);
 
@@ -88,7 +90,7 @@ internal class AccountController : ControllerBase
     [SwaggerResponse(StatusCodes.Status200OK, "Avatar uploaded successfully")]
     [SwaggerResponse(StatusCodes.Status400BadRequest, "Invalid avatar file")]
     [SwaggerResponse(StatusCodes.Status401Unauthorized, "User is not authenticated")]
-    public async Task<IActionResult> Upload(
+    public async Task<ActionResult<UploadAvatarResponse>> Upload(
         IFormFile file,
         IContextAccessor contextAccessor,
         IAccountService accountService)
@@ -99,9 +101,6 @@ internal class AccountController : ControllerBase
 
         return blobName is null
             ? BadRequest()
-            : Ok(new
-            {
-                profileImageUrl = blobName
-            });
+            : Ok(new UploadAvatarResponse(blobName));
     }
 }

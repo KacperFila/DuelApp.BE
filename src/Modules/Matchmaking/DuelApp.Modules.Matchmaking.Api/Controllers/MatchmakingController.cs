@@ -1,3 +1,4 @@
+using DuelApp.Modules.Matchmaking.Api.Responses;
 using DuelApp.Modules.Matchmaking.Application.Services;
 using DuelApp.Shared.Abstractions.Contexts;
 using Microsoft.AspNetCore.Authorization;
@@ -30,7 +31,7 @@ public class MatchmakingController : ControllerBase
     )]
     [SwaggerResponse(StatusCodes.Status200OK, "User successfully joined matchmaking queue")]
     [SwaggerResponse(StatusCodes.Status401Unauthorized, "User is not authenticated")]
-    public async Task<IActionResult> StartMatchmaking()
+    public async Task<ActionResult<StartMatchmakingResponse>> StartMatchmaking()
     {
         var userId = _context.Identity.UserId;
         
@@ -38,16 +39,11 @@ public class MatchmakingController : ControllerBase
 
         if (!didMatchmakingStart)
         {
-            return Ok(new
-            {
-                message = "User is currently during match or another matchmaking."
-            });
+            return Conflict(new StartMatchmakingResponse(
+                "User is currently during match or another matchmaking."));
         }
 
-        return Ok(new
-        {
-            message = "MatchmakingStarted"
-        });
+        return Ok(new StartMatchmakingResponse("MatchmakingStarted"));
     }
     
     [Authorize]

@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using Azure.Storage.Blobs;
 using DuelApp.Shared.Abstractions.Modules;
 using DuelApp.Shared.Abstractions.Storage;
 using DuelApp.Shared.Abstractions.Time;
@@ -121,11 +120,7 @@ namespace DuelApp.Shared.Infrastructure
             services.AddPostgres();
             services.AddSingleton<IClock, UtcClock>();
             services.AddHostedService<AppInitializer>();
-            services.AddSingleton(x =>
-            {
-                var config = x.GetRequiredService<IConfiguration>();
-                return new BlobServiceClient(config["Azure:BlobConnectionString"]);
-            });
+
             services.AddControllers()
                 .ConfigureApplicationPartManager(manager =>
                 {

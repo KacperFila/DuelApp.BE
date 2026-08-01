@@ -1,4 +1,5 @@
-using DuelApp.Modules.Duels.Api.Models;
+using DuelApp.Modules.Duels.Api.Requests;
+using DuelApp.Modules.Duels.Application.Models;
 using DuelApp.Modules.Duels.Application.Services;
 using DuelApp.Shared.Abstractions.Contexts;
 using Microsoft.AspNetCore.Authorization;
@@ -71,7 +72,7 @@ public class DuelsController : ControllerBase
     [SwaggerResponse(StatusCodes.Status200OK, "Current duel round returned")]
     [SwaggerResponse(StatusCodes.Status401Unauthorized, "User is not authenticated")]
     [SwaggerResponse(StatusCodes.Status404NotFound, "No active duel round found")]
-    public async Task<IActionResult> GetDuelCurrentRound()
+    public async Task<ActionResult<DuelRoundDto>> GetDuelCurrentRound()
     {
         var userId = _context.Identity.UserId;
 
@@ -91,7 +92,7 @@ public class DuelsController : ControllerBase
     [SwaggerResponse(StatusCodes.Status200OK, "Duel preview returned")]
     [SwaggerResponse(StatusCodes.Status401Unauthorized, "User is not authenticated")]
     [SwaggerResponse(StatusCodes.Status404NotFound, "No active duel found")]
-    public async Task<IActionResult> GetDuelPreview()
+    public async Task<ActionResult<DuelPreview>> GetDuelPreview()
     {
         var userId = _context.Identity.UserId;
 
@@ -110,7 +111,7 @@ public class DuelsController : ControllerBase
     )]
     [SwaggerResponse(StatusCodes.Status200OK, "Active duel status returned")]
     [SwaggerResponse(StatusCodes.Status401Unauthorized, "User is not authenticated")]
-    public async Task<IActionResult> CheckIfUserInActiveDuel()
+    public async Task<ActionResult<bool>> CheckIfUserInActiveDuel()
     {
         var userId = _context.Identity.UserId;
 

@@ -1,4 +1,16 @@
 {
   "users": {
+    "module": {
+      "name": "Users",
+      "enabled": true
+    }
+  },
+  "Azure": {
+    "Storage": {
+      "ProfilePictures": {
+        "LocalDevelopmentConnectionString": "UseDevelopmentStorage=true", // connection string for local development with Azurite
+        "ContainerName": "profile-pictures"
+      }
+    }
   }
 }

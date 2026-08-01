@@ -4,6 +4,7 @@ using DuelApp.Shared.Abstractions.Modules;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 
 namespace DuelApp.Modules.Matchmaking.Api;
 
@@ -18,9 +19,11 @@ internal class MatchmakingModule : IModule
         "matchmaking"
     ];
 
-    public void Register(IServiceCollection services, IConfiguration configuration)
+    public void Register(
+        IServiceCollection services,
+        IConfiguration configuration,
+        IHostEnvironment hostEnvironment)
     {
-        services.AddApplication();
         services.AddApplication();
         services.AddInfrastructure();
     }

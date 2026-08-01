@@ -416,7 +416,7 @@ resource "azurerm_linux_web_app" "duelapp_be" {
 
     Postgres__ConnectionString = "@Microsoft.KeyVault(SecretUri=${azurerm_key_vault_secret.postgres_connection_string.versionless_id})"
 
-    Azure__BlobConnectionString = "@Microsoft.KeyVault(SecretUri=${azurerm_key_vault_secret.profile_pictures_connection_string.versionless_id})"
+    Azure__Storage__ProfilePictures__ConnectionString = "@Microsoft.KeyVault(SecretUri=${azurerm_key_vault_secret.profile_pictures_connection_string.versionless_id})"
   }
 
   tags = {

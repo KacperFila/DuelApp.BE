@@ -1,8 +1,9 @@
-using System.Text.Json;
 using DuelApp.Modules.Questions.Application.Abstractions;
 using DuelApp.Modules.Questions.Application.Exceptions;
 using DuelApp.Modules.Questions.Application.Models;
 using DuelApp.Modules.Questions.Domain.Questions.Entities;
+using DuelApp.Modules.Questions.Domain.Questions.Enums;
+using DuelApp.Shared.Abstractions.Contexts;
 using DuelApp.Shared.Abstractions.Time;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
@@ -13,72 +14,66 @@ namespace DuelApp.Modules.Questions.Application.Services.Implementations;
 public class QuestionsService : IQuestionsService
 {
     private readonly IQuestionsRepository _questionsRepository;
-    private readonly IAnswersRepository _answersRepository;
+    private readonly IQuestionImportsRepository _questionImportsRepository;
+    private readonly IQuestionImportFileStorage _questionImportFileStorage;
+    private readonly IContext _context;
     private readonly ILogger<QuestionsService> _logger;
     private readonly IClock _clock;
     private readonly List<string> _allowedFileTypes = [".json"];
     
     public QuestionsService(
         IQuestionsRepository questionsRepository,
-        IAnswersRepository answersRepository, ILogger<QuestionsService> logger, IClock clock)
+        IQuestionImportsRepository questionImportsRepository,
+        IQuestionImportFileStorage questionImportFileStorage,
+        IContext context,
+        ILogger<QuestionsService> logger,
+        IClock clock)
     {
         _questionsRepository = questionsRepository;
-        _answersRepository = answersRepository;
+        _questionImportsRepository = questionImportsRepository;
+        _questionImportFileStorage = questionImportFileStorage;
+        _context = context;
         _logger = logger;
         _clock = clock;
     }
 
-    public async Task UploadQuestionsAsync(IFormFile questionsJson, CancellationToken ct)
+    public async Task<Guid> UploadQuestionsAsync(IFormFile questionsJson, CancellationToken ct)
     {
-        _logger.LogInformation("Uploading questions started at {DateTime}", _clock.CurrentDate());
+        _logger.LogInformation("Question import upload started at {DateTime}", _clock.CurrentDate());
 
         if (!IsValidQuestionsFile(questionsJson))
         {
             throw new InvalidQuestionsJsonFormatException();
         }
 
+        var importId = Guid.NewGuid();
+        var blobName = $"imports/{importId:N}/questions.json";
+
         await using var stream = questionsJson.OpenReadStream();
 
-        var questions = new List<Question>();
-        var answers = new List<DuelApp.Modules.Questions.Domain.Questions.Entities.Answer>();
+        var storedFile = await _questionImportFileStorage.UploadAsync(
+            stream,
+            blobName,
+            ct);
 
-        await foreach (var item in JsonSerializer.DeserializeAsyncEnumerable<GeneratedQuestion>(
-                           stream,
-                           new JsonSerializerOptions
-                           {
-                               PropertyNameCaseInsensitive = true
-                           },
-                           ct))
+        var questionImport = new QuestionImport
         {
-            if (item is null)
-            {
-                continue;
-            }
+            Id = importId,
+            BlobName = storedFile.BlobName,
+            BlobETag = storedFile.ETag,
+            RequestedBy = _context.Identity.UserId,
+            Status = ImportStatus.Uploaded,
+            CreatedAtUtc = _clock.CurrentDate()
+        };
 
-            var questionId = Guid.NewGuid();
+        await _questionImportsRepository.AddAsync(questionImport, ct);
 
-            var questionAnswers = item.Answers.Select(a => new DuelApp.Modules.Questions.Domain.Questions.Entities.Answer
-            {
-                Id = Guid.NewGuid(),
-                QuestionId = questionId,
-                Content = a.Content,
-                IsCorrect = a.IsCorrect
-            }).ToList();
+        _logger.LogInformation(
+            "Question import {ImportId} uploaded at {DateTime}",
+            importId,
+            _clock.CurrentDate());
 
-            answers.AddRange(questionAnswers);
-
-            questions.Add(new Question
-            {
-                Id = questionId,
-                Title = item.Title,
-                AnswerIds = questionAnswers.Select(a => a.Id).ToList()
-            });
-        }
-
-        await _questionsRepository.BulkUploadAsync(questions, ct);
-        await _answersRepository.BulkUploadAsync(answers, ct);
-
-        _logger.LogInformation("Uploading questions finished at {DateTime}", _clock.CurrentDate());
+        return importId;
     }
 
     public async Task<IEnumerable<QuestionWithAnswer>> GetQuestionsWithAnswersBatch(int questionsAmount, CancellationToken ct)

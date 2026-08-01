@@ -4,5 +4,13 @@
       "enabled": true,
       "name": "Questions"
     }
+  },
+  "Azure": {
+    "Storage": {
+      "QuestionImports": {
+        "LocalDevelopmentConnectionString": "UseDevelopmentStorage=true", // connection string for local development with Azurite
+        "ContainerName": "question-imports"
+      }
+    }
   }
 }

@@ -4,5 +4,13 @@
       "enabled": true,
       "name": "Questions"
     }
+  },
+  "Azure": {
+    "Storage": {
+      "QuestionImports": {
+        "ServiceUri": "https://stgduelappqimports.blob.core.windows.net/",
+        "ContainerName": "question-imports"
+      }
+    }
   }
 }

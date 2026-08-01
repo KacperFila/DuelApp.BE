@@ -4,5 +4,13 @@
       "name": "Users",
       "enabled": true
     }
+  },
+  "Azure": {
+    "Storage": {
+      "ProfilePictures": {
+        "ServiceUri": "https://stgduelappprofpic.blob.core.windows.net/", // connection string for local development with Azurite
+        "ContainerName": "profile-pictures"
+      }
+    }
   }
 }

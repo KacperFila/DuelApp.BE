@@ -5,6 +5,6 @@ namespace DuelApp.Modules.Questions.Application.Services;
 
 public interface IQuestionsService
 {
-    public Task UploadQuestionsAsync(IFormFile questionsJson, CancellationToken ct);
+    public Task<Guid> UploadQuestionsAsync(IFormFile questionsJson, CancellationToken ct);
     public Task<IEnumerable<QuestionWithAnswer>> GetQuestionsWithAnswersBatch(int questionsAmount, CancellationToken ct);
 }

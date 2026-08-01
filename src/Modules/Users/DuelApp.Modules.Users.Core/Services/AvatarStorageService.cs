@@ -5,6 +5,7 @@ using Azure.Storage.Blobs;
 using Azure.Storage.Blobs.Models;
 using Azure.Storage.Sas;
 using DuelApp.Modules.Users.Core.Constants;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace DuelApp.Modules.Users.Core.Services;
 
@@ -12,9 +13,11 @@ public class AvatarStorageService : IAvatarStorageService
 {
     private readonly BlobContainerClient _container;
 
-    public AvatarStorageService(BlobServiceClient blobServiceClient)
+    public AvatarStorageService(
+        [FromKeyedServices(BlobContainerClients.ProfilePictures)]
+        BlobContainerClient container)
     {
-        _container = blobServiceClient.GetBlobContainerClient(UserProfileConstants.ProfilePicturesContainerName);
+        _container = container;
     }
 
     public async Task UploadAsync(string blobName, Stream content, string contentType)

@@ -1,15 +1,14 @@
-using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Http;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using DuelApp.Shared.Abstractions.Modules;
 using DuelApp.Shared.Infrastructure;
-using DuelApp.Shared.Infrastructure.Modules;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 
 namespace DuelApp.Bootstrapper
 {
@@ -18,10 +17,12 @@ namespace DuelApp.Bootstrapper
         private readonly IList<IModule> _modules;
         private readonly IList<Assembly> _assemblies;
         private readonly IConfiguration _configuration;
+        private readonly IHostEnvironment _environment;
         
-        public Startup(IConfiguration configuration)
+        public Startup(IConfiguration configuration, IHostEnvironment environment)
         {
             _configuration = configuration;
+            _environment = environment;
             _assemblies = ModuleLoader.LoadAssemblies(configuration);
             _modules = ModuleLoader.LoadModules(_assemblies);
         }
@@ -32,7 +33,7 @@ namespace DuelApp.Bootstrapper
 
             foreach (var module in _modules)
             {
-                module.Register(services, _configuration);
+                module.Register(services, _configuration, _environment);
             }
         }
 
