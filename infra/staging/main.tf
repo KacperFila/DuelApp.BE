@@ -126,8 +126,8 @@ resource "azurerm_eventgrid_system_topic_event_subscription" "question_imports_b
   }
 
   storage_blob_dead_letter_destination {
-    storage_account_id  = azurerm_storage_account.question-imports.id
-    blob_container_name = azurerm_storage_container.question_imports_eventgrid_deadletters.name
+    storage_account_id          = azurerm_storage_account.question-imports.id
+    storage_blob_container_name = azurerm_storage_container.question_imports_eventgrid_deadletters.name
   }
 
   dead_letter_identity {
