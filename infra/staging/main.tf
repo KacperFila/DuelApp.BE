@@ -86,6 +86,66 @@ resource "azurerm_servicebus_queue" "question_imports" {
 }
 
 # =====================================================
+# Event Grid
+# =====================================================
+resource "azurerm_eventgrid_system_topic" "question_imports" {
+  name                   = "staging-duelapp-question-imports-events"
+  location               = azurerm_resource_group.rg_duelapp_be_staging.location
+  resource_group_name    = azurerm_resource_group.rg_duelapp_be_staging.name
+  source_arm_resource_id = azurerm_storage_account.question-imports.id
+  topic_type             = "Microsoft.Storage.StorageAccounts"
+
+  identity {
+    type = "SystemAssigned"
+  }
+
+  tags = {
+    environment = "staging"
+    project     = "duelapp"
+    component   = "question-imports"
+  }
+}
+
+resource "azurerm_eventgrid_system_topic_event_subscription" "question_imports_blob_created" {
+  name                = "question-imports-blob-created"
+  system_topic        = azurerm_eventgrid_system_topic.question_imports.name
+  resource_group_name = azurerm_resource_group.rg_duelapp_be_staging.name
+
+  service_bus_queue_endpoint_id = azurerm_servicebus_queue.question_imports.id
+  event_delivery_schema         = "EventGridSchema"
+  included_event_types          = ["Microsoft.Storage.BlobCreated"]
+
+  subject_filter {
+    subject_begins_with = "/blobServices/default/containers/question-imports/blobs/imports/"
+    subject_ends_with   = "/questions.json"
+    case_sensitive      = false
+  }
+
+  delivery_identity {
+    type = "SystemAssigned"
+  }
+
+  storage_blob_dead_letter_destination {
+    storage_account_id  = azurerm_storage_account.question-imports.id
+    blob_container_name = azurerm_storage_container.question_imports_eventgrid_deadletters.name
+  }
+
+  dead_letter_identity {
+    type = "SystemAssigned"
+  }
+
+  retry_policy {
+    event_time_to_live    = 1440
+    max_delivery_attempts = 30
+  }
+
+  depends_on = [
+    azurerm_role_assignment.question_imports_eventgrid_servicebus_sender,
+    azurerm_role_assignment.question_imports_eventgrid_deadletter_contributor
+  ]
+}
+
+# =====================================================
 # Key Vault
 # =====================================================
 data "azurerm_client_config" "current" {}
@@ -336,6 +396,18 @@ resource "azurerm_role_assignment" "duelapp_uami_profile_pictures_blob_contribut
   principal_id         = azurerm_user_assigned_identity.duelapp_uami.principal_id
 }
 
+resource "azurerm_role_assignment" "question_imports_eventgrid_servicebus_sender" {
+  scope                = azurerm_servicebus_namespace.duelapp.id
+  role_definition_name = "Azure Service Bus Data Sender"
+  principal_id         = azurerm_eventgrid_system_topic.question_imports.identity[0].principal_id
+}
+
+resource "azurerm_role_assignment" "question_imports_eventgrid_deadletter_contributor" {
+  scope                = azurerm_storage_account.question-imports.id
+  role_definition_name = "Storage Blob Data Contributor"
+  principal_id         = azurerm_eventgrid_system_topic.question_imports.identity[0].principal_id
+}
+
 data "azuread_service_principal" "github_actions" {
   display_name = "github-actions-oidc"
 }
@@ -545,6 +617,12 @@ resource "azurerm_storage_account" "question-imports" {
 
 resource "azurerm_storage_container" "question_imports" {
   name                  = "question-imports"
+  storage_account_name  = azurerm_storage_account.question-imports.name
+  container_access_type = "private"
+}
+
+resource "azurerm_storage_container" "question_imports_eventgrid_deadletters" {
+  name                  = "eventgrid-deadletters"
   storage_account_name  = azurerm_storage_account.question-imports.name
   container_access_type = "private"
 }
