@@ -62,11 +62,19 @@ jobs:
           --configuration Release
           --output ./artifacts/question-imports-functions
 
+      - name: Validate question imports Function package
+        run: |
+          test -d ./artifacts/question-imports-functions/.azurefunctions
+          test -f ./artifacts/question-imports-functions/functions.metadata
+          test -f ./artifacts/question-imports-functions/host.json
+
       - name: Upload question imports Function artifact
         uses: actions/upload-artifact@v4
         with:
           name: question-imports-functions
           path: ./artifacts/question-imports-functions
+          include-hidden-files: true
+          if-no-files-found: error
 
   migrate:
     runs-on: ubuntu-latest
@@ -115,6 +123,12 @@ jobs:
         with:
           name: question-imports-functions
           path: ./artifacts/question-imports-functions
+
+      - name: Validate downloaded question imports Function package
+        run: |
+          test -d ./artifacts/question-imports-functions/.azurefunctions
+          test -f ./artifacts/question-imports-functions/functions.metadata
+          test -f ./artifacts/question-imports-functions/host.json
 
       - name: Azure Login
         uses: azure/login@v2
