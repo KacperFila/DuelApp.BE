@@ -1,7 +1,5 @@
 using DuelApp.Modules.Duels.Shared;
 using DuelApp.Modules.Matchmaking.Application.Abstractions;
-using DuelApp.Modules.Matchmaking.Application.Constants;
-using DuelApp.Modules.Matchmaking.Application.Events;
 using DuelApp.Modules.Matchmaking.Domain.Matchmaking.Entities;
 using DuelApp.Shared.Abstractions.Messaging;
 using DuelApp.Shared.Abstractions.RealTime;
