@@ -727,7 +727,9 @@ resource "azurerm_function_app_flex_consumption" "question_imports" {
     type = "SystemAssigned"
   }
 
-  site_config {}
+  site_config {
+    application_insights_connection_string = azurerm_application_insights.question_imports_function.connection_string
+  }
 
   tags = {
     environment = "staging"
