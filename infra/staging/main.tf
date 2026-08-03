@@ -717,9 +717,9 @@ resource "azurerm_function_app_flex_consumption" "question_imports" {
   maximum_instance_count = 1
   instance_memory_in_mb  = 2048
 
+  application_insights_connection_string = azurerm_application_insights.question_imports_function.connection_string
+
   app_settings = {
-    APPLICATIONINSIGHTS_CONNECTION_STRING                        = azurerm_application_insights.question_imports_function.connection_string
-    FUNCTIONS_WORKER_RUNTIME                                     = "dotnet-isolated"
     "AzureWebJobs.QuestionImportMessageLoggingFunction.Disabled" = "true"
   }
 
