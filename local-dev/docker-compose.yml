@@ -44,6 +44,28 @@ services:
     volumes:
       - azurite_data:/data
 
+  mssql:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: servicebus_mssql
+    environment:
+      ACCEPT_EULA: "Y"
+      MSSQL_SA_PASSWORD: "LocalServiceBusPassword_2026!"
+
+  servicebus-emulator:
+    image: mcr.microsoft.com/azure-messaging/servicebus-emulator:latest
+    container_name: servicebus_emulator
+    environment:
+      ACCEPT_EULA: "Y"
+      MSSQL_SA_PASSWORD: "LocalServiceBusPassword_2026!"
+      SQL_SERVER: mssql
+    ports:
+      - "127.0.0.1:5300:5300"
+      - "127.0.0.1:5672:5672"
+    volumes:
+      - ./servicebus-emulator/config.json:/ServiceBus_Emulator/ConfigFiles/Config.json:ro
+    depends_on:
+      - mssql
+
   pgadmin:
     image: dpage/pgadmin4:8
     container_name: pgadmin

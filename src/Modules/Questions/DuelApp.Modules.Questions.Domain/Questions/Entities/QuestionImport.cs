@@ -15,4 +15,5 @@ public class QuestionImport
     public string? ErrorMessage { get; set; }
     public DateTime CreatedAtUtc { get; set; }
     public DateTime? CompletedAtUtc { get; set; }
+    public List<UnpublishedQuestion> UnpublishedQuestions { get; set; } = [];
 }

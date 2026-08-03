@@ -626,3 +626,119 @@ resource "azurerm_storage_container" "question_imports_eventgrid_deadletters" {
   storage_account_name  = azurerm_storage_account.question-imports.name
   container_access_type = "private"
 }
+
+# =====================================================
+# Question imports Azure Function
+# =====================================================
+resource "azurerm_storage_account" "question_imports_function" {
+  name                = "stgduelappqifunc"
+  resource_group_name = azurerm_resource_group.rg_duelapp_be_staging.name
+  location            = azurerm_resource_group.rg_duelapp_be_staging.location
+
+  account_tier             = "Standard"
+  account_replication_type = "LRS"
+  account_kind             = "StorageV2"
+
+  min_tls_version                  = "TLS1_2"
+  https_traffic_only_enabled       = true
+  allow_nested_items_to_be_public  = false
+  public_network_access_enabled    = true
+  shared_access_key_enabled        = true
+  cross_tenant_replication_enabled = false
+  access_tier                      = "Hot"
+
+  tags = {
+    environment = "staging"
+    project     = "duelapp"
+    component   = "question-imports-functions"
+  }
+}
+
+resource "azurerm_storage_container" "question_imports_function_deployments" {
+  name                  = "function-releases"
+  storage_account_id    = azurerm_storage_account.question_imports_function.id
+  container_access_type = "private"
+}
+
+resource "azurerm_log_analytics_workspace" "question_imports_function" {
+  name                = "staging-duelapp-question-imports-functions"
+  resource_group_name = azurerm_resource_group.rg_duelapp_be_staging.name
+  location            = azurerm_resource_group.rg_duelapp_be_staging.location
+  sku                 = "PerGB2018"
+  retention_in_days   = 30
+
+  tags = {
+    environment = "staging"
+    project     = "duelapp"
+    component   = "question-imports-functions"
+  }
+}
+
+resource "azurerm_application_insights" "question_imports_function" {
+  name                = "staging-duelapp-question-imports-functions"
+  resource_group_name = azurerm_resource_group.rg_duelapp_be_staging.name
+  location            = azurerm_resource_group.rg_duelapp_be_staging.location
+  application_type    = "web"
+  workspace_id        = azurerm_log_analytics_workspace.question_imports_function.id
+
+  tags = {
+    environment = "staging"
+    project     = "duelapp"
+    component   = "question-imports-functions"
+  }
+}
+
+resource "azurerm_service_plan" "question_imports_function" {
+  name                = "staging-duelapp-question-imports-functions"
+  resource_group_name = azurerm_resource_group.rg_duelapp_be_staging.name
+  location            = azurerm_resource_group.rg_duelapp_be_staging.location
+  os_type             = "Linux"
+  sku_name            = "FC1"
+
+  tags = {
+    environment = "staging"
+    project     = "duelapp"
+    component   = "question-imports-functions"
+  }
+}
+
+resource "azurerm_function_app_flex_consumption" "question_imports" {
+  name                = "staging-duelapp-question-imports"
+  resource_group_name = azurerm_resource_group.rg_duelapp_be_staging.name
+  location            = azurerm_resource_group.rg_duelapp_be_staging.location
+  service_plan_id     = azurerm_service_plan.question_imports_function.id
+
+  storage_container_type      = "blobContainer"
+  storage_container_endpoint  = "${azurerm_storage_account.question_imports_function.primary_blob_endpoint}${azurerm_storage_container.question_imports_function_deployments.name}"
+  storage_authentication_type = "StorageAccountConnectionString"
+  storage_access_key          = azurerm_storage_account.question_imports_function.primary_access_key
+
+  runtime_name           = "dotnet-isolated"
+  runtime_version        = "10.0"
+  maximum_instance_count = 1
+  instance_memory_in_mb  = 2048
+
+  app_settings = {
+    APPLICATIONINSIGHTS_CONNECTION_STRING                        = azurerm_application_insights.question_imports_function.connection_string
+    FUNCTIONS_WORKER_RUNTIME                                     = "dotnet-isolated"
+    "AzureWebJobs.QuestionImportMessageLoggingFunction.Disabled" = "true"
+  }
+
+  identity {
+    type = "SystemAssigned"
+  }
+
+  site_config {}
+
+  tags = {
+    environment = "staging"
+    project     = "duelapp"
+    component   = "question-imports-functions"
+  }
+}
+
+resource "azurerm_role_assignment" "github_actions_question_imports_function_contributor" {
+  scope                = azurerm_function_app_flex_consumption.question_imports.id
+  role_definition_name = "Website Contributor"
+  principal_id         = data.azuread_service_principal.github_actions.object_id
+}

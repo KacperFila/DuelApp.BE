@@ -19,6 +19,11 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "10.0.x"
+
       - name: Azure Login
         uses: azure/login@v2
         with:
@@ -51,11 +56,28 @@ jobs:
         id: set-image
         run: echo "image=${{ env.IMAGE_TAG }}" >> $GITHUB_OUTPUT
 
+      - name: Publish question imports Function App
+        run: >
+          dotnet publish src/Functions/DuelApp.QuestionImports.Functions/DuelApp.QuestionImports.Functions.csproj
+          --configuration Release
+          --output ./artifacts/question-imports-functions
+
+      - name: Upload question imports Function artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: question-imports-functions
+          path: ./artifacts/question-imports-functions
+
   migrate:
     runs-on: ubuntu-latest
     needs: build
     steps:
       - uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "10.0.x"
 
       - name: Azure Login
         uses: azure/login@v2
@@ -88,6 +110,12 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Download question imports Function artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: question-imports-functions
+          path: ./artifacts/question-imports-functions
+
       - name: Azure Login
         uses: azure/login@v2
         with:
@@ -100,6 +128,12 @@ jobs:
         with:
           app-name: staging-duelapp-be
           images: ${{ vars.ACR_LOGIN_SERVER }}/duelapp:${{ needs.build.outputs.image }}
+
+      - name: Deploy question imports Function App
+        uses: Azure/functions-action@v1
+        with:
+          app-name: staging-duelapp-question-imports
+          package: ./artifacts/question-imports-functions
 
       - name: Update staging.tfvars with new image
         working-directory: infra/staging
