@@ -151,13 +151,13 @@ resource "azurerm_eventgrid_system_topic_event_subscription" "question_imports_b
 data "azurerm_client_config" "current" {}
 
 resource "azurerm_key_vault" "duelapp_kv" {
-  name                      = "staging-duelapp-kv"
-  location                  = azurerm_resource_group.rg_duelapp_be_staging.location
-  resource_group_name       = azurerm_resource_group.rg_duelapp_be_staging.name
-  tenant_id                 = data.azurerm_client_config.current.tenant_id
-  sku_name                  = "standard"
-  purge_protection_enabled  = false
-  enable_rbac_authorization = true
+  name                       = "staging-duelapp-kv"
+  location                   = azurerm_resource_group.rg_duelapp_be_staging.location
+  resource_group_name        = azurerm_resource_group.rg_duelapp_be_staging.name
+  tenant_id                  = data.azurerm_client_config.current.tenant_id
+  sku_name                   = "standard"
+  purge_protection_enabled   = false
+  rbac_authorization_enabled = true
 
   tags = {
     environment = "staging"
@@ -252,8 +252,8 @@ resource "azurerm_linux_web_app" "keycloak" {
     container_registry_use_managed_identity = true
 
     application_stack {
-      docker_image     = "${azurerm_container_registry.duelapp_acr.login_server}/keycloak"
-      docker_image_tag = "latest"
+      docker_image_name   = "keycloak:latest"
+      docker_registry_url = "https://${azurerm_container_registry.duelapp_acr.login_server}"
     }
   }
 
@@ -262,7 +262,6 @@ resource "azurerm_linux_web_app" "keycloak" {
   }
 
   app_settings = {
-    "DOCKER_REGISTRY_SERVER_URL" = "https://${azurerm_container_registry.duelapp_acr.name}.azurecr.io"
     "KC_DB" : "postgres"
     "KC_DB_URL_HOST" : azurerm_postgresql_flexible_server.postgres.fqdn
     "KC_DB_URL_PORT" : 5432
