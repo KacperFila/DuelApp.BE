@@ -58,7 +58,7 @@ jobs:
 
       - name: Publish question imports Function App
         run: >
-          dotnet publish src/Functions/DuelApp.QuestionImports.Functions/DuelApp.QuestionImports.Functions.csproj
+          dotnet publish src/Modules/Questions/DuelApp.Modules.Questions.Functions/DuelApp.Modules.Questions.Functions.csproj
           --configuration Release
           --output ./artifacts/question-imports-functions
 

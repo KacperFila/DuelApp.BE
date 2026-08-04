@@ -2,7 +2,7 @@ using Azure.Messaging.ServiceBus;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Extensions.Logging;
 
-namespace DuelApp.QuestionImports.Functions;
+namespace DuelApp.Modules.Questions.Functions;
 
 public sealed class QuestionImportMessageLoggingFunction(
     ILogger<QuestionImportMessageLoggingFunction> logger)

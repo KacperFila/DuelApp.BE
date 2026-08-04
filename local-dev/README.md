@@ -43,8 +43,8 @@ Install [Azure Storage Explorer](https://azure.microsoft.com/products/storage/st
 Install Azure Functions Core Tools, copy the local configuration template and start the host:
 
 ```powershell
-Copy-Item src\Functions\DuelApp.QuestionImports.Functions\local.settings.json.example src\Functions\DuelApp.QuestionImports.Functions\local.settings.json
-Set-Location src\Functions\DuelApp.QuestionImports.Functions
+Copy-Item src\Modules\Questions\DuelApp.Modules.Questions.Functions\local.settings.json.example src\Modules\Questions\DuelApp.Modules.Questions.Functions\local.settings.json
+Set-Location src\Modules\Questions\DuelApp.Modules.Questions.Functions
 func start
 ```
 
