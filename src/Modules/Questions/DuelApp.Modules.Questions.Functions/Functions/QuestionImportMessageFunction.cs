@@ -1,11 +1,11 @@
+using System.Text.Json;
 using Azure.Messaging.ServiceBus;
 using DuelApp.Modules.Questions.Application.Services;
 using DuelApp.Modules.Questions.Functions.Events;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Extensions.Logging;
-using System.Text.Json;
 
-namespace DuelApp.Modules.Questions.Functions;
+namespace DuelApp.Modules.Questions.Functions.Functions;
 
 public sealed class QuestionImportMessageFunction
 {
