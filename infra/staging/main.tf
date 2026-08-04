@@ -435,6 +435,30 @@ resource "azurerm_role_assignment" "keycloak_acr_pull" {
   principal_id         = azurerm_linux_web_app.keycloak.identity[0].principal_id
 }
 
+resource "azurerm_role_assignment" "question_imports_function_servicebus_receiver" {
+  scope                = azurerm_servicebus_queue.question_imports.id
+  role_definition_name = "Azure Service Bus Data Receiver"
+  principal_id         = azurerm_function_app_flex_consumption.question_imports.identity[0].principal_id
+}
+
+resource "azurerm_role_assignment" "question_imports_function_blob_reader" {
+  scope                = azurerm_storage_account.question-imports.id
+  role_definition_name = "Storage Blob Data Reader"
+  principal_id         = azurerm_function_app_flex_consumption.question_imports.identity[0].principal_id
+}
+
+resource "azurerm_role_assignment" "question_imports_function_key_vault_secrets_user" {
+  scope                = azurerm_key_vault.duelapp_kv.id
+  role_definition_name = "Key Vault Secrets User"
+  principal_id         = azurerm_function_app_flex_consumption.question_imports.identity[0].principal_id
+}
+
+resource "azurerm_role_assignment" "github_actions_question_imports_function_contributor" {
+  scope                = azurerm_function_app_flex_consumption.question_imports.id
+  role_definition_name = "Website Contributor"
+  principal_id         = data.azuread_service_principal.github_actions.object_id
+}
+
 # =====================================================
 # API Service Plan
 # =====================================================
@@ -627,7 +651,7 @@ resource "azurerm_storage_container" "question_imports_eventgrid_deadletters" {
 }
 
 # =====================================================
-# Question imports Azure Function
+# Azure Function storage configuration
 # =====================================================
 resource "azurerm_storage_account" "question_imports_function" {
   name                = "stgduelappqifunc"
@@ -659,6 +683,9 @@ resource "azurerm_storage_container" "question_imports_function_deployments" {
   container_access_type = "private"
 }
 
+# =====================================================
+# Log Analytics workspace
+# =====================================================
 resource "azurerm_log_analytics_workspace" "question_imports_function" {
   name                = "staging-duelapp-question-imports-functions"
   resource_group_name = azurerm_resource_group.rg_duelapp_be_staging.name
@@ -673,6 +700,9 @@ resource "azurerm_log_analytics_workspace" "question_imports_function" {
   }
 }
 
+# =====================================================
+# Application Insights
+# =====================================================
 resource "azurerm_application_insights" "question_imports_function" {
   name                = "staging-duelapp-question-imports-functions"
   resource_group_name = azurerm_resource_group.rg_duelapp_be_staging.name
@@ -687,6 +717,9 @@ resource "azurerm_application_insights" "question_imports_function" {
   }
 }
 
+# =====================================================
+# App Service Plan (Functions)
+# =====================================================
 resource "azurerm_service_plan" "question_imports_function" {
   name                = "staging-duelapp-question-imports-functions"
   resource_group_name = azurerm_resource_group.rg_duelapp_be_staging.name
@@ -701,6 +734,9 @@ resource "azurerm_service_plan" "question_imports_function" {
   }
 }
 
+# =====================================================
+# Flex Consumption Function App
+# =====================================================
 resource "azurerm_function_app_flex_consumption" "question_imports" {
   name                = "staging-duelapp-question-imports"
   resource_group_name = azurerm_resource_group.rg_duelapp_be_staging.name
@@ -720,6 +756,8 @@ resource "azurerm_function_app_flex_consumption" "question_imports" {
   app_settings = {
     QuestionImportsQueueName                           = azurerm_servicebus_queue.question_imports.name
     QuestionImportsServiceBus__fullyQualifiedNamespace = "${azurerm_servicebus_namespace.duelapp.name}.servicebus.windows.net"
+    Azure__Storage__QuestionImports__ServiceUri        = azurerm_storage_account.question-imports.primary_blob_endpoint
+    Postgres__ConnectionString                         = "@Microsoft.KeyVault(SecretUri=${azurerm_key_vault_secret.postgres_connection_string.versionless_id})"
   }
 
   identity {
@@ -735,16 +773,4 @@ resource "azurerm_function_app_flex_consumption" "question_imports" {
     project     = "duelapp"
     component   = "question-imports-functions"
   }
-}
-
-resource "azurerm_role_assignment" "question_imports_function_servicebus_receiver" {
-  scope                = azurerm_servicebus_queue.question_imports.id
-  role_definition_name = "Azure Service Bus Data Receiver"
-  principal_id         = azurerm_function_app_flex_consumption.question_imports.identity[0].principal_id
-}
-
-resource "azurerm_role_assignment" "github_actions_question_imports_function_contributor" {
-  scope                = azurerm_function_app_flex_consumption.question_imports.id
-  role_definition_name = "Website Contributor"
-  principal_id         = data.azuread_service_principal.github_actions.object_id
 }
