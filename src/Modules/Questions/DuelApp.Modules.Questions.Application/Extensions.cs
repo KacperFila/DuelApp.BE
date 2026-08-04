@@ -9,6 +9,9 @@ public static class Extensions
     public static IServiceCollection AddApplication(this IServiceCollection services)
     {
         services.AddScoped<IQuestionsService, QuestionsService>();
+        services.AddSingleton<QuestionImportJsonReader>();
+        services.AddSingleton<QuestionImportValidator>();
+        services.AddScoped<QuestionImportService>();
         
         return services;
     }

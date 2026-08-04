@@ -4,6 +4,8 @@
     "AzureWebJobsStorage": "UseDevelopmentStorage=true",
     "FUNCTIONS_WORKER_RUNTIME": "dotnet-isolated",
     "QuestionImportsQueueName": "question-imports",
-    "QuestionImportsServiceBus": "Endpoint=sb://localhost;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=SAS_KEY_VALUE;UseDevelopmentEmulator=true;"
+    "QuestionImportsServiceBus": "Endpoint=sb://localhost;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=SAS_KEY_VALUE;UseDevelopmentEmulator=true;",
+    "Azure__Storage__QuestionImports__LocalDevelopmentConnectionString": "UseDevelopmentStorage=true",
+    "Postgres__ConnectionString": "Host=localhost;Port=5444;Database=app_db;Username=admin;Password=admin"
   }
 }

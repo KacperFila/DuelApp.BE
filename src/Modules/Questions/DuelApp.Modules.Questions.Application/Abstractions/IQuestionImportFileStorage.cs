@@ -11,5 +11,6 @@ public interface IQuestionImportFileStorage
 
     Task<Stream> OpenReadAsync(
         string blobName,
+        string expectedETag,
         CancellationToken cancellationToken);
 }

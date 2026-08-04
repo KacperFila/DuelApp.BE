@@ -1,3 +1,4 @@
+using Azure;
 using Azure.Storage.Blobs;
 using Azure.Storage.Blobs.Models;
 using DuelApp.Modules.Questions.Application.Abstractions;
@@ -56,23 +57,33 @@ public sealed class QuestionImportFileStorage
     /// Opens an import file for streaming read.
     /// </summary>
     /// <param name="blobName">The path of the blob within the question-imports container.</param>
+    /// <param name="expectedETag">The ETag recorded when the import file was uploaded.</param>
     /// <param name="cancellationToken">A token used to cancel the download operation.</param>
     /// <returns>A readable stream containing the blob content. The caller is responsible for disposing it.</returns>
     /// <example>
     /// <code>
-    /// await using var content = await fileStorage.OpenReadAsync(blobName, cancellationToken);
+    /// await using var content = await fileStorage.OpenReadAsync(blobName, expectedETag, cancellationToken);
     /// // Consume content while it is in scope.
     /// </code>
     /// </example>
     public async Task<Stream> OpenReadAsync(
         string blobName,
+        string expectedETag,
         CancellationToken cancellationToken)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(blobName);
+        ArgumentException.ThrowIfNullOrWhiteSpace(expectedETag);
 
         var blobClient = _containerClient.GetBlobClient(blobName);
 
         var response = await blobClient.DownloadStreamingAsync(
+            new BlobDownloadOptions
+            {
+                Conditions = new BlobRequestConditions
+                {
+                    IfMatch = new ETag(expectedETag)
+                }
+            },
             cancellationToken: cancellationToken);
 
         return response.Value.Content;
