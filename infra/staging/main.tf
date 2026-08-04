@@ -718,7 +718,8 @@ resource "azurerm_function_app_flex_consumption" "question_imports" {
   instance_memory_in_mb  = 2048
 
   app_settings = {
-    "AzureWebJobs.QuestionImportMessageLoggingFunction.Disabled" = "true"
+    QuestionImportsQueueName                           = azurerm_servicebus_queue.question_imports.name
+    QuestionImportsServiceBus__fullyQualifiedNamespace = "${azurerm_servicebus_namespace.duelapp.name}.servicebus.windows.net"
   }
 
   identity {
@@ -734,6 +735,12 @@ resource "azurerm_function_app_flex_consumption" "question_imports" {
     project     = "duelapp"
     component   = "question-imports-functions"
   }
+}
+
+resource "azurerm_role_assignment" "question_imports_function_servicebus_receiver" {
+  scope                = azurerm_servicebus_queue.question_imports.id
+  role_definition_name = "Azure Service Bus Data Receiver"
+  principal_id         = azurerm_function_app_flex_consumption.question_imports.identity[0].principal_id
 }
 
 resource "azurerm_role_assignment" "github_actions_question_imports_function_contributor" {
