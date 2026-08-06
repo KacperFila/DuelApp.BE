@@ -85,6 +85,18 @@ resource "azurerm_servicebus_queue" "question_imports" {
   duplicate_detection_history_time_window = "PT10M"
 }
 
+resource "azurerm_servicebus_queue" "question_publications" {
+  name         = "question-publications"
+  namespace_id = azurerm_servicebus_namespace.duelapp.id
+
+  lock_duration                           = "PT5M"
+  max_delivery_count                      = 5
+  default_message_ttl                     = "P14D"
+  dead_lettering_on_message_expiration    = true
+  requires_duplicate_detection            = true
+  duplicate_detection_history_time_window = "PT10M"
+}
+
 # =====================================================
 # Event Grid
 # =====================================================
@@ -383,6 +395,12 @@ resource "azurerm_role_assignment" "duelapp_uami_question_imports_receiver" {
   principal_id         = azurerm_user_assigned_identity.duelapp_uami.principal_id
 }
 
+resource "azurerm_role_assignment" "duelapp_uami_question_publications_sender" {
+  scope                = azurerm_servicebus_queue.question_publications.id
+  role_definition_name = "Azure Service Bus Data Sender"
+  principal_id         = azurerm_user_assigned_identity.duelapp_uami.principal_id
+}
+
 resource "azurerm_role_assignment" "duelapp_uami_question_imports_blob_contributor" {
   scope                = azurerm_storage_account.question-imports.id
   role_definition_name = "Storage Blob Data Contributor"
@@ -437,6 +455,12 @@ resource "azurerm_role_assignment" "keycloak_acr_pull" {
 
 resource "azurerm_role_assignment" "question_imports_function_servicebus_receiver" {
   scope                = azurerm_servicebus_queue.question_imports.id
+  role_definition_name = "Azure Service Bus Data Receiver"
+  principal_id         = azurerm_function_app_flex_consumption.question_imports.identity[0].principal_id
+}
+
+resource "azurerm_role_assignment" "question_imports_function_question_publications_receiver" {
+  scope                = azurerm_servicebus_queue.question_publications.id
   role_definition_name = "Azure Service Bus Data Receiver"
   principal_id         = azurerm_function_app_flex_consumption.question_imports.identity[0].principal_id
 }
@@ -518,7 +542,8 @@ resource "azurerm_linux_web_app" "duelapp_be" {
 
     Postgres__ConnectionString = "@Microsoft.KeyVault(SecretUri=${azurerm_key_vault_secret.postgres_connection_string.versionless_id})"
 
-    Azure__Storage__ProfilePictures__ConnectionString = "@Microsoft.KeyVault(SecretUri=${azurerm_key_vault_secret.profile_pictures_connection_string.versionless_id})"
+    Azure__Storage__ProfilePictures__ConnectionString                = "@Microsoft.KeyVault(SecretUri=${azurerm_key_vault_secret.profile_pictures_connection_string.versionless_id})"
+    Azure__ServiceBus__QuestionPublications__FullyQualifiedNamespace = "${azurerm_servicebus_namespace.duelapp.name}.servicebus.windows.net"
   }
 
   tags = {
@@ -529,7 +554,8 @@ resource "azurerm_linux_web_app" "duelapp_be" {
 
   depends_on = [
     azurerm_role_assignment.duelapp_uami_acr_pull,
-    azurerm_role_assignment.duelapp_uami_kv_access
+    azurerm_role_assignment.duelapp_uami_kv_access,
+    azurerm_role_assignment.duelapp_uami_question_publications_sender
   ]
 }
 
@@ -754,10 +780,12 @@ resource "azurerm_function_app_flex_consumption" "question_imports" {
   instance_memory_in_mb  = 2048
 
   app_settings = {
-    QuestionImportsQueueName                           = azurerm_servicebus_queue.question_imports.name
-    QuestionImportsServiceBus__fullyQualifiedNamespace = "${azurerm_servicebus_namespace.duelapp.name}.servicebus.windows.net"
-    Azure__Storage__QuestionImports__ServiceUri        = azurerm_storage_account.question-imports.primary_blob_endpoint
-    Postgres__ConnectionString                         = "@Microsoft.KeyVault(SecretUri=${azurerm_key_vault_secret.postgres_connection_string.versionless_id})"
+    QuestionImportsQueueName                                = azurerm_servicebus_queue.question_imports.name
+    QuestionImportsServiceBus__FullyQualifiedNamespace      = "${azurerm_servicebus_namespace.duelapp.name}.servicebus.windows.net"
+    QuestionPublicationsQueueName                           = azurerm_servicebus_queue.question_publications.name
+    QuestionPublicationsServiceBus__FullyQualifiedNamespace = "${azurerm_servicebus_namespace.duelapp.name}.servicebus.windows.net"
+    Azure__Storage__QuestionImports__ServiceUri             = azurerm_storage_account.question-imports.primary_blob_endpoint
+    Postgres__ConnectionString                              = "@Microsoft.KeyVault(SecretUri=${azurerm_key_vault_secret.postgres_connection_string.versionless_id})"
   }
 
   identity {
