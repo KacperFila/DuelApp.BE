@@ -12,7 +12,8 @@ public static class Extensions
         services.AddSingleton<QuestionImportJsonReader>();
         services.AddSingleton<QuestionImportValidator>();
         services.AddScoped<QuestionImportService>();
-        
+        services.AddScoped<QuestionPublicationService>();
+
         return services;
     }
 }

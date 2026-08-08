@@ -6,6 +6,11 @@
     }
   },
   "Azure": {
+    "ServiceBus": {
+      "QuestionPublications": {
+        "ConnectionString": "Endpoint=sb://localhost;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=SAS_KEY_VALUE;UseDevelopmentEmulator=true;"
+      }
+    },
     "Storage": {
       "QuestionImports": {
         "LocalDevelopmentConnectionString": "UseDevelopmentStorage=true", // connection string for local development with Azurite

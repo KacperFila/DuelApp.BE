@@ -5,6 +5,8 @@
     "FUNCTIONS_WORKER_RUNTIME": "dotnet-isolated",
     "QuestionImportsQueueName": "question-imports",
     "QuestionImportsServiceBus": "Endpoint=sb://localhost;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=SAS_KEY_VALUE;UseDevelopmentEmulator=true;",
+    "QuestionPublicationsQueueName": "question-publications",
+    "QuestionPublicationsServiceBus": "Endpoint=sb://localhost;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=SAS_KEY_VALUE;UseDevelopmentEmulator=true;",
     "Azure__Storage__QuestionImports__LocalDevelopmentConnectionString": "UseDevelopmentStorage=true",
     "Postgres__ConnectionString": "Host=localhost;Port=5444;Database=app_db;Username=admin;Password=admin"
   }

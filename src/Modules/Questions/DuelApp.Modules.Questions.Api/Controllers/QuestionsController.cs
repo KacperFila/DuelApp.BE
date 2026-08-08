@@ -1,4 +1,5 @@
 using DuelApp.Modules.Questions.Api.Responses;
+using DuelApp.Modules.Questions.Application.Exceptions;
 using DuelApp.Modules.Questions.Application.Models;
 using DuelApp.Modules.Questions.Application.Services;
 using Microsoft.AspNetCore.Authorization;
@@ -29,6 +30,37 @@ public class QuestionsController : ControllerBase
         var importId = await questionsService.UploadQuestionsAsync(questionsJson, ct);
 
         return Accepted(new StartQuestionImportResponse(importId));
+    }
+
+    [Authorize]
+    [HttpPost("import/{importId:guid}/publish")]
+    [SwaggerOperation(
+        Summary = "Queue publication of imported questions",
+        Description = "Queues asynchronous publication of completed question imports."
+    )]
+    [SwaggerResponse(StatusCodes.Status202Accepted, "Question publication queued")]
+    [SwaggerResponse(StatusCodes.Status404NotFound, "Question import was not found")]
+    [SwaggerResponse(StatusCodes.Status409Conflict, "Question import has not completed")]
+    [SwaggerResponse(StatusCodes.Status401Unauthorized, "User is not authenticated")]
+    public async Task<ActionResult<StartQuestionPublicationResponse>> PublishImportedQuestions(
+        Guid importId,
+        QuestionPublicationService questionPublicationService,
+        CancellationToken ct = default)
+    {
+        try
+        {
+            var requestId = await questionPublicationService.RequestPublicationAsync(importId, ct);
+
+            return Accepted(new StartQuestionPublicationResponse(requestId));
+        }
+        catch (QuestionImportNotFoundException)
+        {
+            return NotFound();
+        }
+        catch (QuestionImportNotCompletedException)
+        {
+            return Conflict();
+        }
     }
     
     [Authorize]

@@ -1,7 +1,9 @@
 using DuelApp.Modules.Questions.Application.Abstractions;
 using DuelApp.Modules.Questions.Domain.Questions.Entities;
 using DuelApp.Modules.Questions.Domain.Questions.Enums;
+using DuelApp.Modules.Questions.Infrastructure.EF.Mappers;
 using Microsoft.EntityFrameworkCore;
+using PublishedImportedQuestions = DuelApp.Modules.Questions.Application.Models.PublishedImportedQuestions;
 
 namespace DuelApp.Modules.Questions.Infrastructure.EF.Repositories;
 
@@ -20,6 +22,15 @@ public sealed class QuestionImportsRepository : IQuestionImportsRepository
     {
         await _dbContext.QuestionImports.AddAsync(questionImport, cancellationToken);
         await _dbContext.SaveChangesAsync(cancellationToken);
+    }
+
+    public Task<QuestionImport?> GetAsync(
+        Guid importId,
+        CancellationToken cancellationToken)
+    {
+        return _dbContext.QuestionImports
+            .AsNoTracking()
+            .SingleOrDefaultAsync(questionImport => questionImport.Id == importId, cancellationToken);
     }
 
     public async Task<QuestionImport?> BeginImportProcessingAsync(
@@ -107,6 +118,45 @@ public sealed class QuestionImportsRepository : IQuestionImportsRepository
         questionImport.CompletedAtUtc = DateTime.UtcNow;
 
         await _dbContext.SaveChangesAsync(cancellationToken);
+    }
+
+    public async Task<PublishedImportedQuestions> PublishNextUnpublishedBatchAsync(
+        Guid importId,
+        int batchSize,
+        CancellationToken cancellationToken)
+    {
+        ArgumentOutOfRangeException.ThrowIfNegativeOrZero(batchSize);
+
+        await using var transaction = await _dbContext.Database.BeginTransactionAsync(cancellationToken);
+
+        var unpublishedQuestionsAndAnswers = await _dbContext.UnpublishedQuestions
+            .Include(question => question.Answers)
+            .Where(question => question.QuestionImportId == importId
+                && question.QuestionImport.Status == ImportStatus.Completed)
+            .OrderBy(question => question.SourcePosition)
+            .ThenBy(question => question.Id)
+            .Take(batchSize)
+            .ToListAsync(cancellationToken);
+
+        if (unpublishedQuestionsAndAnswers.Count == 0)
+        {
+            await transaction.CommitAsync(cancellationToken);
+            return new PublishedImportedQuestions(0, 0);
+        }
+
+        var questionsToBePublished = unpublishedQuestionsAndAnswers
+            .Select(QuestionPublicationMapper.Map)
+            .ToList();
+
+        _dbContext.Questions.AddRange(questionsToBePublished);
+        _dbContext.UnpublishedQuestions.RemoveRange(unpublishedQuestionsAndAnswers);
+
+        await _dbContext.SaveChangesAsync(cancellationToken);
+        await transaction.CommitAsync(cancellationToken);
+
+        return new PublishedImportedQuestions(
+            QuestionsCount: questionsToBePublished.Count,
+            AnswersCount: questionsToBePublished.Sum(question => question.Answers.Count));
     }
 
     private Task AddQuestionsAsync(

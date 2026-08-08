@@ -48,9 +48,12 @@ Set-Location src\Modules\Questions\DuelApp.Modules.Questions.Functions
 func start
 ```
 
-The Function listens on the `question-imports` queue in the local Service Bus emulator. It logs only
-the message metadata and automatically completes a successfully handled message. It does not read
-Blob Storage, call the database or perform an import.
+The Function listens on two queues in the local Service Bus emulator:
+
+- `question-imports` receives BlobCreated events and imports validated JSON questions into the
+  unpublished tables;
+- `question-publications` receives publication commands and moves completed imports to the regular
+  questions and answers tables in batches.
 
 Verify that the emulator is available before starting the Function:
 
@@ -58,9 +61,9 @@ Verify that the emulator is available before starting the Function:
 Invoke-WebRequest http://127.0.0.1:5300/health
 ```
 
-Send a message to `question-imports` using any Service Bus SDK client configured with the
-`QuestionImportsServiceBus` connection string from `local.settings.json`. The Functions host should
-log the message ID, sequence number, delivery count and body length.
+Use the corresponding connection string from `local.settings.json` when sending messages to either
+queue. The publication queue accepts a serialized `PublishImportedQuestionsCommand`; normally this is
+published by `POST /api/questions/imports/publish` in the Web API.
 
 Azurite is used by the Functions host through `AzureWebJobsStorage`.
 
