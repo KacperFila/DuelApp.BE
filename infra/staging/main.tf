@@ -780,12 +780,13 @@ resource "azurerm_function_app_flex_consumption" "question_imports" {
   instance_memory_in_mb  = 2048
 
   app_settings = {
-    QuestionImportsQueueName                                = azurerm_servicebus_queue.question_imports.name
-    QuestionImportsServiceBus__FullyQualifiedNamespace      = "${azurerm_servicebus_namespace.duelapp.name}.servicebus.windows.net"
-    QuestionPublicationsQueueName                           = azurerm_servicebus_queue.question_publications.name
-    QuestionPublicationsServiceBus__FullyQualifiedNamespace = "${azurerm_servicebus_namespace.duelapp.name}.servicebus.windows.net"
-    Azure__Storage__QuestionImports__ServiceUri             = azurerm_storage_account.question-imports.primary_blob_endpoint
-    Postgres__ConnectionString                              = "@Microsoft.KeyVault(SecretUri=${azurerm_key_vault_secret.postgres_connection_string.versionless_id})"
+    QuestionImportsQueueName                                         = azurerm_servicebus_queue.question_imports.name
+    QuestionImportsServiceBus__FullyQualifiedNamespace               = "${azurerm_servicebus_namespace.duelapp.name}.servicebus.windows.net"
+    QuestionPublicationsQueueName                                    = azurerm_servicebus_queue.question_publications.name
+    QuestionPublicationsServiceBus__FullyQualifiedNamespace          = "${azurerm_servicebus_namespace.duelapp.name}.servicebus.windows.net"
+    Azure__ServiceBus__QuestionPublications__FullyQualifiedNamespace = "${azurerm_servicebus_namespace.duelapp.name}.servicebus.windows.net"
+    Azure__Storage__QuestionImports__ServiceUri                      = azurerm_storage_account.question-imports.primary_blob_endpoint
+    Postgres__ConnectionString                                       = "@Microsoft.KeyVault(SecretUri=${azurerm_key_vault_secret.postgres_connection_string.versionless_id})"
   }
 
   identity {
